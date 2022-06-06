@@ -1,5 +1,5 @@
 <h1 align="center">
-	42 - cub3d
+	42 - webserv
 </h1>
 
 <p align="center">
