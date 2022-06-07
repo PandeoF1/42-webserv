@@ -3,10 +3,10 @@
 #                                                         :::      ::::::::    #
 #    Makefile                                           :+:      :+:    :+:    #
 #                                                     +:+ +:+         +:+      #
-#    By: nard <nard@student.42.fr>                  +#+  +:+       +#+         #
+#    By: jbosquet <jbosquet@student.42lyon.fr>      +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2021/12/09 13:15:12 by tnard             #+#    #+#              #
-#    Updated: 2022/06/06 16:47:10 by nard             ###   ########.fr        #
+#    Updated: 2022/06/07 12:24:25 by jbosquet         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -16,10 +16,13 @@ RED					= \033[0;31m
 RST					= \033[0m
 END					= \e[0m
 
-SRCS				= main.cpp srcs/File/File.cpp
+SRCS				= main.cpp \
+						srcs/File/File.cpp \
+						srcs/Server/Server.cpp
 NAME				= webserv
 OBJS_DIR			= objs/
-PROJECT_H			= srcs/File/File.hpp
+PROJECT_H			= srcs/File/File.hpp \
+						srcs/Server/Server.hpp
 OBJS				= $(SRCS:.cpp=.o)
 OBJECTS_PREFIXED	= $(addprefix $(OBJS_DIR), $(OBJS))
 CC					= c++
@@ -29,6 +32,7 @@ $(OBJS_DIR)%.o : %.cpp $(PROJECT_H)
 	@mkdir -p $(OBJS_DIR)
 	@mkdir -p $(OBJS_DIR)/srcs
 	@mkdir -p $(OBJS_DIR)/srcs/File
+	@mkdir -p $(OBJS_DIR)/srcs/Server
 	@$(CC) $(CC_FLAGS) -c $< -o $@
 	@printf	"\033[2K\r${BLU}[BUILD]${RST} '$<' $(END)"
 
