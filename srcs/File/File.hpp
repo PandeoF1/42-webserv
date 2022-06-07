@@ -6,11 +6,12 @@
 /*   By: nard <nard@student.42.fr>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/06/06 15:52:21 by nard              #+#    #+#             */
-/*   Updated: 2022/06/06 18:12:09 by nard             ###   ########.fr       */
+/*   Updated: 2022/06/07 16:22:27 by nard             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#pragma once
+#ifndef FILE_HPP
+# define FILE_HPP
 
 #include "../../includes/webserv.hpp"
 
@@ -63,3 +64,5 @@ class File{
 		std::string		_path;
 		static int		_verbose;
 };
+
+#endif

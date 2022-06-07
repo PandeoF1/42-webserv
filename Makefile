@@ -3,10 +3,10 @@
 #                                                         :::      ::::::::    #
 #    Makefile                                           :+:      :+:    :+:    #
 #                                                     +:+ +:+         +:+      #
-#    By: jbosquet <jbosquet@student.42lyon.fr>      +#+  +:+       +#+         #
+#    By: nard <nard@student.42.fr>                  +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2021/12/09 13:15:12 by tnard             #+#    #+#              #
-#    Updated: 2022/06/07 12:24:25 by jbosquet         ###   ########.fr        #
+#    Updated: 2022/06/07 23:14:01 by nard             ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -17,12 +17,12 @@ RST					= \033[0m
 END					= \e[0m
 
 SRCS				= main.cpp \
-						srcs/File/File.cpp \
-						srcs/Server/Server.cpp
+						srcs/File/File.cpp srcs/Server/Server.cpp \
+						srcs/Config/Config.cpp
 NAME				= webserv
 OBJS_DIR			= objs/
 PROJECT_H			= srcs/File/File.hpp \
-						srcs/Server/Server.hpp
+						srcs/Server/Server.hpp srcs/Config/Config.hpp
 OBJS				= $(SRCS:.cpp=.o)
 OBJECTS_PREFIXED	= $(addprefix $(OBJS_DIR), $(OBJS))
 CC					= c++
@@ -32,6 +32,7 @@ $(OBJS_DIR)%.o : %.cpp $(PROJECT_H)
 	@mkdir -p $(OBJS_DIR)
 	@mkdir -p $(OBJS_DIR)/srcs
 	@mkdir -p $(OBJS_DIR)/srcs/File
+	@mkdir -p $(OBJS_DIR)/srcs/Config
 	@mkdir -p $(OBJS_DIR)/srcs/Server
 	@$(CC) $(CC_FLAGS) -c $< -o $@
 	@printf	"\033[2K\r${BLU}[BUILD]${RST} '$<' $(END)"
