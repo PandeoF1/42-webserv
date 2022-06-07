@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Server.hpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: jbosquet <jbosquet@student.42lyon.fr>      +#+  +:+       +#+        */
+/*   By: nard <nard@student.42.fr>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/06/06 20:01:31 by jbosquet          #+#    #+#             */
-/*   Updated: 2022/06/07 12:25:38 by jbosquet         ###   ########.fr       */
+/*   Updated: 2022/06/07 12:42:37 by nard             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -28,14 +28,14 @@
 class Server {
 
 public:
-    Server(void);
-    ~Server(void);
-    // Server(const & Config config);
+	Server(void);
+	~Server(void);
+	// Server(const & Config config);
 
-    void start() const;
+	void start() const;
 
 private:
-    int					listenfd;
+	int					listenfd;
 	int					opt;
 	struct sockaddr_in	servaddr;
 };

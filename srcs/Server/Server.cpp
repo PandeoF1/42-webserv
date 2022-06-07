@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Server.cpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: jbosquet <jbosquet@student.42lyon.fr>      +#+  +:+       +#+        */
+/*   By: nard <nard@student.42.fr>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/06/06 20:03:28 by jbosquet          #+#    #+#             */
-/*   Updated: 2022/06/07 12:25:31 by jbosquet         ###   ########.fr       */
+/*   Updated: 2022/06/07 12:42:43 by nard             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,7 +14,7 @@
 
 Server::Server(void) : opt(1) {
 
-    //Creer un socket en IPV4 sur le protocol TCP
+	//Creer un socket en IPV4 sur le protocol TCP
 	if ((listenfd = socket(AF_INET, SOCK_STREAM, 0)) < 0)
 		std::cerr << "Socket: create error" << std::endl;
 
@@ -29,17 +29,17 @@ Server::Server(void) : opt(1) {
 	if ((bind(listenfd, (struct sockaddr *)&servaddr, sizeof(servaddr))) < 0) // Liaison des parametres du servaddr avec le socket
 		std::cerr << "Bind: error" << errno << std::endl;
 
-    std::cout << "Server constructor called" << std::endl;
+	std::cout << "Server constructor called" << std::endl;
 }
 
 Server::~Server(void) {
-    std::cout << "Server destructor called" << std::endl;
+	std::cout << "Server destructor called" << std::endl;
 }
 
 void Server::start() const{
-    int		connfd = 0;
+	int		connfd = 0;
 	long    valread;
-    std::string    response = "HTTP/1.0 200 OK\r\n\r\n<h1>Webserv</h1>";
+	std::string    response = "HTTP/1.0 200 OK\r\n\r\n<h1>Webserv</h1>";
 
 	if ((listen(listenfd, 5)) < 0) // Ecoute sur le socket
 		std::cerr << "Listen: error" << std::endl;
@@ -49,12 +49,12 @@ void Server::start() const{
 		std::cout << "Waiting for new connection..." << std::endl;
 
 		//Attente d'une connexion sur les infos precisé plus haut
-        if (!connfd)
-            connfd = accept(listenfd, NULL, NULL);
+		if (!connfd)
+			connfd = accept(listenfd, NULL, NULL);
 		if (connfd)
 			std::cout << "Connection" << std::endl;
 		
-        char    buffer[30000] = {0};
+		char    buffer[30000] = {0};
 		valread = read(connfd, buffer, 30000); // Lecture de la demande du client
 
 		(void)valread;
@@ -62,7 +62,7 @@ void Server::start() const{
 
 		send(connfd, response.c_str(), response.size(), 0); // Envoie de la reponse au client
 		close(connfd); // Fermeture de la connexion
-        connfd = 0;
+		connfd = 0;
 	}
 }
 
