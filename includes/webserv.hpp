@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   webserv.hpp                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: nard <nard@student.42.fr>                  +#+  +:+       +#+        */
+/*   By: jbosquet <jbosquet@student.42lyon.fr>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/06/06 15:56:12 by nard              #+#    #+#             */
-/*   Updated: 2022/06/07 23:29:32 by nard             ###   ########.fr       */
+/*   Updated: 2022/06/09 01:23:19 by jbosquet         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -31,3 +31,7 @@
 #include "../srcs/File/File.hpp"
 #include "../srcs/Server/Server.hpp"
 #include "../srcs/Config/Config.hpp"
+#include "../srcs/Request/Request.hpp"
+#include "../srcs/Server/Server.hpp"
+
+void start_servers(void);

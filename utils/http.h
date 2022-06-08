@@ -22,6 +22,15 @@ char* strdup (const char* str);
 #include <arpa/inet.h>
 #include <unistd.h>		/* close */
 #include <netdb.h> 	        /* gethostbyname */
+#include <string.h>   //strlen 
+#include <stdlib.h> 
+#include <errno.h> 
+#include <unistd.h>   //close 
+#include <arpa/inet.h>    //close 
+#include <sys/types.h> 
+#include <sys/socket.h> 
+#include <netinet/in.h> 
+#include <sys/time.h> //FD_SET, FD_ISSET, FD_ZERO macros
 #define INVALID_SOCKET -1
 #define SOCKET_ERROR   -1
 #define closesocket(s) close(s)

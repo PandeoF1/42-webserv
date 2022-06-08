@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   main.cpp                                           :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: nard <nard@student.42.fr>                  +#+  +:+       +#+        */
+/*   By: jbosquet <jbosquet@student.42lyon.fr>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/06/06 15:54:51 by nard              #+#    #+#             */
-/*   Updated: 2022/06/07 16:31:57 by nard             ###   ########.fr       */
+/*   Updated: 2022/06/09 01:23:36 by jbosquet         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,7 +14,9 @@
 
 int main(void)
 {
-	Config *config = Config::createConfig("config.conf");
-	std::cout << config[0].getServerName() << std::endl;
+	// Config *config = Config::createConfig("config.conf");
+	// std::cout << config[0].getServerName() << std::endl;
+
+	start_servers();
  	return (0);
 }
