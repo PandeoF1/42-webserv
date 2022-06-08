@@ -20,5 +20,5 @@ char	*ft_request(char *page)
 	//printf("%s\n", content);
 	closesocket(sock);
 	//free(convert);
-	return (NULL);
+	return (content);
 }
