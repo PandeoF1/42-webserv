@@ -13,6 +13,4 @@ jobs:
 
     steps:
     - name: Compilation
-      run: make re
-    - name: Try to launch
-      run: ./webserv
+      run: make
