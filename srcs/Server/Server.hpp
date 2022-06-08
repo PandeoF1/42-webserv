@@ -1,36 +1,48 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   Server.hpp                                         :+:      :+:    :+:   */
+/*   server.hpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: nard <nard@student.42.fr>                  +#+  +:+       +#+        */
+/*   By: asaffroy <asaffroy@student.42lyon.fr>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2022/06/06 20:01:31 by jbosquet          #+#    #+#             */
-/*   Updated: 2022/06/07 16:22:33 by nard             ###   ########.fr       */
+/*   Created: 2022/06/07 17:36:09 by asaffroy          #+#    #+#             */
+/*   Updated: 2022/06/08 11:57:39 by asaffroy         ###   ########lyon.fr   */
 /*                                                                            */
 /* ************************************************************************** */
 
-#ifndef SERVER_HPP
-# define SERVER_HPP
+#pragma once
 
-#include "../../includes/webserv.hpp"
+#include <stdio.h>
+#include <iostream>
+#include <string.h> 
+#include <stdlib.h>
+#include <errno.h>
+#include <unistd.h>
+#include <arpa/inet.h>
+#include <sys/types.h>
+#include <sys/socket.h>
+#include <netinet/in.h>
+#include <sys/time.h>
+#include <vector>
 
-#define PORT 80
-#define MAXLINE 4086
+class Server
+{
+	private :
+		int _port;
+		int _master_socket;
+		std::vector<int> _client_sockets;
+		struct sockaddr_in _address;
+		void	ft_create_serv();
+	public :
+		Server();
+		// Server(int port_entry);
+		~Server();
 
-class Server {
-
-public:
-	Server(void);
-	~Server(void);
-	// Server(const & Config config);
-
-	void start() const;
-
-private:
-	int					listenfd;
-	int					opt;
-	struct sockaddr_in	servaddr;
+		int					get_master_socket() const;
+		int					get_port() const;
+		struct sockaddr_in	get_address() const;
+		void 				set_port(int port_entry);
+		void				add_client(int client_socket);
+		void				remove_client(int client_socket);
+		bool 				find_client(int client_socket);
 };
-
-#endif
