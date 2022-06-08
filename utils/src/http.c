@@ -43,7 +43,7 @@ Host: %s\r\n\
 		page, HTTP_VERSION,
 		hostname,
 		CONNECTION_TYPE);
-
+  printf("Header : {\n%s\n}\n", buf);
   //send the http request
   send(sock, buf, strlen(buf), 0);
 
