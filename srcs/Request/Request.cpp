@@ -81,8 +81,8 @@ void    Request::set_method(std::string line)
 }
 
 void	Request::check_http_version(std::string line) {
-	int i = line.find("HTTP/1.1");
-	if (i == std::string::npos)
+	unsigned long i = line.find("HTTP/1.1");
+	if (line.find("HTTP/1.1") == std::string::npos)
 	{
 		std::cerr << "HTTP version not found" << std::endl;
 		_return_code = 400;
