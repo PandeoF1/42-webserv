@@ -10,6 +10,7 @@ class Request
 		std::string                         _method;
 		std::map<std::string, std::string>  _headers;
 		Server                              &_server;
+		std::string							_target_path;
 		std::string                         _default_request;
 		int                                 _return_code;
 
