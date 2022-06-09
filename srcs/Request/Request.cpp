@@ -50,9 +50,9 @@ std::string    checkMethod(std::string line)
 
 void    Request::set_method(std::string line)
 {
-	//Surement a changer avec un check dans un vector pour toutes les methodes possible
 	std::string method;
 
+	//Surement a changer avec un check dans un vector pour toutes les methodes possible
 	if ((method = checkMethod(line)) == "")
 	{
 		std::cerr << "Method not found or not at good place" << std::endl;
@@ -67,6 +67,7 @@ void    Request::set_method(std::string line)
 	}
 	//MANQUE Verif l'espace apres la methode
 	int find_first_space = line.find_first_of(' ');
+	
 	for (int i = find_first_space; line[i] != '/'; i++)
 	{
 		if (line[i] != ' ')
