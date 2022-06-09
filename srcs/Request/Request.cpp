@@ -8,6 +8,7 @@ Request::Request(char *request, Server &server) :
     std::string new_request = request;
     _default_request = new_request;
     std::cout << "New request from port: " << server.get_port() << std::endl;
+    std::cout << _default_request << std::endl;
     parse();
 }
 
