@@ -8,6 +8,7 @@ Request::Request(char *request, Server &server) :
 	std::string new_request = request;
 	_default_request = new_request;
 	std::cout << "New request from port: " << server.get_port() << std::endl;
+	std::cout << _default_request << std::endl;
 	parse();
 }
 
@@ -30,12 +31,29 @@ void    Request::parse()
 	}
 }
 
+std::string    checkMethod(std::string line)
+{
+	std::vector<std::string>    methods;
+
+	methods.push_back("GET ");
+	methods.push_back("POST ");
+	methods.push_back("DELETE ");
+	
+	for (std::vector<std::string>::iterator it = methods.begin() ; it != methods.end(); ++it)
+	{
+		if (line.find(*it) == 0)
+			return (*it);
+	}
+	return ("");
+}
+
+
 void    Request::set_method(std::string line)
 {
+	std::string method;
+
 	//Surement a changer avec un check dans un vector pour toutes les methodes possible
-	if ((line.find("GET") == std::string::npos) != 0 &&
-		(line.find("POST") == std::string::npos) != 0 && 
-		(line.find("DELETE") == std::string::npos) != 0) 
+	if ((method = checkMethod(line)) == "")
 	{
 		std::cerr << "Method not found or not at good place" << std::endl;
 		_return_code = 400;
@@ -48,7 +66,18 @@ void    Request::set_method(std::string line)
 		return ;
 	}
 	//MANQUE Verif l'espace apres la methode
-	_method = line.substr(0, line.find_first_of(' '));
+	int find_first_space = line.find_first_of(' ');
+	
+	for (int i = find_first_space; line[i] != '/'; i++)
+	{
+		if (line[i] != ' ')
+		{		
+			std::cerr << "Not only space after method" << std::endl;
+			_return_code = 400;
+			return ;
+		}
+	}
+	_method = line.substr(0, find_first_space);
 }
 
 void	Request::check_http_version(std::string line) {
