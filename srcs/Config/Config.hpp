@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Config.hpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: nard <nard@student.42.fr>                  +#+  +:+       +#+        */
+/*   By: tnard <tnard@student.42lyon.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/06/07 16:21:22 by nard              #+#    #+#             */
-/*   Updated: 2022/06/08 00:21:10 by nard             ###   ########.fr       */
+/*   Updated: 2022/06/10 12:27:46 by tnard            ###   ########lyon.fr   */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -22,19 +22,49 @@
 
 class Config {
 	public:
+		Config(void);
 		~Config(void);
 
-		std::string		getServerName(void) const;
+		std::string			getServerName(void) const;
+		std::string			getIndex(void) const;
+		std::string			getRoot(void) const;
+		std::string			getAllow_methods(void) const;
+		std::string			getListen_ip(void) const;
+		int					getListen_port(void) const;
 
-		static int		isEndOfFile(std::string content, int pos);
-		static int		findEndBracket(std::string content, int pos);
-		static Config	*createConfig(std::string path);
-		static int		getLineOfPos(std::string content, int pos);
+		void				setServerName(std::string data);
+		void				setIndex(std::string data);
+		void				setRoot(std::string data);
+		void				setAllow_methods(std::string data);
+		void				setListen_ip(std::string data);
+		void				setListen_port(int data);
+
+		static Config		*createConfig(std::string path);
+		/* Return the pos of the last bracket */
+		static int			findEndBracket(std::string content, size_t pos);
+		/* Return the content of the pos bracket */
+		static std::string	getBracket(std::string content, size_t pos);
+		/* Return the line of the pos in content */
+		static int			getLineOfPos(std::string content, size_t pos);
+		/* Return all word before the new line */
+		static std::string	getDataBeforeLine(std::string content, size_t pos);
+		/* Check if the server bracket is valid */
+		static int			isValidServer(std::string content, size_t pos);
+		/* Check if we are at the end of the config file */
+		static int			isEndOfFile(std::string content, size_t pos);
+		/* Check if the current word is the same of value */
+		static int			isSameWord(std::string content, size_t pos, std::string word);
+		/* Extract all the parameters of server bracket */
+		static Config		extractConfig(std::string content);
 	private:
-		Config(void);
 
 		static int	_verbose;
 		std::string	_serverName;
+		std::string	_index;
+		std::string	_root;
+		std::string	_allow_methods;
+		std::string	_listen_ip;
+		int			_listen_port;
 	public:
 		class SyntaxInvalidAt : public std::exception
 		{
