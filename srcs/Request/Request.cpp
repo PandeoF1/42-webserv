@@ -20,6 +20,7 @@ void    Request::parse()
 {
 	std::istringstream  requestString(_default_request);
 	std::string         line;
+	std::string         parsed_line;
 	int i = 0;
 
 	// Parcours toutes les lignes pour parser la request
@@ -33,11 +34,22 @@ void    Request::parse()
 			if (_return_code != 400)
 				check_http_version(line);
 		}
+		if (i > 1)
+		{
+			for (size_t j = 0; j != line.size() && line[j] != ':'; j++)
+				line[j] = ::tolower(line[j]);
+			parsed_line = parse_line(line);
+			if (parsed_line != "")
+			{
+				_headers[parsed_line] = line.substr(line.find_first_of(':') + 1, line.size() - line.find_first_of(':'));
+				std::cout << "look }" << _headers[parsed_line] << std::endl;
+			}
+		}
 		i++;
 	}
 }
 
-std::string    checkMethod(std::string line)
+std::string    Request::checkMethod(std::string line)
 {
 	std::vector<std::string>    methods;
 
@@ -84,6 +96,36 @@ void    Request::set_method(std::string line)
 		}
 	}
 	_method = line.substr(0, find_first_space);
+}
+
+std::string	Request::parse_line(std::string line)
+{
+	std::vector<std::string>    header_lines;
+
+	header_lines.push_back("host:");
+	header_lines.push_back("cache-control:");
+	header_lines.push_back("sec-ch-ua:");
+	header_lines.push_back("sec-ch-mobile:");
+	header_lines.push_back("sec-ch-ua-platform:");
+	header_lines.push_back("upgrade-insecure-requests:");
+	header_lines.push_back("user-agent:");
+	header_lines.push_back("sec-fetch-site:");
+	header_lines.push_back("sec-fetch-mode:");
+	header_lines.push_back("sec-fetch-user:");
+	header_lines.push_back("sec-fetch-dest:");
+	header_lines.push_back("accept-encoding:");
+	header_lines.push_back("accept-language:");
+	header_lines.push_back("connection:");
+	header_lines.push_back("accept:");
+	header_lines.push_back("referer:");
+	header_lines.push_back("connection:");
+
+	for (std::vector<std::string>::iterator it = header_lines.begin() ; it != header_lines.end(); ++it)
+	{
+		if (line.find(*it) == 0)
+			return (*it);
+	}
+	return ("");
 }
 
 void    Request::check_first_line_words(std::string line)
