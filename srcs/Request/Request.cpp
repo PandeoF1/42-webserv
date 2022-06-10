@@ -1,14 +1,15 @@
 #include "../../includes/webserv.hpp"
 
 Request::Request(char *request, Server &server) :  
-    _server(server),
-    _return_code(200)
+	_server(server),
+	_return_code(200)
 {
-    (void)_server;
-    std::string new_request = request;
-    _default_request = new_request;
-    std::cout << "New request from port: " << server.get_port() << std::endl;
-    parse();
+	(void)_server;
+	std::string new_request = request;
+	_default_request = new_request;
+	std::cout << "New request from port: " << server.get_port() << std::endl;
+	std::cout << _default_request << std::endl;
+	parse();
 }
 
 Request::~Request(void) {
@@ -17,48 +18,128 @@ Request::~Request(void) {
 
 void    Request::parse()
 {
-    std::istringstream  requestString(_default_request);
-    std::string         line;
-    int i = 0;
+	std::istringstream  requestString(_default_request);
+	std::string         line;
+	int i = 0;
 
-    // Parcours toutes les lignes pour parser la request
-    while (std::getline(requestString, line) && _return_code != 400)
-    {
-        if (i == 0)
-            set_method(line);
-        i++;
-    }
+	// Parcours toutes les lignes pour parser la request
+	while (std::getline(requestString, line) && _return_code != 400)
+	{
+		if (i == 0)
+		{
+			check_first_line_words(line);
+			if (_return_code != 400)
+				set_method(line);
+			if (_return_code != 400)
+				check_http_version(line);
+		}
+		i++;
+	}
 }
+
+std::string    checkMethod(std::string line)
+{
+	std::vector<std::string>    methods;
+
+	methods.push_back("GET ");
+	methods.push_back("POST ");
+	methods.push_back("DELETE ");
+		
+	for (std::vector<std::string>::iterator it = methods.begin() ; it != methods.end(); ++it)
+	{
+		if (line.find(*it) == 0)
+			return (*it);
+	}
+	return ("");
+}
+
 
 void    Request::set_method(std::string line)
 {
-    //Surement a changer avec un check dans un vector pour toutes les methodes possible
-    if ((line.find("GET") == std::string::npos) != 0 &&
-        (line.find("POST") == std::string::npos) != 0 && 
-        (line.find("DELETE") == std::string::npos) != 0) 
-    {
-        std::cerr << "Method not found or not at good place" << std::endl;
-        _return_code = 400;
-        return ;
-    }
-    if (line.find_first_of(' ') == std::string::npos)
-    {
-        std::cerr << "No space after method" << std::endl;
-        _return_code = 400;
-        return ;
-    }
-    //MANQUE Verif l'espace apres la methode
-    _method = line.substr(0, line.find_first_of(' '));
+	std::string method;
+
+	//Surement a changer avec un check dans un vector pour toutes les methodes possible
+	if ((method = checkMethod(line)) == "")
+	{
+		std::cerr << "Method not found or not at good place" << std::endl;
+		_return_code = 400;
+		return ;
+	}
+	if (line.find_first_of(' ') == std::string::npos)
+	{
+		std::cerr << "No space after method" << std::endl;
+		_return_code = 400;
+		return ;
+	}
+	//MANQUE Verif l'espace apres la methode
+	int find_first_space = line.find_first_of(' ');
+	
+	for (int i = find_first_space; line[i] != '/'; i++)
+	{
+		if (line[i] != ' ')
+		{		
+			std::cerr << "Not only space after method" << std::endl;
+			_return_code = 400;
+			return ;
+		}
+	}
+	_method = line.substr(0, find_first_space);
 }
 
-// void    Request::check_http_version(std::string line) {
-//     int i = line.find_last_of(' ');
-// }
+void    Request::check_first_line_words(std::string line)
+{
+	std::string delimiter = " ";
+	std::vector<std::string>	words;
+	size_t 			pos;
+	int 			u = 0;
+
+	while ((pos = line.find(delimiter)) != std::string::npos) {
+		words.push_back(line.substr(0, pos));
+		line.erase(0, pos + delimiter.length());
+		if (line[0] == ' ')
+		{
+			for (u = 0; line[u] == ' '; u++);
+			line.erase(0, u);
+		}
+		if (line.find(delimiter) == std::string::npos)
+			words.push_back(line.substr(0, line.size()));
+	}
+
+	if (words.size() != 3 && words.size() != 4)
+	{
+		std::cerr << "First line not contains 3 or 4 words" << std::endl;
+		_return_code = 400;
+		return ;
+	}
+}
+
+void	Request::check_http_version(std::string line) {
+	unsigned long i = line.find("HTTP/1.1");
+	if (line.find("HTTP/1.1") == std::string::npos)
+	{
+		std::cerr << "HTTP version not found" << std::endl;
+		_return_code = 400;
+		return ;
+	}
+	if (line.find(" ", i - 1) != i - 1)
+	{
+		std::cerr << "No space before HTTP version" << std::endl;
+		_return_code = 400;
+		return ;
+	}
+	i = line.find("HTTP/1.1");
+	if (line.find_first_not_of("\n\r ", i + 8) != std::string::npos)
+	{
+		std::cerr << "Invalid char after HTTP version" << std::endl;
+		_return_code = 400;
+		return ;
+	}
+}
 
 std::string Request::get_method() const {
-    return (_method);
+	return (_method);
 }
 
 int Request::get_code() const {
-    return (_return_code);
+	return (_return_code);
 }

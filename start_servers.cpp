@@ -178,11 +178,11 @@ void start_servers(void)
 							switch (request.get_code())
 							{
 								case 200:
-							 		response = "HTTP/1.1 200 OK\r\ncontent-type: text/html\r\ncontent-length: 12\r\n\r\n<h1>Oui</h1>\r\n";
+							 		response = "HTTP/1.1 200 OK\r\ncontent-type: text/html\r\ncontent-length: 15\r\n\r\n<h1>200 OK</h1>\r\n";
 									send(sd , response.c_str() , response.size() , 0 );
 									break;
 								case 400:
-									response = "HTTP/1.1 400 Bad Request\r\ncontent-type: text/html\r\ncontent-length: 12\r\n\r\n<h1>Nop</h1>\r\n";
+									response = "HTTP/1.1 400 Bad Request\r\ncontent-type: text/html\r\ncontent-length: 24\r\n\r\n<h1>400 Bad Request</h1>\r\n";
 									send(sd , response.c_str() , response.size() , 0 );
 									break;
 							}
