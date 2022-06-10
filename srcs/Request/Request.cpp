@@ -26,7 +26,13 @@ void    Request::parse()
 	while (std::getline(requestString, line) && _return_code != 400)
 	{
 		if (i == 0)
-			set_method(line);
+		{
+			check_first_line_words(line);
+			if (_return_code != 400)
+				set_method(line);
+			if (_return_code != 400)
+				check_http_version(line);
+		}
 		i++;
 	}
 }
@@ -38,7 +44,7 @@ std::string    checkMethod(std::string line)
 	methods.push_back("GET ");
 	methods.push_back("POST ");
 	methods.push_back("DELETE ");
-	
+		
 	for (std::vector<std::string>::iterator it = methods.begin() ; it != methods.end(); ++it)
 	{
 		if (line.find(*it) == 0)
@@ -78,6 +84,33 @@ void    Request::set_method(std::string line)
 		}
 	}
 	_method = line.substr(0, find_first_space);
+}
+
+void    Request::check_first_line_words(std::string line)
+{
+	std::string delimiter = " ";
+	std::vector<std::string>	words;
+	size_t 			pos;
+	int 			u = 0;
+
+	while ((pos = line.find(delimiter)) != std::string::npos) {
+		words.push_back(line.substr(0, pos));
+		line.erase(0, pos + delimiter.length());
+		if (line[0] == ' ')
+		{
+			for (u = 0; line[u] == ' '; u++);
+			line.erase(0, u);
+		}
+		if (line.find(delimiter) == std::string::npos)
+			words.push_back(line.substr(0, line.size()));
+	}
+
+	if (words.size() != 3 && words.size() != 4)
+	{
+		std::cerr << "First line not contains 3 or 4 words" << std::endl;
+		_return_code = 400;
+		return ;
+	}
 }
 
 void	Request::check_http_version(std::string line) {

@@ -36,7 +36,7 @@ char* http_request(SOCKET sock, const char *hostname, const char *page){
 
   //Create a GET HTTP request
   len = sprintf(buf, "\
-GET %s %s\r\n\
+GET %s %s\
 Host: %s\r\n\
 %s\r\n\
 \r\n",
