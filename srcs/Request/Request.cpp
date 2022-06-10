@@ -8,7 +8,7 @@ Request::Request(char *request, Server &server) :
 	std::string new_request = request;
 	_default_request = new_request;
 	std::cout << "New request from port: " << server.get_port() << std::endl;
-	// std::cout << _default_request << std::endl;
+	std::cout << _default_request << std::endl;
 	parse();
 }
 
@@ -36,7 +36,7 @@ void    Request::parse()
 			if (_return_code != 400)
 				set_target_path(line);
 		}
-		if (i > 1)
+		if (i > 0)
 		{
 			for (size_t j = 0; j != line.size() && line[j] != ':'; j++)
 				line[j] = ::tolower(line[j]);
@@ -177,20 +177,20 @@ void	Request::check_http_version(std::string line) {
 	unsigned long i = line.find("HTTP/1.1");
 	if (line.find("HTTP/1.1") == std::string::npos)
 	{
-		std::cerr << "HTTP version not found" << std::endl;
+		std::cerr << RED << "HTTP version not found" << RST << std::endl;
 		_return_code = 400;
 		return ;
 	}
 	if (line.find(" ", i - 1) != i - 1)
 	{
-		std::cerr << "No space before HTTP version" << std::endl;
+		std::cerr << RED << "No space before HTTP version" << RST << std::endl;
 		_return_code = 400;
 		return ;
 	}
 	i = line.find("HTTP/1.1");
 	if (line.find_first_not_of("\n\r ", i + 8) != std::string::npos)
 	{
-		std::cerr << "Invalid char after HTTP version" << std::endl;
+		std::cerr << RED << "Invalid char after HTTP version" << RST << std::endl;
 		_return_code = 400;
 		return ;
 	}
