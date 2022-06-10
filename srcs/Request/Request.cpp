@@ -26,7 +26,10 @@ void    Request::parse()
 	while (std::getline(requestString, line) && _return_code != 400)
 	{
 		if (i == 0)
+		{
 			set_method(line);
+			check_http_version(line);
+		}
 		i++;
 	}
 }
@@ -81,23 +84,30 @@ void    Request::set_method(std::string line)
 }
 
 void	Request::check_http_version(std::string line) {
-	unsigned long i = line.find("HTTP/1.1");
-	if (line.find("HTTP/1.1") == std::string::npos)
+	std::size_t i = line.find(" HTTP/1.1");
+	if (i == std::string::npos)
 	{
 		std::cerr << "HTTP version not found" << std::endl;
 		_return_code = 400;
 		return ;
 	}
-	if (line.find(" ", i - 1) != i - 1)
+	std::size_t j = line.find_first_not_of("\n\r ", i + 9);
+	if (j != std::string::npos)
 	{
-		std::cerr << "No space before HTTP version" << std::endl;
+		std::cerr << "Invalid char after HTTP version : " << line[j] << std::endl;
 		_return_code = 400;
 		return ;
 	}
-	i = line.find("HTTP/1.1");
-	if (line.find_first_not_of("\n\r ", i + 8) != std::string::npos)
+	j = line.find_first_not_of(" ", i + 9);
+	if (j == std::string::npos || (line[j] == '\r' && j + 1 == std::string::npos))
 	{
-		std::cerr << "Invalid char after HTTP version" << std::endl;
+		std::cerr << "No '\\n' after HTTP version" << std::endl;
+		_return_code = 400;
+		return ;
+	}
+	if (line[j] == '\r' && line[j + 1] != '\0')
+	{
+		std::cerr << "No '\\n' after '\\r' in HTTP version" << std::endl;
 		_return_code = 400;
 		return ;
 	}
