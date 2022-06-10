@@ -6,7 +6,7 @@
 /*   By: tnard <tnard@student.42lyon.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/06/07 16:21:18 by nard              #+#    #+#             */
-/*   Updated: 2022/06/10 14:48:45 by tnard            ###   ########lyon.fr   */
+/*   Updated: 2022/06/10 15:45:16 by tnard            ###   ########lyon.fr   */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -81,58 +81,41 @@ Config		Config::extractConfig(std::string content)
 		/* Skip all useless char */
 		while (pos < content.length() && (content[pos] == '\n' || content[pos] == ' ' || content[pos] == '	'))
 			pos++;
-		//std::cout << content[pos] << std::endl;
-		if (Config::isSameWord(content, pos, "server_name"))
-		{
-			std::cout << "Server_Name part" << std::endl;
-			pos += std::string("server_name").length() + 1;
-			config.setServerName(Config::getDataBeforeLine(content, pos));
-			pos += config.getServerName().length();
-		}
-		else if (Config::isSameWord(content, pos, "listen"))
-		{
-			std::cout << "listen part" << std::endl;
-			pos += std::string("listen").length() + 1;
-			config.setListen_ip(Config::getDataBeforeLine(content, pos));
-			pos += config.getListen_ip().length();
-		}
-		else if (Config::isSameWord(content, pos, "root"))
-		{
-			std::cout << "root part" << std::endl;
-			pos += std::string("root").length() + 1;
-			config.setRoot(Config::getDataBeforeLine(content, pos));
-			pos += config.getRoot().length();
-		}
-		else if (Config::isSameWord(content, pos, "index"))
-		{
-			std::cout << "index part" << std::endl;
-			pos += std::string("index").length() + 1;
-			config.setIndex(Config::getDataBeforeLine(content, pos));
-			pos += config.getIndex().length();
-		}
-		else if (Config::isSameWord(content, pos, "allow_methods"))
-		{
-			std::cout << "allow_methods part" << std::endl;
-			pos += std::string("allow_methods").length() + 1;
-			config.setAllow_methods(Config::getDataBeforeLine(content, pos));
-			pos += config.getAllow_methods().length();
-		}
-		else if (Config::isSameWord(content, pos, "location"))
+		
+		config._data["test"] = "hey";
+		if (Config::isSameWord(content, pos, "location"))
 		{
 			std::cout << "location part" << std::endl;
-			std::cout << "Size : " << config.getLocation().size() << std::endl;
-			config._location[config._location.size()] = Location::extractLocation(content, pos);
-			pos += std::string("location").length() + 1;
-			pos += Config::getDataBeforeLine(content, pos).length() - 1;
+			//pos += std::string("location").length() + 1;
+			//config.setAllow_methods(Config::getDataBeforeLine(content, pos));
+			pos += getDataBeforeLine(content, pos).length() - 1;
 			pos += Config::getBracket(content, pos).length();
 		}
 		else
-			throw Config::SyntaxInvalidAt(Config::getLineOfPos(content, pos));
+		{
+			//std::cout << "test : " << Config::getWord(content, pos) << std::endl;
+			std::cout << "New type : " << Config::getWord(content, pos) << std::endl;
+			
+			config._data[Config::getWord(content, pos)] = Config::getDataBeforeLine(content, pos + Config::getWord(content, pos).length() + 1 // replace 1 by the number of space / tab);
+			pos += Config::getWord(content, pos).length() + config._data[Config::getWord(content, pos)].length() + 1;
+		}
+		// else
+		// 	throw Config::SyntaxInvalidAt(Config::getLineOfPos(content, pos));
 		std::cout << content[pos - 1] << " | " << pos << " | " << Config::getLineOfPos(content, pos) << std::endl;
 		//exit(0);
 	}
+	std::cout << config._data["listen"] << std::endl;
 	(void)content;
 	return (config);
+}
+
+std::string Config::getWord(std::string content, size_t pos)
+{
+	std::string tmp;
+
+	while (pos < content.length() && ((content[pos] != '\n' && content[pos] != ' ' && content[pos] != '	')))
+		tmp += content[pos++];
+	return (tmp);
 }
 
 std::string	Config::getDataBeforeLine(std::string content, size_t pos)

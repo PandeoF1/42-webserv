@@ -6,7 +6,7 @@
 /*   By: tnard <tnard@student.42lyon.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/06/07 16:21:22 by nard              #+#    #+#             */
-/*   Updated: 2022/06/10 14:35:28 by tnard            ###   ########lyon.fr   */
+/*   Updated: 2022/06/10 15:23:12 by tnard            ###   ########lyon.fr   */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -51,6 +51,8 @@ class Config {
 		static std::string	getBracket(std::string content, size_t pos);
 		/* Return the line of the pos in content */
 		static int			getLineOfPos(std::string content, size_t pos);
+		/* Return the current word */
+		static std::string	getWord(std::string content, size_t pos);
 		/* Return all word before the new line */
 		static std::string	getDataBeforeLine(std::string content, size_t pos);
 		/* Check if the server bracket is valid */
@@ -66,6 +68,7 @@ class Config {
 	private:
 
 		static int	_verbose;
+		std::map<std::string, std::string>	_data;
 		std::string	_serverName;
 		std::string	_index;
 		std::string	_root;
