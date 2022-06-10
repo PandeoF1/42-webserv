@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Location.hpp                                       :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: tnard <tnard@student.42lyon.fr>            +#+  +:+       +#+        */
+/*   By: marvin <marvin@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/06/06 15:52:21 by nard              #+#    #+#             */
-/*   Updated: 2022/06/10 14:58:33 by tnard            ###   ########lyon.fr   */
+/*   Updated: 2022/06/10 23:30:03 by marvin           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,18 +20,16 @@ class Location{
 		Location(void);
 		~Location(void);
 
-		static Location	extractLocation(std::string content, size_t pos);
+		static Location		extractLocation(std::string content, size_t pos);
+		static int			isValidParameter(std::string content, size_t pos);
+		static std::string	removeBracket(std::string content);
 
-		std::string getName(void);
-		std::string getAllow_methods(void);
-
-		void		setName(std::string);
-		void		setAllow_methods(std::string);
+		void				setLocation(std::string index, std::string value);
+		std::string			operator[](std::string index) const;
+		std::map<std::string, std::string>	getData(void) const;
 	private:
 		static int _verbose;
-		std::string	_name;
-		std::string	_allow_methods;
-		
+		std::map<std::string, std::string>	_data;
 };
 
 #endif

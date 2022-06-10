@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   webserv.hpp                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: tnard <tnard@student.42lyon.fr>            +#+  +:+       +#+        */
+/*   By: marvin <marvin@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/06/06 15:56:12 by nard              #+#    #+#             */
-/*   Updated: 2022/06/10 14:17:18 by tnard            ###   ########lyon.fr   */
+/*   Updated: 2022/06/10 22:07:39 by marvin           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -38,5 +38,11 @@
 #include "../srcs/Config/Location/Location.hpp"
 #include "../srcs/Request/Request.hpp"
 #include "../srcs/Server/Server.hpp"
+
+static std::string Location_Valid_Param[] = {"allow_methods", "root", "alias", "client_body_buffer_size", "index", "cgi_pass"};
+#define Location_Valid_Param_Length 6
+
+static std::string Server_Valid_Param[] = {"server_name", "listen", "root", "index", "allow_methods"};
+#define Server_Valid_Param_Length 5
 
 void start_servers(void);

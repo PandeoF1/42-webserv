@@ -3,10 +3,10 @@
 #                                                         :::      ::::::::    #
 #    Makefile                                           :+:      :+:    :+:    #
 #                                                     +:+ +:+         +:+      #
-#    By: tnard <tnard@student.42lyon.fr>            +#+  +:+       +#+         #
+#    By: marvin <marvin@student.42.fr>              +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2021/12/09 13:15:12 by tnard             #+#    #+#              #
-#    Updated: 2022/06/10 14:17:56 by tnard            ###   ########lyon.fr    #
+#    Updated: 2022/06/10 22:01:30 by marvin           ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -22,7 +22,7 @@ SRCS				= main.cpp \
 						start_servers.cpp srcs/Config/Location/Location.cpp
 NAME				= webserv
 OBJS_DIR			= objs/
-PROJECT_H			= srcs/File/File.hpp \
+PROJECT_H			= includes/webserv.hpp srcs/File/File.hpp \
 						srcs/Server/Server.hpp srcs/Config/Config.hpp srcs/Request/Request.hpp srcs/Config/Location/Location.hpp
 OBJS				= $(SRCS:.cpp=.o)
 OBJECTS_PREFIXED	= $(addprefix $(OBJS_DIR), $(OBJS))

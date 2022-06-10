@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Config.hpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: tnard <tnard@student.42lyon.fr>            +#+  +:+       +#+        */
+/*   By: marvin <marvin@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/06/07 16:21:22 by nard              #+#    #+#             */
-/*   Updated: 2022/06/10 15:23:12 by tnard            ###   ########lyon.fr   */
+/*   Updated: 2022/06/10 23:18:05 by marvin           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -26,22 +26,15 @@ class Config {
 		Config(void);
 		~Config(void);
 
-		std::string			getServerName(void) const;
-		std::string			getIndex(void) const;
-		std::string			getRoot(void) const;
-		std::string			getAllow_methods(void) const;
-		std::string			getListen_ip(void) const;
-		int					getListen_port(void) const;
 		std::map<int, Location>	getLocation(void) const;
+		std::map<std::string, Location>	getLocation_str(void) const;
 
-		std::string			operator[](std::string index) const;
+		std::string				operator[](std::string index) const;
 
-		void				setServerName(std::string data);
-		void				setIndex(std::string data);
-		void				setRoot(std::string data);
-		void				setAllow_methods(std::string data);
-		void				setListen_ip(std::string data);
-		void				setListen_port(int data);
+		void					setData(std::string index, std::string value);
+		void					setLocation(std::string index, Location value);
+		std::map<std::string, std::string>	getData(void) const;
+
 
 		/* Return the map of the config file */	
 		static std::map<int, Config> createConfig(std::string path);
@@ -65,18 +58,16 @@ class Config {
 		static int			isSameWord(std::string content, size_t pos, std::string word);
 		/* Extract all the parameters of server bracket */
 		static Config		extractConfig(std::string content);
+		/* Check the format of the parameters */
+		static int			isValidParameter(std::string content, size_t pos);
+		/* Return the number of space / tab */
+		static std::string	removeWhiteSpace(std::string content);
 	private:
 
 		static int	_verbose;
 		std::map<std::string, std::string>	_data;
-		std::string	_serverName;
-		std::string	_index;
-		std::string	_root;
-		std::string	_allow_methods;
-		std::string	_listen_ip;
-		int			_listen_port;
-
-		std::map<int, Location>	_location;
+		std::map<int, Location>				_location;
+		std::map<std::string, Location>				_location_str;
 	public:
 		class IndexOutOfRange : public std::exception
 		{

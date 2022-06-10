@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Location.cpp                                       :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: tnard <tnard@student.42lyon.fr>            +#+  +:+       +#+        */
+/*   By: marvin <marvin@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/06/06 15:52:24 by nard              #+#    #+#             */
-/*   Updated: 2022/06/10 15:02:06 by tnard            ###   ########lyon.fr   */
+/*   Updated: 2022/06/10 23:32:01 by marvin           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,7 +14,7 @@
 
 int Location::_verbose = 0;
 
-Location::Location(void) : _name("undefined")
+Location::Location(void)
 {
 	if (_verbose)
 		std::cout << "Location constructor called" << std::endl;
@@ -31,23 +31,22 @@ Location	Location::extractLocation(std::string content, size_t pos)
 	size_t		global_l = pos;
 
 	pos += std::string("location ").length();
-	loc.setName(Config::getDataBeforeLine(content, pos));
-	pos += loc.getName().length() - 1;
+	loc.setLocation("name", Config::getDataBeforeLine(content, pos));
+	pos += Config::getDataBeforeLine(content, pos).length() - 1;
 	std::string tmp = Config::getBracket(content, pos);
-	std::cout << tmp << std::endl;
+	//std::cout << tmp << std::endl;
 	pos = 1;
 	while (!Config::isEndOfBracket(tmp, pos))
 	{
 		/* Skip all useless char */
 		while (pos < tmp.length() && (tmp[pos] == '\n' || tmp[pos] == ' ' || tmp[pos] == '	'))
 			pos++;
-		if (Config::isSameWord(tmp, pos, "allow_methods"))
+		if (Location::isValidParameter(tmp, pos))
 		{
-			std::cout << "Location allow_methods part" << std::endl;
-			pos += std::string("allow_methods").length() + 1;
-			loc.setAllow_methods(Config::getDataBeforeLine(tmp, pos));
-			pos += loc.getAllow_methods().length();
-			std::cout << tmp[pos] << std::endl;
+			//std::cout << "New location type : " << Config::getWord(tmp, pos) << std::endl;
+			loc.setLocation(Config::getWord(tmp, pos), Config::removeWhiteSpace(Config::getDataBeforeLine(tmp, pos + Config::getWord(tmp, pos).length())));
+			//std::cout << "Value loc -> " << Config::removeWhiteSpace(Config::getDataBeforeLine(tmp, pos + Config::getWord(tmp, pos).length())) << std::endl;
+ 			pos += Config::getWord(tmp, pos).length() + Config::getDataBeforeLine(tmp, pos + Config::getWord(tmp, pos).length()).length();
 		}
 		else
 			throw Config::SyntaxInvalidAt(Config::getLineOfPos(content, global_l + pos));
@@ -56,22 +55,34 @@ Location	Location::extractLocation(std::string content, size_t pos)
 	return (loc);
 }
 
-void Location::setName(std::string name)
+int	Location::isValidParameter(std::string content, size_t pos)
 {
-	this->_name = name;
+	for (int i = 0; i < Location_Valid_Param_Length; i++)
+		if (Config::isSameWord(content, pos, Location_Valid_Param[i]))
+			return (1);
+	return (0);
 }
 
-void Location::setAllow_methods(std::string name)
+void		Location::setLocation(std::string index, std::string value)
 {
-	this->_allow_methods = name;
+	this->_data[index] = value;
 }
 
-std::string Location::getName(void)
+std::string	Location::removeBracket(std::string content)
 {
-	return (this->_name);
+	size_t	pos = content.length() - 1;
+
+	while (!isalnum(content[pos]) && pos > 0)
+		pos--;
+	return (content.substr(0, pos + 1));
 }
 
-std::string Location::getAllow_methods(void)
+std::string	Location::operator[](std::string index) const
 {
-	return (this->_allow_methods);
+	return (this->getData()[index]);
+}
+
+std::map<std::string, std::string>	Location::getData(void) const
+{
+	return (this->_data);
 }
