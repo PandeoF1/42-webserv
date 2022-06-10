@@ -8,7 +8,7 @@ Request::Request(char *request, Server &server) :
 	std::string new_request = request;
 	_default_request = new_request;
 	std::cout << "New request from port: " << server.get_port() << std::endl;
-	std::cout << _default_request << std::endl;
+	// std::cout << _default_request << std::endl;
 	parse();
 }
 
@@ -29,9 +29,11 @@ void    Request::parse()
 		{
 			check_first_line_words(line);
 			if (_return_code != 400)
+				check_http_version(line);
+			if (_return_code != 400)
 				set_method(line);
 			if (_return_code != 400)
-				check_http_version(line);
+				set_target_path(line);
 		}
 		i++;
 	}
@@ -61,13 +63,13 @@ void    Request::set_method(std::string line)
 	//Surement a changer avec un check dans un vector pour toutes les methodes possible
 	if ((method = checkMethod(line)) == "")
 	{
-		std::cerr << "Method not found or not at good place" << std::endl;
+		std::cerr << RED << "Method not found or not at good place" << RST << std::endl;
 		_return_code = 400;
 		return ;
 	}
 	if (line.find_first_of(' ') == std::string::npos)
 	{
-		std::cerr << "No space after method" << std::endl;
+		std::cerr << RED << "No space after method" << RST << std::endl;
 		_return_code = 400;
 		return ;
 	}
@@ -78,12 +80,28 @@ void    Request::set_method(std::string line)
 	{
 		if (line[i] != ' ')
 		{		
-			std::cerr << "Not only space after method" << std::endl;
+			std::cerr << RED << "Not only space after method" << RST << std::endl;
 			_return_code = 400;
 			return ;
 		}
 	}
 	_method = line.substr(0, find_first_space);
+}
+
+void    Request::set_target_path(std::string line)
+{
+	std::size_t i, j;
+
+	for (i = line.find_first_of(' '); line[i] && line[i] == ' '; i++);
+	if (i != std::string::npos && line[i] && line[i] != '/')
+	{
+		std::cerr << RED << "Target path not start by '/'" << RST << std::endl;
+		_return_code = 400;
+		return ;
+	}
+
+	for (j = 0; line[i + j] && line[i + j] != ' '; j++);
+	_target_path = line.substr(i, j);
 }
 
 void    Request::check_first_line_words(std::string line)
@@ -107,7 +125,7 @@ void    Request::check_first_line_words(std::string line)
 
 	if (words.size() != 3 && words.size() != 4)
 	{
-		std::cerr << "First line not contains 3 or 4 words" << std::endl;
+		std::cerr << RED << "First line not contains 3 or 4 words" << RST << std::endl;
 		_return_code = 400;
 		return ;
 	}
