@@ -6,7 +6,7 @@
 #    By: jbosquet <jbosquet@student.42lyon.fr>      +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2021/12/09 13:15:12 by tnard             #+#    #+#              #
-#    Updated: 2022/06/10 14:11:00 by jbosquet         ###   ########.fr        #
+#    Updated: 2022/06/10 14:42:17 by jbosquet         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -27,7 +27,7 @@ PROJECT_H			= srcs/File/File.hpp \
 OBJS				= $(SRCS:.cpp=.o)
 OBJECTS_PREFIXED	= $(addprefix $(OBJS_DIR), $(OBJS))
 CC					= c++
-CC_FLAGS			= -Wall -Werror -Wextra -std=c++98
+CC_FLAGS			= -std=c++98 #-Wall -Werror -Wextra
 
 $(OBJS_DIR)%.o : %.cpp $(PROJECT_H)
 	@mkdir -p $(OBJS_DIR)
