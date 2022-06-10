@@ -6,7 +6,7 @@
 /*   By: tnard <tnard@student.42lyon.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/06/07 16:21:22 by nard              #+#    #+#             */
-/*   Updated: 2022/06/10 12:27:46 by tnard            ###   ########lyon.fr   */
+/*   Updated: 2022/06/10 14:35:28 by tnard            ###   ########lyon.fr   */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,6 +20,7 @@
 # define RED "\033[0;31m"
 # define RST "\033[0m"
 
+class Location;
 class Config {
 	public:
 		Config(void);
@@ -31,6 +32,9 @@ class Config {
 		std::string			getAllow_methods(void) const;
 		std::string			getListen_ip(void) const;
 		int					getListen_port(void) const;
+		std::map<int, Location>	getLocation(void) const;
+
+		std::string			operator[](std::string index) const;
 
 		void				setServerName(std::string data);
 		void				setIndex(std::string data);
@@ -39,7 +43,8 @@ class Config {
 		void				setListen_ip(std::string data);
 		void				setListen_port(int data);
 
-		static Config		*createConfig(std::string path);
+		/* Return the map of the config file */	
+		static std::map<int, Config> createConfig(std::string path);
 		/* Return the pos of the last bracket */
 		static int			findEndBracket(std::string content, size_t pos);
 		/* Return the content of the pos bracket */
@@ -52,6 +57,8 @@ class Config {
 		static int			isValidServer(std::string content, size_t pos);
 		/* Check if we are at the end of the config file */
 		static int			isEndOfFile(std::string content, size_t pos);
+		/* Check if we are at the end of a bracket */
+		static int			isEndOfBracket(std::string content, size_t pos);
 		/* Check if the current word is the same of value */
 		static int			isSameWord(std::string content, size_t pos, std::string word);
 		/* Extract all the parameters of server bracket */
@@ -65,7 +72,16 @@ class Config {
 		std::string	_allow_methods;
 		std::string	_listen_ip;
 		int			_listen_port;
+
+		std::map<int, Location>	_location;
 	public:
+		class IndexOutOfRange : public std::exception
+		{
+			virtual const char *what() const throw ()
+			{
+				return ("[Config] Index out of range !");
+			}
+		};
 		class SyntaxInvalidAt : public std::exception
 		{
 			public :

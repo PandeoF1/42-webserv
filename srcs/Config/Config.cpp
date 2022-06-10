@@ -6,11 +6,18 @@
 /*   By: tnard <tnard@student.42lyon.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/06/07 16:21:18 by nard              #+#    #+#             */
-/*   Updated: 2022/06/10 12:40:55 by tnard            ###   ########lyon.fr   */
+/*   Updated: 2022/06/10 14:48:45 by tnard            ###   ########lyon.fr   */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "Config.hpp"
+
+/*
+TODO:
+	extractConfig :
+		ex (root /test), gerer x espace et pas que un (+1 dans le += pos), pareil pour locaation dcp
+
+*/
 
 int Config::_verbose = 0;
 
@@ -26,8 +33,9 @@ Config::~Config(void)
 		std::cout << "Config destructor called" << std::endl;
 }
 
-Config *Config::createConfig(std::string path)
+std::map<int, Config> Config::createConfig(std::string path)
 {
+	std::map<int, Config> dump;
 	File			file;
 	std::string		content;
 	size_t			pos = 0;
@@ -42,15 +50,21 @@ Config *Config::createConfig(std::string path)
 		throw SyntaxInvalidAt(Config::getLineOfPos(content, pos));
 
 	pos = Config::isValidServer(content, pos);
-
+	
 	std::string tmp = Config::getBracket(content, pos);
 	std::cout << tmp << std::endl << "------------------- Extract : -------------------" << std::endl;
-	Config test = Config::extractConfig(tmp);
-	(void)test;
+	dump[0] = Config::extractConfig(tmp);
 	if (Config::isEndOfFile(content, pos))
 		throw SyntaxInvalidAt(Config::getLineOfPos(content, pos));
 	exit(0);
-	return (NULL);
+	return (dump);
+}
+
+std::string	Config::operator[](std::string index) const
+{
+	if (index == "test")
+		return (std::string("hey"));
+	return (std::string(";)"));
 }
 
 Config		Config::extractConfig(std::string content)
@@ -58,10 +72,11 @@ Config		Config::extractConfig(std::string content)
 	Config	config;
 	size_t	pos = 0;
 
+	std::cout << config["test"] << " " << config["gfgd"] << std::endl;
 	if (content[pos] == '{')
 		pos++;
 	/* While server bracket is not cleared */
-	while (!Config::isEndOfFile(content, pos))
+	while (!Config::isEndOfBracket(content, pos))
 	{
 		/* Skip all useless char */
 		while (pos < content.length() && (content[pos] == '\n' || content[pos] == ' ' || content[pos] == '	'))
@@ -105,9 +120,10 @@ Config		Config::extractConfig(std::string content)
 		else if (Config::isSameWord(content, pos, "location"))
 		{
 			std::cout << "location part" << std::endl;
+			std::cout << "Size : " << config.getLocation().size() << std::endl;
+			config._location[config._location.size()] = Location::extractLocation(content, pos);
 			pos += std::string("location").length() + 1;
 			pos += Config::getDataBeforeLine(content, pos).length() - 1;
-			std::cout << " '" << content[pos] << "' " << std::endl;
 			pos += Config::getBracket(content, pos).length();
 		}
 		else
@@ -187,6 +203,24 @@ int	Config::isEndOfFile(std::string content, size_t pos)
 	return (1);
 }
 
+int	Config::isEndOfBracket(std::string content, size_t pos)
+{
+	size_t	x;
+
+	x = 0;
+	while (content.length() > (pos + x))
+	{
+		if (content.at(pos + x) != '	' && content.at(pos + x) != '\n' && content.at(pos + x) != '\r' && content.at(pos + x) != ' ')
+		{
+			if (content.at(pos + x) == '}' && (pos + x) == content.length() - 1)
+				return (1);
+			return (0);
+		}
+		x++;
+	}
+	return (1);
+}
+
 int	Config::getLineOfPos(std::string content, size_t pos)
 {
 	size_t	x;
@@ -257,6 +291,10 @@ int			Config::getListen_port(void) const
 	return (this->_listen_port);
 }
 
+std::map<int, Location>	Config::getLocation(void) const
+{
+	return (this->_location);
+}
 
 void	Config::setServerName(std::string data)
 {

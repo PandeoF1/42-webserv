@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   webserv.hpp                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: jbosquet <jbosquet@student.42lyon.fr>      +#+  +:+       +#+        */
+/*   By: tnard <tnard@student.42lyon.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/06/06 15:56:12 by nard              #+#    #+#             */
-/*   Updated: 2022/06/09 01:23:19 by jbosquet         ###   ########.fr       */
+/*   Updated: 2022/06/10 14:17:18 by tnard            ###   ########lyon.fr   */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -28,9 +28,14 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+#include <map>
+#include <iostream>
+#include <sstream>
+
 #include "../srcs/File/File.hpp"
 #include "../srcs/Server/Server.hpp"
 #include "../srcs/Config/Config.hpp"
+#include "../srcs/Config/Location/Location.hpp"
 #include "../srcs/Request/Request.hpp"
 #include "../srcs/Server/Server.hpp"
 

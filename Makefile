@@ -6,7 +6,7 @@
 #    By: tnard <tnard@student.42lyon.fr>            +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2021/12/09 13:15:12 by tnard             #+#    #+#              #
-#    Updated: 2022/06/10 11:48:19 by tnard            ###   ########lyon.fr    #
+#    Updated: 2022/06/10 14:17:56 by tnard            ###   ########lyon.fr    #
 #                                                                              #
 # **************************************************************************** #
 
@@ -19,11 +19,11 @@ END					= \e[0m
 SRCS				= main.cpp \
 						srcs/File/File.cpp srcs/Server/Server.cpp \
 						srcs/Config/Config.cpp srcs/Request/Request.cpp	\
-						start_servers.cpp
+						start_servers.cpp srcs/Config/Location/Location.cpp
 NAME				= webserv
 OBJS_DIR			= objs/
 PROJECT_H			= srcs/File/File.hpp \
-						srcs/Server/Server.hpp srcs/Config/Config.hpp srcs/Request/Request.hpp
+						srcs/Server/Server.hpp srcs/Config/Config.hpp srcs/Request/Request.hpp srcs/Config/Location/Location.hpp
 OBJS				= $(SRCS:.cpp=.o)
 OBJECTS_PREFIXED	= $(addprefix $(OBJS_DIR), $(OBJS))
 CC					= c++
@@ -34,6 +34,7 @@ $(OBJS_DIR)%.o : %.cpp $(PROJECT_H)
 	@mkdir -p $(OBJS_DIR)/srcs
 	@mkdir -p $(OBJS_DIR)/srcs/File
 	@mkdir -p $(OBJS_DIR)/srcs/Config
+	@mkdir -p $(OBJS_DIR)/srcs/Config/Location
 	@mkdir -p $(OBJS_DIR)/srcs/Server
 	@mkdir -p $(OBJS_DIR)/srcs/Request
 	@$(CC) $(CC_FLAGS) -c $< -o $@
