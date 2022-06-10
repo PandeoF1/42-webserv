@@ -17,7 +17,7 @@ class Request
 		void    parse();
 		void    set_method(std::string line);
 		void    check_http_version(std::string line);
-
+		void    check_first_line_words(std::string line);
 
 	public:
 		Request(char *request, Server &server);

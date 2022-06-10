@@ -27,8 +27,11 @@ void    Request::parse()
 	{
 		if (i == 0)
 		{
-			set_method(line);
-			check_http_version(line);
+			check_first_line_words(line);
+			if (_return_code != 400)
+				set_method(line);
+			if (_return_code != 400)
+				check_http_version(line);
 		}
 		i++;
 	}
@@ -41,7 +44,7 @@ std::string    checkMethod(std::string line)
 	methods.push_back("GET ");
 	methods.push_back("POST ");
 	methods.push_back("DELETE ");
-	
+		
 	for (std::vector<std::string>::iterator it = methods.begin() ; it != methods.end(); ++it)
 	{
 		if (line.find(*it) == 0)
@@ -83,31 +86,51 @@ void    Request::set_method(std::string line)
 	_method = line.substr(0, find_first_space);
 }
 
+void    Request::check_first_line_words(std::string line)
+{
+	std::string delimiter = " ";
+	std::vector<std::string>	words;
+	size_t 			pos;
+	int 			u = 0;
+
+	while ((pos = line.find(delimiter)) != std::string::npos) {
+		words.push_back(line.substr(0, pos));
+		line.erase(0, pos + delimiter.length());
+		if (line[0] == ' ')
+		{
+			for (u = 0; line[u] == ' '; u++);
+			line.erase(0, u);
+		}
+		if (line.find(delimiter) == std::string::npos)
+			words.push_back(line.substr(0, line.size()));
+	}
+
+	if (words.size() != 3 && words.size() != 4)
+	{
+		std::cerr << "First line not contains 3 or 4 words" << std::endl;
+		_return_code = 400;
+		return ;
+	}
+}
+
 void	Request::check_http_version(std::string line) {
-	std::size_t i = line.find(" HTTP/1.1");
-	if (i == std::string::npos)
+	unsigned long i = line.find("HTTP/1.1");
+	if (line.find("HTTP/1.1") == std::string::npos)
 	{
 		std::cerr << "HTTP version not found" << std::endl;
 		_return_code = 400;
 		return ;
 	}
-	std::size_t j = line.find_first_not_of("\n\r ", i + 9);
-	if (j != std::string::npos)
+	if (line.find(" ", i - 1) != i - 1)
 	{
-		std::cerr << "Invalid char after HTTP version : " << line[j] << std::endl;
+		std::cerr << "No space before HTTP version" << std::endl;
 		_return_code = 400;
 		return ;
 	}
-	j = line.find_first_not_of(" ", i + 9);
-	if (j == std::string::npos || (line[j] == '\r' && j + 1 == std::string::npos))
+	i = line.find("HTTP/1.1");
+	if (line.find_first_not_of("\n\r ", i + 8) != std::string::npos)
 	{
-		std::cerr << "No '\\n' after HTTP version" << std::endl;
-		_return_code = 400;
-		return ;
-	}
-	if (line[j] == '\r' && line[j + 1] != '\0')
-	{
-		std::cerr << "No '\\n' after '\\r' in HTTP version" << std::endl;
+		std::cerr << "Invalid char after HTTP version" << std::endl;
 		_return_code = 400;
 		return ;
 	}
