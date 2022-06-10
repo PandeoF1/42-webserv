@@ -13,7 +13,6 @@ Request::Request(char *request, Server &server) :
 }
 
 Request::~Request(void) {
-
 }
 
 void    Request::parse()
@@ -23,7 +22,6 @@ void    Request::parse()
 	std::string         parsed_line;
 	int i = 0;
 
-	// Parcours toutes les lignes pour parser la request
 	while (std::getline(requestString, line) && _return_code != 400)
 	{
 		if (i == 0)
@@ -49,6 +47,13 @@ void    Request::parse()
 		}
 		i++;
 	}
+	if (_headers["host"].size() > 0)
+	{
+		int after_space = _headers["host"].find_first_not_of(' ');
+		if (_headers["host"][after_space] == '\r' || _headers["host"][after_space] == std::string::npos)
+			_return_code = 400;
+	} else if (_headers["host"].size() == 0)
+		_return_code = 400;
 }
 
 std::string    Request::checkMethod(std::string line)
@@ -58,22 +63,33 @@ std::string    Request::checkMethod(std::string line)
 	methods.push_back("GET ");
 	methods.push_back("POST ");
 	methods.push_back("DELETE ");
-		
+
+	for (int i = 0; line[i] != ' '; i++)
+		if (std::islower(line[i]))
+			return ("400");
+
 	for (std::vector<std::string>::iterator it = methods.begin() ; it != methods.end(); ++it)
-	{
 		if (line.find(*it) == 0)
 			return (*it);
-	}
-	return ("");
-}
 
+	for (int i = 0; line[i] != ' '; i++)
+		if (std::isupper(line[i]))
+			return ("405");
+	return ("400");
+}
 
 void    Request::set_method(std::string line)
 {
 	std::string method;
 
-	//Surement a changer avec un check dans un vector pour toutes les methodes possible
-	if ((method = checkMethod(line)) == "")
+	method = checkMethod(line);
+	if (method == "405")
+	{
+		std::cerr << RED << "Method not allowed" << RST << std::endl;
+		_return_code = 405;
+		return ;
+	}
+	if (method == "400")
 	{
 		std::cerr << RED << "Method not found or not at good place" << RST << std::endl;
 		_return_code = 400;
@@ -85,9 +101,8 @@ void    Request::set_method(std::string line)
 		_return_code = 400;
 		return ;
 	}
-	//MANQUE Verif l'espace apres la methode
+
 	int find_first_space = line.find_first_of(' ');
-	
 	for (int i = find_first_space; line[i] != '/'; i++)
 	{
 		if (line[i] != ' ')
@@ -141,7 +156,7 @@ std::string	Request::parse_line(std::string line)
 	for (std::vector<std::string>::iterator it = header_lines.begin() ; it != header_lines.end(); ++it)
 	{
 		if (line.find(*it) == 0)
-			return (*it);
+			return ((*it).erase((*it).size() -1));
 	}
 	return ("");
 }
@@ -165,9 +180,13 @@ void    Request::check_first_line_words(std::string line)
 			words.push_back(line.substr(0, line.size()));
 	}
 
-	if (words.size() != 3 && words.size() != 4)
+	if ((words.size() != 3 && words.size() != 4) || (words[2].find("HTTP/1.1") == std::string::npos))
 	{
-		std::cerr << RED << "First line not contains 3 or 4 words" << RST << std::endl;
+		std::cout << "|" << words[2] << "|" << std::endl;
+		if (words[2].find("HTTP/1.1") == std::string::npos)
+			std::cerr << RED << "First line has not HTTP/1.1 in third argument" << RST << std::endl;
+		else
+			std::cerr << RED << "First line not contains 3 or 4 words" << RST << std::endl;
 		_return_code = 400;
 		return ;
 	}

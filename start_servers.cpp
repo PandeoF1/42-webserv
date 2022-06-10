@@ -185,6 +185,10 @@ void start_servers(void)
 									response = "HTTP/1.1 400 Bad Request\r\ncontent-type: text/html\r\ncontent-length: 24\r\n\r\n<h1>400 Bad Request</h1>\r\n";
 									send(sd , response.c_str() , response.size() , 0 );
 									break;
+								case 405:
+									response = "HTTP/1.1 405 Not Allowed\r\ncontent-type: text/html\r\ncontent-length: 24\r\n\r\n<h1>405 Not Allowed</h1>\r\n";
+									send(sd , response.c_str() , response.size() , 0 );
+									break;
 							}
 						}
 					}
