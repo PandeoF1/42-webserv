@@ -6,7 +6,7 @@
 /*   By: marvin <marvin@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/06/07 16:21:22 by nard              #+#    #+#             */
-/*   Updated: 2022/06/11 20:55:47 by marvin           ###   ########.fr       */
+/*   Updated: 2022/06/11 22:27:42 by marvin           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -34,7 +34,6 @@ class Config {
 		void					setData(std::string index, std::string value);
 		void					setLocation(std::string index, Location value);
 		std::map<std::string, std::string>	getData(void) const;
-
 
 		/* Return the map of the config file */	
 		static std::map<int, Config> createConfig(std::string path);

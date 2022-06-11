@@ -6,7 +6,7 @@
 /*   By: marvin <marvin@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/06/07 16:21:18 by nard              #+#    #+#             */
-/*   Updated: 2022/06/11 21:21:56 by marvin           ###   ########.fr       */
+/*   Updated: 2022/06/11 22:41:43 by marvin           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,7 +14,8 @@
 
 /*
 TODO:
-
+	Add ip to config["ip"]
+	Allowmethods to check
 */
 
 int Config::_verbose = 0;
@@ -80,7 +81,7 @@ Config		Config::extractConfig(std::string content)
 		while (pos < content.length() && (content[pos] == '\n' || content[pos] == ' ' || content[pos] == '	'))
 			pos++;
 		/* If location part == special case of new bracket */
-		if (Config::isSameWord(content, pos, "location"))
+		if (Config::isSameWord(content, pos, Location_Name))
 		{
 			Location tmp = Location::extractLocation(content, pos);
 			config.setLocation(Location::removeBracket(tmp["name"]), tmp);
@@ -131,7 +132,7 @@ int	Config::isValidValue(std::string param, std::string value)
 	}
 	else
 		return (1);
-	exit(0);
+	//exit(0);
 	return (1);
 }
 
@@ -147,6 +148,7 @@ int			Config::isValidIp(std::string ip)
 	std::cout << a << " " << b << " " << c << " " << d << " " << std::endl;
 	// if (a.length() > 3 || b.length() > 3 || c.length() > 3 || d.length() > 3) add it if you want to parse 00005
 	// 	throw Config::SyntaxInvalidValue("IP", ip);
+	// to do : add ip to config["ip"]
 	if (atoi(a.c_str()) > 255 || atoi(b.c_str()) > 255 || atoi(c.c_str()) > 255 || atoi(d.c_str()) > 255)
 		throw Config::SyntaxInvalidValue("IP", ip);
 	return (0);
