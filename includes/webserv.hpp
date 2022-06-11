@@ -6,7 +6,7 @@
 /*   By: marvin <marvin@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/06/06 15:56:12 by nard              #+#    #+#             */
-/*   Updated: 2022/06/10 22:07:39 by marvin           ###   ########.fr       */
+/*   Updated: 2022/06/11 21:22:21 by marvin           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -44,5 +44,6 @@ static std::string Location_Valid_Param[] = {"allow_methods", "root", "alias", "
 
 static std::string Server_Valid_Param[] = {"server_name", "listen", "root", "index", "allow_methods"};
 #define Server_Valid_Param_Length 5
+#define Server_IP 1
 
-void start_servers(void);
+void	start_servers(void);

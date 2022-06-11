@@ -6,7 +6,7 @@
 /*   By: marvin <marvin@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/06/07 16:21:22 by nard              #+#    #+#             */
-/*   Updated: 2022/06/10 23:18:05 by marvin           ###   ########.fr       */
+/*   Updated: 2022/06/11 20:55:47 by marvin           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -40,6 +40,8 @@ class Config {
 		static std::map<int, Config> createConfig(std::string path);
 		/* Return the pos of the last bracket */
 		static int			findEndBracket(std::string content, size_t pos);
+		/* Check the value of the parameter */
+		static int			isValidValue(std::string param, std::string value);
 		/* Return the content of the pos bracket */
 		static std::string	getBracket(std::string content, size_t pos);
 		/* Return the line of the pos in content */
@@ -62,6 +64,8 @@ class Config {
 		static int			isValidParameter(std::string content, size_t pos);
 		/* Return the number of space / tab */
 		static std::string	removeWhiteSpace(std::string content);
+		/* Check if the ip is valid */
+		static int			isValidIp(std::string ip);
 	private:
 
 		static int	_verbose;
@@ -75,6 +79,19 @@ class Config {
 			{
 				return ("[Config] Index out of range !");
 			}
+		};
+		class SyntaxInvalidValue : public std::exception
+		{
+			public:
+				std::string	_param;
+				std::string	_value;
+				~SyntaxInvalidValue() throw() {}
+				SyntaxInvalidValue(std::string param, std::string value) : _param(param), _value(value) {}
+				virtual const char *what() const throw ()
+				{
+					static std::string s = std::string("[Config] Syntax invalid value for parameter \033[0;34m") + _param + std::string("\033[0m : \033[0;34m") + _value + std::string("\033[0m");
+					return (s.c_str());
+				}
 		};
 		class SyntaxInvalidAt : public std::exception
 		{

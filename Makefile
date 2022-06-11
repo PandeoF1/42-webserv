@@ -6,7 +6,7 @@
 #    By: marvin <marvin@student.42.fr>              +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2021/12/09 13:15:12 by tnard             #+#    #+#              #
-#    Updated: 2022/06/10 22:01:30 by marvin           ###   ########.fr        #
+#    Updated: 2022/06/11 21:22:15 by marvin           ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -37,6 +37,7 @@ $(OBJS_DIR)%.o : %.cpp $(PROJECT_H)
 	@mkdir -p $(OBJS_DIR)/srcs/Config/Location
 	@mkdir -p $(OBJS_DIR)/srcs/Server
 	@mkdir -p $(OBJS_DIR)/srcs/Request
+	@mkdir -p $(OBJS_DIR)/srcs/Utils
 	@$(CC) $(CC_FLAGS) -c $< -o $@
 	@printf	"\033[2K\r${BLU}[BUILD]${RST} '$<' $(END)"
 

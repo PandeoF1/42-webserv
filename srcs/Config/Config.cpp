@@ -6,7 +6,7 @@
 /*   By: marvin <marvin@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/06/07 16:21:18 by nard              #+#    #+#             */
-/*   Updated: 2022/06/10 23:33:08 by marvin           ###   ########.fr       */
+/*   Updated: 2022/06/11 21:21:56 by marvin           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,8 +14,6 @@
 
 /*
 TODO:
-	extractConfig :
-		ex (root /test), gerer x espace et pas que un (+1 dans le += pos), pareil pour locaation dcp
 
 */
 
@@ -81,27 +79,77 @@ Config		Config::extractConfig(std::string content)
 		/* Skip all useless char */
 		while (pos < content.length() && (content[pos] == '\n' || content[pos] == ' ' || content[pos] == '	'))
 			pos++;
-		
+		/* If location part == special case of new bracket */
 		if (Config::isSameWord(content, pos, "location"))
 		{
-			//std::cout << "Location part : " << std::endl;
 			Location tmp = Location::extractLocation(content, pos);
 			config.setLocation(Location::removeBracket(tmp["name"]), tmp);
 			pos += getDataBeforeLine(content, pos).length() - 1;
 			pos += Config::getBracket(content, pos).length();
 		}
+		/* Else, check if it's a valid parameter */
 		else if (Config::isValidParameter(content, pos))
 		{
-			//std::cout << "New type : " << Config::getWord(content, pos) << std::endl;
 			config.setData(Config::getWord(content, pos), Config::removeWhiteSpace(Config::getDataBeforeLine(content, pos + Config::getWord(content, pos).length())));
-			//std::cout << "Value type -> " << config._data[Config::getWord(content, pos)] << std::endl;
+			Config::isValidValue(Config::getWord(content, pos), Config::removeWhiteSpace(Config::getDataBeforeLine(content, pos + Config::getWord(content, pos).length())));
 			pos += Config::getWord(content, pos).length() + Config::getDataBeforeLine(content, pos + Config::getWord(content, pos).length()).length();
 		}
 		else
 			throw Config::SyntaxInvalidAt(Config::getLineOfPos(content, pos));
 	}
-	//std::cout << config._data["listen"] << std::endl;
 	return (config);
+}
+
+int	Config::isValidValue(std::string param, std::string value)
+{
+	if (param == Server_Valid_Param[Server_IP])
+	{
+		size_t pos = 0;
+		std::cout << std::endl << "Param : " << param << " | Value : " << value << std::endl << std::endl;
+		if (value.find(":") == std::string::npos)
+			throw Config::SyntaxInvalidValue(param, value);
+		else
+		{
+			pos = value.find(":");
+			std::string ip = value.substr(0, pos);
+			std::string port = value.substr(pos + 1);
+			std::cout << "IP : `" << ip << "` | Port : `" << port << '`' << std::endl << std::endl;
+			if (ip.length() > 15 || port.length() > 5)
+				throw Config::SyntaxInvalidValue(param, value);
+			pos = 0;
+			int	dot = 0;
+			while (pos < ip.length())
+			{
+				if (((ip[pos] < '0' || ip[pos] > '9') && ip[pos] != '.') || (ip[pos] == '.' && dot++ > 3) || (ip[pos] == '.' && pos == 0) || (ip[pos] == '.' && pos == ip.length() - 1) || (pos < ip.length() && ip[pos] == '.' && ip[pos + 1] == '.'))
+					throw Config::SyntaxInvalidValue(param, value);
+				pos++;
+			}
+			if (dot != 3)
+				throw Config::SyntaxInvalidValue(param, value);
+			Config::isValidIp(ip);
+		}
+	}
+	else
+		return (1);
+	exit(0);
+	return (1);
+}
+
+int			Config::isValidIp(std::string ip)
+{
+	size_t pos = ip.find(".");
+	std::string a = ip.substr(0, ip.find("."));
+	std::string b = ip.substr(pos + 1, ip.find(".", pos + 1) - pos - 1);
+	pos = ip.find(".", pos + 1);
+	std::string c = ip.substr(pos + 1, ip.find(".", pos + 1) - pos - 1);
+	pos = ip.find(".", pos + 1);
+	std::string d = ip.substr(pos + 1, ip.find(".", pos + 1) - pos - 1);
+	std::cout << a << " " << b << " " << c << " " << d << " " << std::endl;
+	// if (a.length() > 3 || b.length() > 3 || c.length() > 3 || d.length() > 3) add it if you want to parse 00005
+	// 	throw Config::SyntaxInvalidValue("IP", ip);
+	if (atoi(a.c_str()) > 255 || atoi(b.c_str()) > 255 || atoi(c.c_str()) > 255 || atoi(d.c_str()) > 255)
+		throw Config::SyntaxInvalidValue("IP", ip);
+	return (0);
 }
 
 std::map<int, Location>	Config::getLocation(void) const
