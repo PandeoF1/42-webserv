@@ -227,37 +227,114 @@ void	Response::fill_content_with_error_code(int code)
 	_extension = ".html";
 }
 
+// std::vector<std::string>	Response::split_file_and_directory(std::string line)
+// {
+// 	std::string 				delimiter = "\n";
+// 	std::vector<std::string>	words;
+// 	size_t 			pos;
+// 	int 			u = 0;
+
+// 	while ((pos = line.find(delimiter)) != std::string::npos) {
+// 		words.push_back(line.substr(0, pos));
+// 		line.erase(0, pos + delimiter.length());
+// 		if (line[0] == '\n')
+// 		{
+// 			for (u = 0; line[u] == '\n'; u++);
+// 			line.erase(0, u);
+// 		}
+// 		if (line.find(delimiter) == std::string::npos)
+// 			words.push_back(line.substr(0, line.size()));
+// 	}
+// 	return (words);
+// }
+std::vector<std::string>	Response::split_file_and_directory(std::string line)
+{
+	std::string 				delimiter = "\n";
+	std::vector<std::string>	words;
+	size_t 			pos;
+	int 			u = 0, i = 0;
+	if (line.size() == 0)
+		return (words);
+	while ((i = line.find_first_of(delimiter)) != std::string::npos)
+	{
+		words.push_back(line.substr(0, i));
+		line.erase(0, i + 1);
+		u++;
+	}
+	words.push_back(line);
+	words[words.size() - 1].erase(words[words.size() - 1].size() - 1, 1);
+	return (words);
+}
+
+void	Response::autoindex(std::string directory, std::string indexFile)
+{
+	std::vector<std::string> listedDirectory = split_file_and_directory(File::listDirectory(directory + _request.get_target_path() + indexFile));
+
+	if (listedDirectory.size() == 0)
+		fill_content_with_error_code(403);
+	else
+	{
+		std::string	templateFile;
+		try
+		{
+			templateFile = File::getFile("template_pages/autoindex.html");
+		}
+		catch(const std::exception& e)
+		{
+			templateFile = "<html><body><h1>Index of $path</h1><ul>$files_and_directories</ul></body></html>";
+			std::cerr << e.what() << '\n';
+		}
+
+		int i = templateFile.find("$path");
+		templateFile.erase(i, 5);
+		templateFile.insert(i, _request.get_target_path() + indexFile);
+
+		std::string temp;
+		for (i = 0; i < listedDirectory.size(); i++)
+		{
+			temp += "<li><a href=\"" + _request.get_target_path() + indexFile + listedDirectory[i] + "\">" + listedDirectory[i] + "</a></li>";
+		}
+		i = templateFile.find("$files_and_directories");
+		templateFile.erase(i, 23);
+		templateFile.insert(i, temp);
+		
+		_content = templateFile;
+		_content_length = _content.length();
+		_extension = ".html";
+	}
+}
+
 void	Response::content_fill_from_file(void)
 {
 	std::string	content;
 	std::string directory = "www";
 
 	//A recup de la config plus tard
-	std::string indexFile;
+	std::string indexFile = "";
+	std::cout << _request.get_target_path() << std::endl;
 	if (_request.get_target_path()[_request.get_target_path().find_first_of("/") + 1] == ' ' || _request.get_target_path()[_request.get_target_path().find_first_of("/") + 1] == '\0')
 		indexFile = "index.html";
-	else
-		indexFile = "";
 
-	if (File::getType(directory + _request.get_target_path() + indexFile) == -1) { // Not exist
-		fill_content_with_error_code(404);
-	} else if (File::getType(directory + _request.get_target_path() + indexFile) == 1) { // Directory
-		std::string listedDirectory = File::listDirectory(directory + _request.get_target_path() + indexFile);
-		std::cout << listedDirectory << std::endl;
-		if (listedDirectory.empty())
-			fill_content_with_error_code(403);
-		else
-		{
-			content = "<html><body><h1>Index of " + _request.get_target_path() + indexFile + "</h1></body></html>";
+	// Faire pour que quand ont fasse http://localhost/coucou sa fasse pareil que http://localhost/coucou/
+
+	switch(File::getType(directory + _request.get_target_path() + indexFile))
+	{
+		case -1:
+			fill_content_with_error_code(404);
+			break;
+		case 1:
+			if (File::getType(directory + _request.get_target_path() + "index.html") == -1)
+			{
+				autoindex(directory, indexFile);
+				break;
+			} else
+				indexFile = "index.html";
+		case 2:
+			content += File::getFile(directory + _request.get_target_path() + indexFile);
 			_content = content;
 			_content_length = _content.length();
-			_extension = ".html";
-		}
-	} else if (File::getType(directory + _request.get_target_path() + indexFile) == 2) { // File
-		content += File::getFile(directory + _request.get_target_path() + indexFile);
-		_content = content;
-		_content_length = _content.length();
-		_extension = get_extension(_request.get_target_path() + indexFile);
+			_extension = get_extension(_request.get_target_path() + indexFile);
+			break;
 	}
 }
 
