@@ -6,7 +6,7 @@
 /*   By: marvin <marvin@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/06/06 15:52:24 by nard              #+#    #+#             */
-/*   Updated: 2022/06/11 22:40:24 by marvin           ###   ########.fr       */
+/*   Updated: 2022/06/14 16:01:14 by marvin           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -28,12 +28,12 @@ Location::~Location(void){
 Location	Location::extractLocation(std::string content, size_t pos)
 {
 	Location	loc;
-	size_t		global_l = pos;
 
 	pos += std::string("location ").length();
 	loc.setLocation("name", Config::getDataBeforeLine(content, pos));
 	pos += Config::getDataBeforeLine(content, pos).length() - 1;
 	std::string tmp = Config::getBracket(content, pos);
+	size_t		global_l = pos;
 	pos = 1;
 	while (!Config::isEndOfBracket(tmp, pos))
 	{
@@ -45,7 +45,7 @@ Location	Location::extractLocation(std::string content, size_t pos)
 			if (Config::removeWhiteSpace(Config::getDataBeforeLine(tmp, pos + Config::getWord(tmp, pos).length())).length() > 0)
 				loc.setLocation(Config::getWord(tmp, pos), Config::removeWhiteSpace(Config::getDataBeforeLine(tmp, pos + Config::getWord(tmp, pos).length())));
 			else
-				loc.setLocation(Config::getWord(tmp, pos), "undefined");
+				throw Config::SyntaxInvalidAt(Config::getLineOfPos(content, global_l + pos));
 			pos += Config::getWord(tmp, pos).length() + Config::getDataBeforeLine(tmp, pos + Config::getWord(tmp, pos).length()).length();
 		}
 		else

@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   File.hpp                                           :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: nard <nard@student.42.fr>                  +#+  +:+       +#+        */
+/*   By: marvin <marvin@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/06/06 15:52:21 by nard              #+#    #+#             */
-/*   Updated: 2022/06/07 16:22:27 by nard             ###   ########.fr       */
+/*   Updated: 2022/06/14 15:19:08 by marvin           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -31,6 +31,7 @@ class File{
 		void			setPath(std::string path);
 		/* Return the content of the file */
 		std::string		getFile(std::string file);
+		std::string		getFile(void);
 		/* Return the list of file/dir in the path */
 		std::string		listDirectory(std::string path);
 		/* Return the list of file/dir in the current path */

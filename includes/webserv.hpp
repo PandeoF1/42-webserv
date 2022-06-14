@@ -6,7 +6,7 @@
 /*   By: marvin <marvin@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/06/06 15:56:12 by nard              #+#    #+#             */
-/*   Updated: 2022/06/11 22:57:22 by marvin           ###   ########.fr       */
+/*   Updated: 2022/06/14 15:34:25 by marvin           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -42,10 +42,15 @@
 #define				Location_Name "location"
 static std::string	Location_Valid_Param[] = {"allow_methods", "root", "alias", "client_body_buffer_size", "index", "cgi_pass"};
 #define				Location_Valid_Param_Length 6
+#define				Location_Methods 1
 
 
 static std::string	Server_Valid_Param[] = {"server_name", "listen", "root", "index", "allow_methods"};
 #define				Server_Valid_Param_Length 5
 #define				Server_IP 1
+#define				Server_Methods 4
+
+static std::string	Methods_List[] = {"POST", "GET", "DELETE"};
+#define				Methods_List_Length 3
 
 void	start_servers(void);

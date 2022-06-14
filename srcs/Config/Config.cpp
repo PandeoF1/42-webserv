@@ -6,7 +6,7 @@
 /*   By: marvin <marvin@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/06/07 16:21:18 by nard              #+#    #+#             */
-/*   Updated: 2022/06/11 22:41:43 by marvin           ###   ########.fr       */
+/*   Updated: 2022/06/14 16:11:34 by marvin           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,8 +14,9 @@
 
 /*
 TODO:
-	Add ip to config["ip"]
-	Allowmethods to check
+	Allowmethods to check for location
+	Add a check for the location path (and remove ///////)
+	Check if root of location / server has just one parameter
 */
 
 int Config::_verbose = 0;
@@ -85,6 +86,8 @@ Config		Config::extractConfig(std::string content)
 		{
 			Location tmp = Location::extractLocation(content, pos);
 			config.setLocation(Location::removeBracket(tmp["name"]), tmp);
+			std::cout << Location::removeBracket(tmp["name"]) << std::endl;
+			exit(0);
 			pos += getDataBeforeLine(content, pos).length() - 1;
 			pos += Config::getBracket(content, pos).length();
 		}
@@ -92,7 +95,7 @@ Config		Config::extractConfig(std::string content)
 		else if (Config::isValidParameter(content, pos))
 		{
 			config.setData(Config::getWord(content, pos), Config::removeWhiteSpace(Config::getDataBeforeLine(content, pos + Config::getWord(content, pos).length())));
-			Config::isValidValue(Config::getWord(content, pos), Config::removeWhiteSpace(Config::getDataBeforeLine(content, pos + Config::getWord(content, pos).length())));
+			config.isValidValue(Config::getWord(content, pos), Config::removeWhiteSpace(Config::getDataBeforeLine(content, pos + Config::getWord(content, pos).length())));
 			pos += Config::getWord(content, pos).length() + Config::getDataBeforeLine(content, pos + Config::getWord(content, pos).length()).length();
 		}
 		else
@@ -106,7 +109,6 @@ int	Config::isValidValue(std::string param, std::string value)
 	if (param == Server_Valid_Param[Server_IP])
 	{
 		size_t pos = 0;
-		std::cout << std::endl << "Param : " << param << " | Value : " << value << std::endl << std::endl;
 		if (value.find(":") == std::string::npos)
 			throw Config::SyntaxInvalidValue(param, value);
 		else
@@ -114,7 +116,6 @@ int	Config::isValidValue(std::string param, std::string value)
 			pos = value.find(":");
 			std::string ip = value.substr(0, pos);
 			std::string port = value.substr(pos + 1);
-			std::cout << "IP : `" << ip << "` | Port : `" << port << '`' << std::endl << std::endl;
 			if (ip.length() > 15 || port.length() > 5)
 				throw Config::SyntaxInvalidValue(param, value);
 			pos = 0;
@@ -128,11 +129,57 @@ int	Config::isValidValue(std::string param, std::string value)
 			if (dot != 3)
 				throw Config::SyntaxInvalidValue(param, value);
 			Config::isValidIp(ip);
+			Config::isValidPort(port);
+			this->setData("ip", ip);
+			this->setData("port", port);
 		}
 	}
+	else if (param == Server_Valid_Param[Server_Methods])
+		Config::isValidMethods(value);
 	else
 		return (1);
-	//exit(0);
+	return (1);
+}
+
+int	Config::isValidMethods(std::string value)
+{
+	size_t	pos = 0;
+	int		nb = 0;
+
+	while (pos < value.length())
+	{
+		nb = 0;
+		for (size_t x = 0; x < Methods_List_Length; x++)
+		{
+			if (Config::isSameWord(value, pos, Methods_List[x]))
+			{
+				nb = 1;
+				pos += std::string(Methods_List[x]).length();
+				x = Methods_List_Length;
+			}
+		}
+		if (nb == 0)
+			throw Config::SyntaxInvalidValue(Server_Valid_Param[Server_Methods], value);
+		while (pos < value.length() && value[pos] == ' ')
+			pos++;
+	}
+	if (pos != value.length())
+		throw Config::SyntaxInvalidValue(Server_Valid_Param[Server_Methods], value);
+	return (1);
+}
+
+int			Config::isValidPort(std::string	port)
+{
+	int	port_int = std::atoi(port.c_str());
+	if (port_int < 1 || port_int > 65535)
+		throw Config::SyntaxInvalidValue("Port", port);
+	size_t pos = 0;
+	while (pos < port.length())
+	{
+		if (port[pos] < '0' || port[pos] > '9')
+			throw Config::SyntaxInvalidValue("Port", port);
+		pos++;
+	}
 	return (1);
 }
 
@@ -145,7 +192,6 @@ int			Config::isValidIp(std::string ip)
 	std::string c = ip.substr(pos + 1, ip.find(".", pos + 1) - pos - 1);
 	pos = ip.find(".", pos + 1);
 	std::string d = ip.substr(pos + 1, ip.find(".", pos + 1) - pos - 1);
-	std::cout << a << " " << b << " " << c << " " << d << " " << std::endl;
 	// if (a.length() > 3 || b.length() > 3 || c.length() > 3 || d.length() > 3) add it if you want to parse 00005
 	// 	throw Config::SyntaxInvalidValue("IP", ip);
 	// to do : add ip to config["ip"]
@@ -213,7 +259,7 @@ int			Config::isSameWord(std::string content, size_t pos, std::string word)
 
 	while (pos < content.length() && pos_word < word.length() && content[pos] == word[pos_word])
 		pos_word++, pos++;
-	if (pos_word == word.length() && pos + 1 < content.length() && (content[pos] == ' ' || content[pos] == '	' || content[pos] == '\n'))
+	if (pos_word == word.length() && pos <= content.length() && (content[pos] == ' ' || content[pos] == '	' || content[pos] == '\n' || content.length() == pos))
 		return (1);
 	return (0);
 }

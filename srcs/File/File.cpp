@@ -3,14 +3,19 @@
 /*                                                        :::      ::::::::   */
 /*   File.cpp                                           :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: nard <nard@student.42.fr>                  +#+  +:+       +#+        */
+/*   By: marvin <marvin@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/06/06 15:52:24 by nard              #+#    #+#             */
-/*   Updated: 2022/06/06 18:08:30 by nard             ###   ########.fr       */
+/*   Updated: 2022/06/14 15:18:48 by marvin           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "File.hpp"
+
+/*
+TODO:
+	Repair checkFile()
+*/
 
 int File::_verbose = 0;
 
@@ -55,7 +60,7 @@ int	File::checkPath(std::string path)
 	throw DirectoryNotAccessible();
 	return (0);
 }
-
+/* To repair */
 int	File::checkFile(std::string path)
 {
 	if (_verbose)
@@ -109,7 +114,20 @@ std::string File::listDirectory(void)
 
 std::string File::getFile(std::string file)
 {
-	file = this->getPath() + file;
+	if (_verbose)
+		std::cout << "Film::getFile called" << std::endl;
+	if (file.empty() || file.length() == 0)
+		throw FileInvalid();
+	std::ifstream myfile(file.c_str());
+	if (!myfile || !myfile.is_open())
+		throw FileNotAccessible();
+	std::string file_content((std::istreambuf_iterator<char>(myfile)), std::istreambuf_iterator<char>());
+	return (file_content);
+}
+
+std::string File::getFile(void)
+{
+	std::string file = this->getPath();
 	if (_verbose)
 		std::cout << "Film::getFile called" << std::endl;
 	if (file.empty() || file.length() == 0)
