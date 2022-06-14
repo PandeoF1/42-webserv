@@ -216,8 +216,12 @@ void	Response::fill_content_with_error_code(int code)
 	std::string content;
 
 	_request.set_code(code);
-	//Attention crash possible ici
-	content += file.getFile("errors_pages/" + std::to_string(code) + ".html");
+	try {
+		content = file.getFile("errors_pages/" + std::to_string(code) + ".html");
+	}
+	catch (std::exception &e) {
+		content = "<h1>404 Not Found</h1>";
+	}	
 	_content = content;
 	_content_length = content.length();
 	_extension = ".html";
@@ -225,7 +229,6 @@ void	Response::fill_content_with_error_code(int code)
 
 void	Response::content_fill_from_file(void)
 {
-	File 		file;
 	std::string	content;
 	std::string directory = "www";
 
@@ -236,28 +239,26 @@ void	Response::content_fill_from_file(void)
 	else
 		indexFile = "";
 
-	try
-	{
-		content += file.getFile(directory + _request.get_target_path() + indexFile);
+	if (File::getType(directory + _request.get_target_path() + indexFile) == -1) { // Not exist
+		fill_content_with_error_code(404);
+	} else if (File::getType(directory + _request.get_target_path() + indexFile) == 1) { // Directory
+		std::string listedDirectory = File::listDirectory(directory + _request.get_target_path() + indexFile);
+		std::cout << listedDirectory << std::endl;
+		if (listedDirectory.empty())
+			fill_content_with_error_code(403);
+		else
+		{
+			content = "<html><body><h1>Index of " + _request.get_target_path() + indexFile + "</h1></body></html>";
+			_content = content;
+			_content_length = _content.length();
+			_extension = ".html";
+		}
+	} else if (File::getType(directory + _request.get_target_path() + indexFile) == 2) { // File
+		content += File::getFile(directory + _request.get_target_path() + indexFile);
 		_content = content;
-		_content_length = content.length();
-		_extension = get_extension(indexFile);
+		_content_length = _content.length();
+		_extension = get_extension(_request.get_target_path() + indexFile);
 	}
-	catch(const std::exception& e)
-	{
-		fill_content_with_error_code(404);
-	}
-
-	try
-	{
-		std::string listedDirectory = file.listDirectory(directory + _request.get_target_path() + "dfkdsn");
-		std::cout << RED << listedDirectory << RST << std::endl;
-	}
-	catch(const std::exception& e)
-	{
-		fill_content_with_error_code(404);
-	}
-	
 }
 
 void	Response::create_response(void)
