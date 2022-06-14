@@ -22,19 +22,21 @@ class File{
 		~File(void);
 	
 		/* Return the current path */
-		std::string		getPath(void);
+		std::string			getPath(void);
 		/* Check if the path is accessible */
-		static int		checkPath(std::string path);
+		static int			checkPath(std::string path);
 		/* Check if the file is accessible */
-		static int		checkFile(std::string file);
+		static int			checkFile(std::string file);
 		/* Replace the current path and check it. */
-		void			setPath(std::string path);
+		void				setPath(std::string path);
 		/* Return the content of the file */
-		std::string		getFile(std::string file);
+		static std::string	getFile(std::string file);
 		/* Return the list of file/dir in the path */
-		std::string		listDirectory(std::string path);
+		static std::string	listDirectory(std::string path);
 		/* Return the list of file/dir in the current path */
-		std::string		listDirectory(void);
+		std::string			listDirectory(void);
+		/* Return the type of the path */
+		static int			getType(std::string path);
 	public:
 		class DirectoryNotAccessible : public std::exception
 		{

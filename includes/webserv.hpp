@@ -28,6 +28,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+#include <sys/stat.h>
+
 #include "../srcs/File/File.hpp"
 #include "../srcs/Server/Server.hpp"
 #include "../srcs/Config/Config.hpp"

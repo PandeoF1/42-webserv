@@ -23,7 +23,7 @@ SRCS				= main.cpp \
 NAME				= webserv
 OBJS_DIR			= objs/
 PROJECT_H			= srcs/File/File.hpp \
-						srcs/Server/Server.hpp srcs/Config/Config.hpp srcs/Request/Request.hpp
+						srcs/Server/Server.hpp srcs/Config/Config.hpp srcs/Request/Request.hpp includes/webserv.hpp
 OBJS				= $(SRCS:.cpp=.o)
 OBJECTS_PREFIXED	= $(addprefix $(OBJS_DIR), $(OBJS))
 CC					= c++
