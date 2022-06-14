@@ -84,7 +84,7 @@ std::string File::listDirectory(std::string path)
 		closedir (dir);
 	}
 	else
-		throw DirectoryNotAccessible();
+		throw File::DirectoryNotAccessible();
 	return (dirlist);
 }
 
@@ -109,13 +109,31 @@ std::string File::listDirectory(void)
 
 std::string File::getFile(std::string file)
 {
-    if (_verbose)
-        std::cout << "Film::getFile called" << std::endl;
-    if (file.empty() || file.length() == 0)
-        throw FileInvalid();
-    std::ifstream myfile(file.c_str());
-    if (!myfile || !myfile.is_open())
-        throw FileNotAccessible();
-    std::string file_content((std::istreambuf_iterator<char>(myfile)), std::istreambuf_iterator<char>());
-    return (file_content);
+	if (_verbose)
+		std::cout << "Film::getFile called" << std::endl;
+	if (file.empty() || file.length() == 0)
+		throw File::FileInvalid();
+	std::ifstream myfile(file.c_str());
+	if (!myfile || !myfile.is_open())
+		throw File::FileNotAccessible();
+	std::string file_content((std::istreambuf_iterator<char>(myfile)), std::istreambuf_iterator<char>());
+	return (file_content);
+}
+
+int			File::getType(std::string path)
+{
+	struct stat s;
+
+	if( stat(path.c_str(),&s) == 0 )
+	{
+		if( s.st_mode & S_IFDIR )
+			return (1);//it's a directory
+		else if( s.st_mode & S_IFREG )
+			return (2);//it's a file
+		else
+			return (3); //something else
+	}
+	else
+		return (-1);
+	return (0);
 }
