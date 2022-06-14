@@ -8,7 +8,7 @@ Request::Request(char *request, Server &server) :
 	std::string new_request = request;
 	_default_request = new_request;
 	std::cout << "New request from port: " << server.get_port() << std::endl;
-	std::cout << _default_request << std::endl;
+	// std::cout << _default_request << std::endl;
 	parse();
 }
 
@@ -42,7 +42,7 @@ void    Request::parse()
 			if (parsed_line != "")
 			{
 				_headers[parsed_line] = line.substr(line.find_first_of(':') + 1, line.size() - line.find_first_of(':'));
-				std::cout << "look }" << _headers[parsed_line] << std::endl;
+				// std::cout << "look }" << _headers[parsed_line] << std::endl;
 			}
 		}
 		i++;
@@ -242,6 +242,14 @@ std::string Request::get_method() const {
 	return (_method);
 }
 
+std::string Request::get_target_path() const {
+	return (_target_path);
+}
+
 int Request::get_code() const {
 	return (_return_code);
+}
+
+void	Request::set_code(int code) {
+	_return_code = code;
 }

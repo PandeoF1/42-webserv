@@ -6,7 +6,7 @@
 /*   By: jbosquet <jbosquet@student.42lyon.fr>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/06/06 15:56:12 by nard              #+#    #+#             */
-/*   Updated: 2022/06/10 14:10:52 by jbosquet         ###   ########.fr       */
+/*   Updated: 2022/06/14 13:53:39 by jbosquet         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -32,6 +32,7 @@
 #include "../srcs/Server/Server.hpp"
 #include "../srcs/Config/Config.hpp"
 #include "../srcs/Request/Request.hpp"
+#include "../srcs/Response/Response.hpp"
 #include "../srcs/Server/Server.hpp"
 
 void start_servers(void);

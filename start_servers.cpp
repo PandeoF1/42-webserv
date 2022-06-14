@@ -100,13 +100,6 @@ void start_servers(void)
 				if (!client_socket[max_clients - 1])
 				{
 					printf("New connection on Port : %d, socket fd is %d , ip is : %s , port : %d\n" , servers[i]->get_port(),  new_socket , inet_ntoa(address.sin_addr) , ntohs(address.sin_port));  
-			
-				//send new connection greeting message 
-					// if( send(new_socket, message, strlen(message), 0) != strlen(message) )  
-					// {  
-					// 	perror("send");  
-					// }
-					// puts("Welcome message sent successfully");
 				}
 					
 				//add new socket to array of sockets 
@@ -121,7 +114,7 @@ void start_servers(void)
 							
 						break;  
 					}  
-				}  
+				}
 			}
 		}      
         //else its some IO operation on some other socket
@@ -165,31 +158,14 @@ void start_servers(void)
                     //set the string terminating NULL byte on the end 
                     //of the data read 
                     buffer[valread] = '\0';  
-                    // std::string response = "HTTP/1.1 200 OK\r\ncontent-type: text/html\r\ncontent-length: 12\r\n\r\n<h1>Oui</h1>\r\n";
-					// send(sd , response.c_str() , response.size() , 0 );
-					// printf("%s\n", buffer);
 					for (int l = 0; l < NB_PORTS; l++)
 					{
 						if (servers[l]->find_client(sd))
 						{
 							Request request(buffer, *servers[l]);
 							
-							std::string response;
-							switch (request.get_code())
-							{
-								case 200:
-							 		response = "HTTP/1.1 200 OK\r\ncontent-type: text/html\r\ncontent-length: 15\r\n\r\n<h1>200 OK</h1>\r\n";
-									send(sd , response.c_str() , response.size() , 0 );
-									break;
-								case 400:
-									response = "HTTP/1.1 400 Bad Request\r\ncontent-type: text/html\r\ncontent-length: 24\r\n\r\n<h1>400 Bad Request</h1>\r\n";
-									send(sd , response.c_str() , response.size() , 0 );
-									break;
-								case 405:
-									response = "HTTP/1.1 405 Not Allowed\r\ncontent-type: text/html\r\ncontent-length: 24\r\n\r\n<h1>405 Not Allowed</h1>\r\n";
-									send(sd , response.c_str() , response.size() , 0 );
-									break;
-							}
+							Response response(request);
+							send(sd, response.get_response().c_str(), response.get_response().size(), 0);
 						}
 					}
 				}  
