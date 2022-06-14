@@ -27,6 +27,8 @@ class Request
 		Request(char *request, Server &server);
 		~Request(void);
 
+		std::string    get_target_path() const;
 		std::string    get_method() const;
 		int            get_code() const;
+		void           set_code(int code);
 };
