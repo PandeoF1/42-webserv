@@ -31,7 +31,6 @@ class File{
 		void			setPath(std::string path);
 		/* Return the content of the file */
 		std::string		getFile(std::string file);
-		std::string		getFile(void);
 		/* Return the list of file/dir in the path */
 		std::string		listDirectory(std::string path);
 		/* Return the list of file/dir in the current path */

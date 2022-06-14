@@ -124,17 +124,3 @@ std::string File::getFile(std::string file)
 	std::string file_content((std::istreambuf_iterator<char>(myfile)), std::istreambuf_iterator<char>());
 	return (file_content);
 }
-
-std::string File::getFile(void)
-{
-	std::string file = this->getPath();
-	if (_verbose)
-		std::cout << "Film::getFile called" << std::endl;
-	if (file.empty() || file.length() == 0)
-		throw FileInvalid();
-	std::ifstream myfile(file.c_str());
-	if (!myfile || !myfile.is_open())
-		throw FileNotAccessible();
-	std::string file_content((std::istreambuf_iterator<char>(myfile)), std::istreambuf_iterator<char>());
-	return (file_content);
-}
