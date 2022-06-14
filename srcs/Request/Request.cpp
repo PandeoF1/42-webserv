@@ -54,6 +54,7 @@ void    Request::parse()
 			_return_code = 400;
 	} else if (_headers["host"].size() == 0)
 		_return_code = 400;
+	std::cout << _target_path << std::endl;
 }
 
 std::string    Request::checkMethod(std::string line)
@@ -103,30 +104,53 @@ void    Request::set_method(std::string line)
 	}
 
 	int find_first_space = line.find_first_of(' ');
-	for (int i = find_first_space; line[i] != '/'; i++)
+	_method = line.substr(0, find_first_space);
+}
+
+bool 	Request::check_target_path(std::string line)
+{
+	std::size_t 	i;
+	bool			is_http_request = false;
+
+	for (i = 0; line[i]; i++) line[i] = std::tolower(line[i]);
+
+	for (i = line.find_first_of(' '); line[i] && line[i] == ' '; i++);
+	if ((line[i] == 'h' && line[i + 1] == 't' && line[i + 2] == 't' && line[i + 3] == 'p' && line[i + 4] == ':' && line[i + 5] == '/' && line[i + 6] == '/'))
+		is_http_request = true;
+	if (i != std::string::npos && line[i] && (line[i] != '/' && is_http_request == false))
+		return (false);
+
+	if (is_http_request)
 	{
-		if (line[i] != ' ')
-		{		
-			std::cerr << RED << "Not only space after method" << RST << std::endl;
-			_return_code = 400;
-			return ;
+		i = i + 7;
+		bool has_double_point = false;
+		if (!std::isalnum(line[i]))
+			return (false);
+		for (line[i]; line[i] && line[i] != '/' && line[i] != ' '; i++)
+		{
+			if (has_double_point && line[i] == ':')
+				return (false);
+			else if (line[i] == ':')
+				has_double_point = true;
+			if (line[i] != ':' && !std::isalnum(line[i]))
+				return (false);
 		}
 	}
-	_method = line.substr(0, find_first_space);
+	return (true);
 }
 
 void    Request::set_target_path(std::string line)
 {
 	std::size_t i, j;
 
-	for (i = line.find_first_of(' '); line[i] && line[i] == ' '; i++);
-	if (i != std::string::npos && line[i] && line[i] != '/')
+	if (!check_target_path(line))
 	{
-		std::cerr << RED << "Target path not start by '/'" << RST << std::endl;
+		std::cerr << RED << "Invalid target path" << RST << std::endl;
 		_return_code = 400;
 		return ;
 	}
 
+	for (i = line.find_first_of(' '); line[i] && line[i] == ' '; i++);
 	for (j = 0; line[i + j] && line[i + j] != ' '; j++);
 	_target_path = line.substr(i, j); 
 }
@@ -182,7 +206,6 @@ void    Request::check_first_line_words(std::string line)
 
 	if ((words.size() != 3 && words.size() != 4) || (words[2].find("HTTP/1.1") == std::string::npos))
 	{
-		std::cout << "|" << words[2] << "|" << std::endl;
 		if (words[2].find("HTTP/1.1") == std::string::npos)
 			std::cerr << RED << "First line has not HTTP/1.1 in third argument" << RST << std::endl;
 		else
