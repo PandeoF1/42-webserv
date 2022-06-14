@@ -124,7 +124,7 @@ int			File::getType(std::string path)
 {
 	struct stat s;
 
-	if( stat(path.c_str(),&s) == 0 )
+	if (stat(path.c_str(),&s) == 0 )
 	{
 		if( s.st_mode & S_IFDIR )
 			return (1);//it's a directory
