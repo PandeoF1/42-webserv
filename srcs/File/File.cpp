@@ -12,6 +12,11 @@
 
 #include "File.hpp"
 
+/*
+TODO:
+	Repair checkFile()
+*/
+
 int File::_verbose = 0;
 
 File::File(std::string path) : _path(path)
@@ -55,7 +60,7 @@ int	File::checkPath(std::string path)
 	throw DirectoryNotAccessible();
 	return (0);
 }
-
+/* To repair */
 int	File::checkFile(std::string path)
 {
 	if (_verbose)

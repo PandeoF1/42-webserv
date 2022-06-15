@@ -1,8 +1,5 @@
 #pragma once
 #include "../Server/Server.hpp"
-#include <map>
-#include <iostream>
-#include <sstream>
 
 class Request
 {

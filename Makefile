@@ -20,7 +20,8 @@ SRCS				= main.cpp \
 						srcs/File/File.cpp srcs/Server/Server.cpp \
 						srcs/Config/Config.cpp srcs/Request/Request.cpp	\
 						srcs/Response/Response.cpp \
-						start_servers.cpp
+						start_servers.cpp \
+            srcs/Config/Location/Location.cpp
 NAME				= webserv
 OBJS_DIR			= objs/
 PROJECT_H			= srcs/File/File.hpp \
@@ -36,6 +37,7 @@ $(OBJS_DIR)%.o : %.cpp $(PROJECT_H)
 	@mkdir -p $(OBJS_DIR)/srcs
 	@mkdir -p $(OBJS_DIR)/srcs/File
 	@mkdir -p $(OBJS_DIR)/srcs/Config
+	@mkdir -p $(OBJS_DIR)/srcs/Config/Location
 	@mkdir -p $(OBJS_DIR)/srcs/Server
 	@mkdir -p $(OBJS_DIR)/srcs/Request
 	@mkdir -p $(OBJS_DIR)/srcs/Response

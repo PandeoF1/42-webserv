@@ -6,15 +6,20 @@
 /*   By: tnard <tnard@student.42lyon.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/06/07 16:21:18 by nard              #+#    #+#             */
-/*   Updated: 2022/06/10 12:40:55 by tnard            ###   ########lyon.fr   */
+/*   Updated: 2022/06/15 14:27:08 by tnard            ###   ########lyon.fr   */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "Config.hpp"
 
+/*
+TODO:
+	Check if root of location / server has just one parameter
+*/
+
 int Config::_verbose = 0;
 
-Config::Config(void) : _serverName("undefined"), _root("undefined"), _index("undefined"), _allow_methods("undefined"), _listen_ip("undefined"), _listen_port(0)
+Config::Config(void)
 {
 	if (_verbose)
 		std::cout << "Config constructor called" << std::endl;
@@ -26,31 +31,37 @@ Config::~Config(void)
 		std::cout << "Config destructor called" << std::endl;
 }
 
-Config *Config::createConfig(std::string path)
+std::map<int, Config> Config::createConfig(std::string path)
 {
-	File			file;
-	std::string		content;
-	size_t			pos = 0;
+	std::map<int, Config>	dump;
+	File					file;
+	std::string				content;
+	size_t					pos = 0;
 	
 
 	content = file.getFile(path);
-	/* Go ahead to find the bracket and check it */
-	while (pos < content.length() && (content[pos] == '\n' || content[pos] == ' ' || content[pos] == '	'))
-		pos++;
-	/* If its end of file, this is invalid */
-	if (Config::isEndOfFile(content, pos))
-		throw SyntaxInvalidAt(Config::getLineOfPos(content, pos));
+	while (!Config::isEndOfFile(content, pos))
+	{
+		/* Go ahead to find the bracket and check it */
+		while (pos < content.length() && (content[pos] == '\n' || content[pos] == ' ' || content[pos] == '	'))
+			pos++;
+		pos = Config::isValidServer(content, pos);
+		
+		std::string tmp = Config::getBracket(content, pos);
+		dump[dump.size()] = Config::extractConfig(tmp);
+		pos += tmp.length();
+	}
+	return (dump);
+}
 
-	pos = Config::isValidServer(content, pos);
+std::string	Config::operator[](std::string index) const
+{
+	return (this->getData()[index]);
+}
 
-	std::string tmp = Config::getBracket(content, pos);
-	std::cout << tmp << std::endl << "------------------- Extract : -------------------" << std::endl;
-	Config test = Config::extractConfig(tmp);
-	(void)test;
-	if (Config::isEndOfFile(content, pos))
-		throw SyntaxInvalidAt(Config::getLineOfPos(content, pos));
-	exit(0);
-	return (NULL);
+std::map<std::string, std::string>	Config::getData(void) const
+{
+	return (this->_data);
 }
 
 Config		Config::extractConfig(std::string content)
@@ -61,62 +72,172 @@ Config		Config::extractConfig(std::string content)
 	if (content[pos] == '{')
 		pos++;
 	/* While server bracket is not cleared */
-	while (!Config::isEndOfFile(content, pos))
+	while (!Config::isEndOfBracket(content, pos))
 	{
 		/* Skip all useless char */
 		while (pos < content.length() && (content[pos] == '\n' || content[pos] == ' ' || content[pos] == '	'))
 			pos++;
-		//std::cout << content[pos] << std::endl;
-		if (Config::isSameWord(content, pos, "server_name"))
+		/* If location part == special case of new bracket */
+		if (Config::isSameWord(content, pos, Location_Name))
 		{
-			std::cout << "Server_Name part" << std::endl;
-			pos += std::string("server_name").length() + 1;
-			config.setServerName(Config::getDataBeforeLine(content, pos));
-			pos += config.getServerName().length();
-		}
-		else if (Config::isSameWord(content, pos, "listen"))
-		{
-			std::cout << "listen part" << std::endl;
-			pos += std::string("listen").length() + 1;
-			config.setListen_ip(Config::getDataBeforeLine(content, pos));
-			pos += config.getListen_ip().length();
-		}
-		else if (Config::isSameWord(content, pos, "root"))
-		{
-			std::cout << "root part" << std::endl;
-			pos += std::string("root").length() + 1;
-			config.setRoot(Config::getDataBeforeLine(content, pos));
-			pos += config.getRoot().length();
-		}
-		else if (Config::isSameWord(content, pos, "index"))
-		{
-			std::cout << "index part" << std::endl;
-			pos += std::string("index").length() + 1;
-			config.setIndex(Config::getDataBeforeLine(content, pos));
-			pos += config.getIndex().length();
-		}
-		else if (Config::isSameWord(content, pos, "allow_methods"))
-		{
-			std::cout << "allow_methods part" << std::endl;
-			pos += std::string("allow_methods").length() + 1;
-			config.setAllow_methods(Config::getDataBeforeLine(content, pos));
-			pos += config.getAllow_methods().length();
-		}
-		else if (Config::isSameWord(content, pos, "location"))
-		{
-			std::cout << "location part" << std::endl;
-			pos += std::string("location").length() + 1;
-			pos += Config::getDataBeforeLine(content, pos).length() - 1;
-			std::cout << " '" << content[pos] << "' " << std::endl;
+			Location tmp = Location::extractLocation(content, pos);
+			config.setLocation(Location::removeBracket(tmp["name"]), tmp);
+			if (Location::removeBracket(tmp["name"]).find(" ") != std::string::npos)
+				throw Config::SyntaxInvalidAt(Config::getLineOfPos(content, pos));
+			pos += getDataBeforeLine(content, pos).length() - 1;
 			pos += Config::getBracket(content, pos).length();
+		}
+		/* Else, check if it's a valid parameter */
+		else if (Config::isValidParameter(content, pos))
+		{
+			if (!Multiple_Declaration && !config.getData()[Config::getWord(content, pos)].empty())
+				throw Config::SyntaxInvalidAt(Config::getLineOfPos(content, pos));
+			if (Config::getWord(content, pos) == Server_Valid_Param[Server_Root] && Config::getNumberOfValue(Config::removeWhiteSpace(Config::getDataBeforeLine(content, pos + Config::getWord(content, pos).length()))) != 1)
+				throw Config::SyntaxInvalidAt(Config::getLineOfPos(content, pos));
+			config.setData(Config::getWord(content, pos), Config::removeWhiteSpace(Config::getDataBeforeLine(content, pos + Config::getWord(content, pos).length())));
+			config.isValidValue(Config::getWord(content, pos), Config::removeWhiteSpace(Config::getDataBeforeLine(content, pos + Config::getWord(content, pos).length())));
+			pos += Config::getWord(content, pos).length() + Config::getDataBeforeLine(content, pos + Config::getWord(content, pos).length()).length();
 		}
 		else
 			throw Config::SyntaxInvalidAt(Config::getLineOfPos(content, pos));
-		std::cout << content[pos - 1] << " | " << pos << " | " << Config::getLineOfPos(content, pos) << std::endl;
-		//exit(0);
 	}
-	(void)content;
 	return (config);
+}
+
+int	Config::isValidValue(std::string param, std::string value)
+{
+	if (param == Server_Valid_Param[Server_IP])
+	{
+		size_t pos = 0;
+		if (value.find(":") == std::string::npos)
+			throw Config::SyntaxInvalidValue(param, value);
+		else
+		{
+			pos = value.find(":");
+			std::string ip = value.substr(0, pos);
+			std::string port = value.substr(pos + 1);
+			if (ip.length() > 15 || port.length() > 5)
+				throw Config::SyntaxInvalidValue(param, value);
+			pos = 0;
+			int	dot = 0;
+			while (pos < ip.length())
+			{
+				if (((ip[pos] < '0' || ip[pos] > '9') && ip[pos] != '.') || (ip[pos] == '.' && dot++ > 3) || (ip[pos] == '.' && pos == 0) || (ip[pos] == '.' && pos == ip.length() - 1) || (pos < ip.length() && ip[pos] == '.' && ip[pos + 1] == '.'))
+					throw Config::SyntaxInvalidValue(param, value);
+				pos++;
+			}
+			if (dot != 3)
+				throw Config::SyntaxInvalidValue(param, value);
+			Config::isValidIp(ip);
+			Config::isValidPort(port);
+			this->setData("ip", ip);
+			this->setData("port", port);
+		}
+	}
+	else if (param == Server_Valid_Param[Server_Methods])
+		Config::isValidMethods(value);
+	return (1);
+}
+
+int	Config::isValidMethods(std::string value)
+{
+	size_t	pos = 0;
+	int		nb = 0;
+
+	while (pos < value.length())
+	{
+		nb = 0;
+		for (size_t x = 0; x < Methods_List_Length; x++)
+		{
+			if (Config::isSameWord(value, pos, Methods_List[x]))
+			{
+				nb = 1;
+				pos += std::string(Methods_List[x]).length();
+				x = Methods_List_Length;
+			}
+		}
+		if (nb == 0)
+			throw Config::SyntaxInvalidValue(Server_Valid_Param[Server_Methods], value);
+		while (pos < value.length() && value[pos] == ' ')
+			pos++;
+	}
+	if (pos != value.length())
+		throw Config::SyntaxInvalidValue(Server_Valid_Param[Server_Methods], value);
+	return (1);
+}
+
+int			Config::isValidPort(std::string	port)
+{
+	int	port_int = std::atoi(port.c_str());
+	if (port_int < 1 || port_int > 65535)
+		throw Config::SyntaxInvalidValue("Port", port);
+	size_t pos = 0;
+	while (pos < port.length())
+	{
+		if (port[pos] < '0' || port[pos] > '9')
+			throw Config::SyntaxInvalidValue("Port", port);
+		pos++;
+	}
+	return (1);
+}
+
+int			Config::isValidIp(std::string ip)
+{
+	size_t pos = ip.find(".");
+	std::string a = ip.substr(0, ip.find("."));
+	std::string b = ip.substr(pos + 1, ip.find(".", pos + 1) - pos - 1);
+	pos = ip.find(".", pos + 1);
+	std::string c = ip.substr(pos + 1, ip.find(".", pos + 1) - pos - 1);
+	pos = ip.find(".", pos + 1);
+	std::string d = ip.substr(pos + 1, ip.find(".", pos + 1) - pos - 1);
+	// if (a.length() > 3 || b.length() > 3 || c.length() > 3 || d.length() > 3) add it if you want to parse 00005
+	// 	throw Config::SyntaxInvalidValue("IP", ip);
+	if (atoi(a.c_str()) > 255 || atoi(b.c_str()) > 255 || atoi(c.c_str()) > 255 || atoi(d.c_str()) > 255)
+		throw Config::SyntaxInvalidValue("IP", ip);
+	return (0);
+}
+
+std::map<int, Location>	Config::getLocation(void) const
+{
+	return (this->_location);
+}
+
+std::map<std::string, Location>	Config::getLocation_str(void) const
+{
+	return (this->_location_str);
+}
+void					Config::setLocation(std::string index, Location value)
+{
+	this->_location_str[index] = value;
+	this->_location[this->_location.size()] = value;
+	
+}
+
+std::string		Config::removeWhiteSpace(std::string content)
+{
+	size_t		pos = 0;
+
+	while (pos < content.length() && (content[pos] == ' ' || content[pos] == '	'))
+		pos++;
+	return (content.substr(pos));
+}
+
+int			Config::isValidParameter(std::string content, size_t pos)
+{
+	for (int i = 0; i < Server_Valid_Param_Length; i++)
+		if (Config::isSameWord(content, pos, Server_Valid_Param[i]))
+			return (1);
+	return (0);
+}
+
+std::string Config::getWord(std::string content, size_t pos)
+{
+	std::string tmp;
+
+	/* Copy all char while it is not a space, new line or a tab */
+	while (pos < content.length() && ((content[pos] != '\n' && content[pos] != ' ' && content[pos] != '	')))
+		tmp += content[pos++];
+	return (tmp);
 }
 
 std::string	Config::getDataBeforeLine(std::string content, size_t pos)
@@ -135,7 +256,7 @@ int			Config::isSameWord(std::string content, size_t pos, std::string word)
 
 	while (pos < content.length() && pos_word < word.length() && content[pos] == word[pos_word])
 		pos_word++, pos++;
-	if (pos_word == word.length() && pos + 1 < content.length() && (content[pos] == ' ' || content[pos] == '	'))
+	if (pos_word == word.length() && pos <= content.length() && (content[pos] == ' ' || content[pos] == '	' || content[pos] == '\n' || content.length() == pos))
 		return (1);
 	return (0);
 }
@@ -163,7 +284,7 @@ std::string Config::getBracket(std::string content, size_t pos)
 
 int	Config::isValidServer(std::string content, size_t pos)
 {
-	if (content.find("server") != pos)
+	if (content.find("server", pos) != pos)
 		throw Config::SyntaxInvalidAt(Config::getLineOfPos(content, pos));
 	pos += std::string("server").length();
 	while (pos < content.length() && (content[pos] == ' ' || content[pos] == '	'))
@@ -178,10 +299,28 @@ int	Config::isEndOfFile(std::string content, size_t pos)
 	size_t	x;
 
 	x = 0;
-	while (content.length() > (size_t)(pos + x) && content.at(pos + x) != '\0')
+	while (content.length() > (pos + x) && content.at(pos + x) != '\0')
 	{
-		if (content.at(pos + x) == '	' || content.at(pos + x) == '\n' || content.at(pos + x) == '\r' || content.at(pos + x) == ' ')
+		if (content.at(pos + x) != '	' && content.at(pos + x) != '\n' && content.at(pos + x) != '\r' && content.at(pos + x) != ' ')
 			return (0);
+		x++;
+	}
+	return (1);
+}
+
+int	Config::isEndOfBracket(std::string content, size_t pos)
+{
+	size_t	x;
+
+	x = 0;
+	while (content.length() > (pos + x))
+	{
+		if (content.at(pos + x) != '	' && content.at(pos + x) != '\n' && content.at(pos + x) != '\r' && content.at(pos + x) != ' ')
+		{
+			if (content.at(pos + x) == '}' && (pos + x) == content.length() - 1)
+				return (1);
+			return (0);
+		}
 		x++;
 	}
 	return (1);
@@ -227,63 +366,42 @@ int	Config::findEndBracket(std::string content, size_t pos)
 	return (pos);
 }
 
-std::string Config::getServerName(void) const
+void		Config::setData(std::string index, std::string value)
 {
-	return (this->_serverName);
+	this->_data[index] = value;
 }
 
-std::string	Config::getIndex(void) const
+void		Config::print(std::map<int, Config> config)
 {
-	return (this->_index);
+	std::cout << "------------- Show Config -------------" << std::endl;
+	for(size_t x = 0; x < config.size(); x++)
+	{
+		std::cout << "    ---------- Config (" << x << ") ----------" << std::endl;
+		for (size_t y = 0; y < Server_Valid_Param_Length; y++)
+			std::cout << "    " << Server_Valid_Param[y] << " | " << config[x][Server_Valid_Param[y]] << std::endl;
+		for (size_t y = 0; y < config[x].getLocation().size(); y++)
+		{
+			std::cout << "        ---------- Location (" << y << ") ----------" << std::endl;
+			for (size_t z = 0; z < Location_Valid_Param_Length; z++)
+			{
+				if (config[x].getLocation()[y][Location_Valid_Param[z]].length() != 0)
+					std::cout << "        " << Location_Valid_Param[z] << " | " << config[x].getLocation()[y][Location_Valid_Param[z]] << std::endl;
+			}
+		}
+	}
+	std::cout << "------------- End Config -------------" << std::endl;
 }
 
-std::string	Config::getRoot(void) const
+int			Config::getNumberOfValue(std::string value)
 {
-	return (this->_root);
-}
+	int	nb = 1;
 
-std::string	Config::getAllow_methods(void) const
-{
-	return (this->_allow_methods);
-}
-
-std::string	Config::getListen_ip(void) const
-{
-	return (this->_listen_ip);
-}
-
-int			Config::getListen_port(void) const
-{
-	return (this->_listen_port);
-}
-
-
-void	Config::setServerName(std::string data)
-{
-	this->_serverName = data;
-}
-
-void	Config::setIndex(std::string data)
-{
-	this->_index = data;
-}
-
-void	Config::setRoot(std::string data)
-{
-	this->_root = data;
-}
-
-void	Config::setAllow_methods(std::string data)
-{
-	this->_allow_methods = data;
-}
-
-void	Config::setListen_ip(std::string data)
-{
-	this->_listen_ip = data;
-}
-
-void	Config::setListen_port(int data)
-{
-	this->_listen_port = data;
+	for (size_t x = 0; x < value.length(); x++)
+	{
+		if (value[x] == ' ' || value[x] == '	')
+			nb++;
+		while (x < value.length() && (value[x] == ' ' || value[x] == '	'))
+			x++;
+	}
+	return (nb);
 }

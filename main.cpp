@@ -14,9 +14,8 @@
 
 int main(void)
 {
-	// Config *config = Config::createConfig("config.conf");
-	// std::cout << config[0].getServerName() << std::endl;
-
+	std::map<int, Config> config = Config::createConfig("config.conf");
+	Config::print(config);
 	start_servers();
  	return (0);
 }
