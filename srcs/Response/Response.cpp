@@ -219,7 +219,7 @@ void	Response::fill_content_with_error_code(int code)
 	try {
 		content = file.getFile("errors_pages/" + std::to_string(code) + ".html");
 	}
-	catch (std::exception &e) {
+	catch (std::exception &e) { // edit avec le bon code erreur
 		content = "<h1>404 Not Found</h1>";
 	}	
 	_content = content;
@@ -227,26 +227,6 @@ void	Response::fill_content_with_error_code(int code)
 	_extension = ".html";
 }
 
-// std::vector<std::string>	Response::split_file_and_directory(std::string line)
-// {
-// 	std::string 				delimiter = "\n";
-// 	std::vector<std::string>	words;
-// 	size_t 			pos;
-// 	int 			u = 0;
-
-// 	while ((pos = line.find(delimiter)) != std::string::npos) {
-// 		words.push_back(line.substr(0, pos));
-// 		line.erase(0, pos + delimiter.length());
-// 		if (line[0] == '\n')
-// 		{
-// 			for (u = 0; line[u] == '\n'; u++);
-// 			line.erase(0, u);
-// 		}
-// 		if (line.find(delimiter) == std::string::npos)
-// 			words.push_back(line.substr(0, line.size()));
-// 	}
-// 	return (words);
-// }
 std::vector<std::string>	Response::split_file_and_directory(std::string line)
 {
 	std::string 				delimiter = "\n";
@@ -292,7 +272,9 @@ void	Response::autoindex(std::string directory, std::string indexFile)
 		std::string temp;
 		for (i = 0; i < listedDirectory.size(); i++)
 		{
-			temp += "<li><a href=\"" + _request.get_target_path() + indexFile + listedDirectory[i] + "\">" + listedDirectory[i] + "</a></li>";
+			std::stringstream ss;
+			ss << File::getFileSize("www" + _request.get_target_path() + indexFile + listedDirectory[i]);
+			temp += "<li><a href=\"" + URL::encode(_request.get_target_path() + indexFile + listedDirectory[i]) + "\">" + listedDirectory[i] + " - " + ss.str() + " byte(s)" + "</a></li>";
 		}
 		i = templateFile.find("$files_and_directories");
 		templateFile.erase(i, 23);
@@ -311,25 +293,30 @@ void	Response::content_fill_from_file(void)
 
 	//A recup de la config plus tard
 	std::string indexFile = "";
-	std::cout << _request.get_target_path() << std::endl;
 	if (_request.get_target_path()[_request.get_target_path().find_first_of("/") + 1] == ' ' || _request.get_target_path()[_request.get_target_path().find_first_of("/") + 1] == '\0')
 		indexFile = "index.html";
 
-	// Faire pour que quand ont fasse http://localhost/coucou sa fasse pareil que http://localhost/coucou/
-
 	switch(File::getType(directory + _request.get_target_path() + indexFile))
 	{
-		case -1:
+		case -1: //Not exist
+			std::cout << RED << "Not exist" << RST << std::endl;
 			fill_content_with_error_code(404);
 			break;
-		case 1:
+		case 1: //Directory
+			if (_request.get_target_path().find_last_of('/') != _request.get_target_path().size() - 1)
+			{
+				std::string	target_path_with_slash = _request.get_target_path() + "/";
+				std::cout << target_path_with_slash << std::endl;
+				_request.set_target_path_force(target_path_with_slash);
+			}
 			if (File::getType(directory + _request.get_target_path() + "index.html") == -1)
 			{
 				autoindex(directory, indexFile);
 				break;
 			} else
 				indexFile = "index.html";
-		case 2:
+		case 2: //File
+			std::cout << RED << "File" << RST << std::endl;
 			content += File::getFile(directory + _request.get_target_path() + indexFile);
 			_content = content;
 			_content_length = _content.length();

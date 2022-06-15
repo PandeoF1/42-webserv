@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   webserv.hpp                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: tnard <tnard@student.42lyon.fr>            +#+  +:+       +#+        */
+/*   By: jbosquet <jbosquet@student.42lyon.fr>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/06/06 15:56:12 by nard              #+#    #+#             */
-/*   Updated: 2022/06/14 13:53:39 by jbosquet         ###   ########.fr       */
+/*   Updated: 2022/06/15 16:22:02 by jbosquet         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -39,6 +39,7 @@
 #include "../srcs/Request/Request.hpp"
 #include "../srcs/Response/Response.hpp"
 #include "../srcs/Server/Server.hpp"
+#include "../srcs/URL/URL.hpp"
 
 #define				Location_Name "location"
 static std::string	Location_Valid_Param[] = {"allow_methods", "root", "alias", "client_body_buffer_size", "index", "cgi_pass"};
@@ -64,4 +65,9 @@ static std::string	Methods_List[] = {"POST", "GET", "DELETE"};
 /* 1 = You can set up multiple parameters declaration with the same name (ex : 2 server_name (the last take the main)), 0 = you can't */
 #define             Multiple_Declaration 1
 
+static std::string		url_encoding_characters[]	= {" "  , "\""};
+static std::string		url_encoding_utf8[] 		= {"%20", "%22"};
+#define					url_encoding_length 2
+
 void	start_servers(void);
+
