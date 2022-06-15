@@ -3,10 +3,10 @@
 #                                                         :::      ::::::::    #
 #    Makefile                                           :+:      :+:    :+:    #
 #                                                     +:+ +:+         +:+      #
-#    By: marvin <marvin@student.42.fr>              +#+  +:+       +#+         #
+#    By: jbosquet <jbosquet@student.42lyon.fr>      +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2021/12/09 13:15:12 by tnard             #+#    #+#              #
-#    Updated: 2022/06/14 13:18:25 by marvin           ###   ########.fr        #
+#    Updated: 2022/06/14 13:42:33 by jbosquet         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -19,11 +19,14 @@ END					= \e[0m
 SRCS				= main.cpp \
 						srcs/File/File.cpp srcs/Server/Server.cpp \
 						srcs/Config/Config.cpp srcs/Request/Request.cpp	\
-						start_servers.cpp srcs/Config/Location/Location.cpp
+						srcs/Response/Response.cpp \
+						start_servers.cpp \
+            srcs/Config/Location/Location.cpp
 NAME				= webserv
 OBJS_DIR			= objs/
-PROJECT_H			= includes/webserv.hpp srcs/File/File.hpp \
-						srcs/Server/Server.hpp srcs/Config/Config.hpp srcs/Request/Request.hpp srcs/Config/Location/Location.hpp
+PROJECT_H			= srcs/File/File.hpp \
+						srcs/Server/Server.hpp srcs/Config/Config.hpp srcs/Request/Request.hpp \
+						srcs/Response/Response.hpp includes/webserv.hpp
 OBJS				= $(SRCS:.cpp=.o)
 OBJECTS_PREFIXED	= $(addprefix $(OBJS_DIR), $(OBJS))
 CC					= c++
@@ -37,7 +40,7 @@ $(OBJS_DIR)%.o : %.cpp $(PROJECT_H)
 	@mkdir -p $(OBJS_DIR)/srcs/Config/Location
 	@mkdir -p $(OBJS_DIR)/srcs/Server
 	@mkdir -p $(OBJS_DIR)/srcs/Request
-	@mkdir -p $(OBJS_DIR)/srcs/Utils
+	@mkdir -p $(OBJS_DIR)/srcs/Response
 	@$(CC) $(CC_FLAGS) -c $< -o $@
 	@printf	"\033[2K\r${BLU}[BUILD]${RST} '$<' $(END)"
 
