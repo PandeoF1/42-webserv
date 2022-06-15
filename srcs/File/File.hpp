@@ -6,7 +6,7 @@
 /*   By: jbosquet <jbosquet@student.42lyon.fr>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/06/06 15:52:21 by nard              #+#    #+#             */
-/*   Updated: 2022/06/14 16:56:55 by jbosquet         ###   ########.fr       */
+/*   Updated: 2022/06/15 15:23:44 by jbosquet         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -37,6 +37,7 @@ class File{
 		std::string			listDirectory(void);
 		/* Return the type of the path */
 		static int			getType(std::string path);
+		static size_t		getFileSize(const std::string& filename);
 	public:
 		class DirectoryNotAccessible : public std::exception
 		{

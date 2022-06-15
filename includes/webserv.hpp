@@ -6,7 +6,7 @@
 /*   By: jbosquet <jbosquet@student.42lyon.fr>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/06/06 15:56:12 by nard              #+#    #+#             */
-/*   Updated: 2022/06/14 13:53:39 by jbosquet         ###   ########.fr       */
+/*   Updated: 2022/06/15 14:55:41 by jbosquet         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -36,5 +36,10 @@
 #include "../srcs/Request/Request.hpp"
 #include "../srcs/Response/Response.hpp"
 #include "../srcs/Server/Server.hpp"
+#include "../srcs/URL/URL.hpp"
 
 void start_servers(void);
+
+static std::string		url_encoding_characters[]	= {" "  , "\""};
+static std::string		url_encoding_utf8[] 		= {"%20", "%22"};
+#define					url_encoding_length 2

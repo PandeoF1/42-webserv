@@ -16,7 +16,7 @@
 #define PORT 80
 #define PORT2 8765
 #define NB_PORTS 2
-#define MAX_CLIENTS 20
+#define MAX_CLIENTS 500000
 #define BUFLEN 65536
 
 void start_servers(void)

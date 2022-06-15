@@ -6,7 +6,7 @@
 #    By: jbosquet <jbosquet@student.42lyon.fr>      +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2021/12/09 13:15:12 by tnard             #+#    #+#              #
-#    Updated: 2022/06/14 13:42:33 by jbosquet         ###   ########.fr        #
+#    Updated: 2022/06/15 14:19:43 by jbosquet         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -20,12 +20,14 @@ SRCS				= main.cpp \
 						srcs/File/File.cpp srcs/Server/Server.cpp \
 						srcs/Config/Config.cpp srcs/Request/Request.cpp	\
 						srcs/Response/Response.cpp \
-						start_servers.cpp
+						start_servers.cpp	\
+						srcs/URL/URL.cpp
 NAME				= webserv
 OBJS_DIR			= objs/
 PROJECT_H			= srcs/File/File.hpp \
 						srcs/Server/Server.hpp srcs/Config/Config.hpp srcs/Request/Request.hpp \
-						srcs/Response/Response.hpp includes/webserv.hpp
+						srcs/Response/Response.hpp includes/webserv.hpp	\
+						srcs/URL/URL.hpp
 OBJS				= $(SRCS:.cpp=.o)
 OBJECTS_PREFIXED	= $(addprefix $(OBJS_DIR), $(OBJS))
 CC					= c++
@@ -39,6 +41,7 @@ $(OBJS_DIR)%.o : %.cpp $(PROJECT_H)
 	@mkdir -p $(OBJS_DIR)/srcs/Server
 	@mkdir -p $(OBJS_DIR)/srcs/Request
 	@mkdir -p $(OBJS_DIR)/srcs/Response
+	@mkdir -p $(OBJS_DIR)/srcs/URL
 	@$(CC) $(CC_FLAGS) -c $< -o $@
 	@printf	"\033[2K\r${BLU}[BUILD]${RST} '$<' $(END)"
 

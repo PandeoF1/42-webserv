@@ -6,7 +6,7 @@
 /*   By: jbosquet <jbosquet@student.42lyon.fr>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/06/06 15:52:24 by nard              #+#    #+#             */
-/*   Updated: 2022/06/14 16:57:32 by jbosquet         ###   ########.fr       */
+/*   Updated: 2022/06/15 15:28:42 by jbosquet         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -136,4 +136,14 @@ int			File::getType(std::string path)
 	else
 		return (-1);
 	return (0);
+}
+
+size_t	File::getFileSize(const std::string& filename)
+{
+    struct stat st;
+	
+    if(stat(filename.c_str(), &st) != 0) {
+        return (0);
+    }
+    return (st.st_size);   
 }
