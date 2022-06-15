@@ -8,7 +8,7 @@ Request::Request(char *request, Server &server) :
 	std::string new_request = request;
 	_default_request = new_request;
 	std::cout << "New request from port: " << server.get_port() << std::endl;
-	// std::cout << _default_request << std::endl;
+	std::cout << _default_request << std::endl;
 	parse();
 }
 
@@ -152,7 +152,12 @@ void    Request::set_target_path(std::string line)
 
 	for (i = line.find_first_of(' '); line[i] && line[i] == ' '; i++);
 	for (j = 0; line[i + j] && line[i + j] != ' '; j++);
-	_target_path = line.substr(i, j); 
+	_target_path = URL::decode(line.substr(i, j));
+}
+
+void    Request::set_target_path_force(std::string line)
+{
+	_target_path = line;
 }
 
 std::string	Request::parse_line(std::string line)
