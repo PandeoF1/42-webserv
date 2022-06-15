@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Location.hpp                                       :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: marvin <marvin@student.42.fr>              +#+  +:+       +#+        */
+/*   By: tnard <tnard@student.42lyon.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/06/06 15:52:21 by nard              #+#    #+#             */
-/*   Updated: 2022/06/10 23:30:03 by marvin           ###   ########.fr       */
+/*   Updated: 2022/06/15 12:28:07 by tnard            ###   ########lyon.fr   */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -27,6 +27,8 @@ class Location{
 		void				setLocation(std::string index, std::string value);
 		std::string			operator[](std::string index) const;
 		std::map<std::string, std::string>	getData(void) const;
+		/* Check the value of the parameter */
+		int					isValidValue(std::string param, std::string value);
 	private:
 		static int _verbose;
 		std::map<std::string, std::string>	_data;

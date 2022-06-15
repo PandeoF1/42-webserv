@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Config.cpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: marvin <marvin@student.42.fr>              +#+  +:+       +#+        */
+/*   By: tnard <tnard@student.42lyon.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/06/07 16:21:18 by nard              #+#    #+#             */
-/*   Updated: 2022/06/14 16:11:34 by marvin           ###   ########.fr       */
+/*   Updated: 2022/06/15 14:27:08 by tnard            ###   ########lyon.fr   */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,8 +14,6 @@
 
 /*
 TODO:
-	Allowmethods to check for location
-	Add a check for the location path (and remove ///////)
 	Check if root of location / server has just one parameter
 */
 
@@ -50,9 +48,7 @@ std::map<int, Config> Config::createConfig(std::string path)
 		pos = Config::isValidServer(content, pos);
 		
 		std::string tmp = Config::getBracket(content, pos);
-		std::cout << "------------------- Extract : -------------------" << tmp << std::endl;
 		dump[dump.size()] = Config::extractConfig(tmp);
-		std::cout << "------------------- End of extract : -------------------" << std::endl;
 		pos += tmp.length();
 	}
 	return (dump);
@@ -86,14 +82,18 @@ Config		Config::extractConfig(std::string content)
 		{
 			Location tmp = Location::extractLocation(content, pos);
 			config.setLocation(Location::removeBracket(tmp["name"]), tmp);
-			std::cout << Location::removeBracket(tmp["name"]) << std::endl;
-			exit(0);
+			if (Location::removeBracket(tmp["name"]).find(" ") != std::string::npos)
+				throw Config::SyntaxInvalidAt(Config::getLineOfPos(content, pos));
 			pos += getDataBeforeLine(content, pos).length() - 1;
 			pos += Config::getBracket(content, pos).length();
 		}
 		/* Else, check if it's a valid parameter */
 		else if (Config::isValidParameter(content, pos))
 		{
+			if (!Multiple_Declaration && !config.getData()[Config::getWord(content, pos)].empty())
+				throw Config::SyntaxInvalidAt(Config::getLineOfPos(content, pos));
+			if (Config::getWord(content, pos) == Server_Valid_Param[Server_Root] && Config::getNumberOfValue(Config::removeWhiteSpace(Config::getDataBeforeLine(content, pos + Config::getWord(content, pos).length()))) != 1)
+				throw Config::SyntaxInvalidAt(Config::getLineOfPos(content, pos));
 			config.setData(Config::getWord(content, pos), Config::removeWhiteSpace(Config::getDataBeforeLine(content, pos + Config::getWord(content, pos).length())));
 			config.isValidValue(Config::getWord(content, pos), Config::removeWhiteSpace(Config::getDataBeforeLine(content, pos + Config::getWord(content, pos).length())));
 			pos += Config::getWord(content, pos).length() + Config::getDataBeforeLine(content, pos + Config::getWord(content, pos).length()).length();
@@ -136,8 +136,6 @@ int	Config::isValidValue(std::string param, std::string value)
 	}
 	else if (param == Server_Valid_Param[Server_Methods])
 		Config::isValidMethods(value);
-	else
-		return (1);
 	return (1);
 }
 
@@ -194,7 +192,6 @@ int			Config::isValidIp(std::string ip)
 	std::string d = ip.substr(pos + 1, ip.find(".", pos + 1) - pos - 1);
 	// if (a.length() > 3 || b.length() > 3 || c.length() > 3 || d.length() > 3) add it if you want to parse 00005
 	// 	throw Config::SyntaxInvalidValue("IP", ip);
-	// to do : add ip to config["ip"]
 	if (atoi(a.c_str()) > 255 || atoi(b.c_str()) > 255 || atoi(c.c_str()) > 255 || atoi(d.c_str()) > 255)
 		throw Config::SyntaxInvalidValue("IP", ip);
 	return (0);
@@ -372,4 +369,39 @@ int	Config::findEndBracket(std::string content, size_t pos)
 void		Config::setData(std::string index, std::string value)
 {
 	this->_data[index] = value;
+}
+
+void		Config::print(std::map<int, Config> config)
+{
+	std::cout << "------------- Show Config -------------" << std::endl;
+	for(size_t x = 0; x < config.size(); x++)
+	{
+		std::cout << "    ---------- Config (" << x << ") ----------" << std::endl;
+		for (size_t y = 0; y < Server_Valid_Param_Length; y++)
+			std::cout << "    " << Server_Valid_Param[y] << " | " << config[x][Server_Valid_Param[y]] << std::endl;
+		for (size_t y = 0; y < config[x].getLocation().size(); y++)
+		{
+			std::cout << "        ---------- Location (" << y << ") ----------" << std::endl;
+			for (size_t z = 0; z < Location_Valid_Param_Length; z++)
+			{
+				if (config[x].getLocation()[y][Location_Valid_Param[z]].length() != 0)
+					std::cout << "        " << Location_Valid_Param[z] << " | " << config[x].getLocation()[y][Location_Valid_Param[z]] << std::endl;
+			}
+		}
+	}
+	std::cout << "------------- End Config -------------" << std::endl;
+}
+
+int			Config::getNumberOfValue(std::string value)
+{
+	int	nb = 1;
+
+	for (size_t x = 0; x < value.length(); x++)
+	{
+		if (value[x] == ' ' || value[x] == '	')
+			nb++;
+		while (x < value.length() && (value[x] == ' ' || value[x] == '	'))
+			x++;
+	}
+	return (nb);
 }

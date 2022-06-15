@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Location.cpp                                       :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: marvin <marvin@student.42.fr>              +#+  +:+       +#+        */
+/*   By: tnard <tnard@student.42lyon.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/06/06 15:52:24 by nard              #+#    #+#             */
-/*   Updated: 2022/06/14 16:01:14 by marvin           ###   ########.fr       */
+/*   Updated: 2022/06/15 15:35:40 by tnard            ###   ########lyon.fr   */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -43,7 +43,10 @@ Location	Location::extractLocation(std::string content, size_t pos)
 		if (Location::isValidParameter(tmp, pos))
 		{
 			if (Config::removeWhiteSpace(Config::getDataBeforeLine(tmp, pos + Config::getWord(tmp, pos).length())).length() > 0)
+			{
 				loc.setLocation(Config::getWord(tmp, pos), Config::removeWhiteSpace(Config::getDataBeforeLine(tmp, pos + Config::getWord(tmp, pos).length())));
+				loc.isValidValue(Config::getWord(tmp, pos), Config::removeWhiteSpace(Config::getDataBeforeLine(tmp, pos + Config::getWord(tmp, pos).length())));
+			}
 			else
 				throw Config::SyntaxInvalidAt(Config::getLineOfPos(content, global_l + pos));
 			pos += Config::getWord(tmp, pos).length() + Config::getDataBeforeLine(tmp, pos + Config::getWord(tmp, pos).length()).length();
@@ -53,6 +56,27 @@ Location	Location::extractLocation(std::string content, size_t pos)
 	}
 	
 	return (loc);
+}
+
+int	Location::isValidValue(std::string param, std::string value)
+{
+	if (param == Location_Valid_Param[Location_Methods])
+		Config::isValidMethods(value);
+	else if (param == Location_Valid_Param[Location_Root] && Config::getNumberOfValue(value) != 1)
+		throw Config::SyntaxInvalidValue(Location_Valid_Param[Location_Root], value);
+	else if (param == Location_Valid_Param[Location_Cgi] && Config::getNumberOfValue(value) != 1)
+		throw Config::SyntaxInvalidValue(Location_Valid_Param[Location_Cgi], value);
+	else if (param == Location_Valid_Param[Location_Buffer])
+	{
+		if (atoi(value.c_str()) < Buffer_Min || atoi(value.c_str()) > Buffer_Max)
+			throw Config::SyntaxInvalidValue(Location_Valid_Param[Location_Buffer], value);
+		for (size_t x = 0; x < value.length(); x++)
+			if (!isnumber(value[x]))
+				throw Config::SyntaxInvalidValue(Location_Valid_Param[Location_Buffer], value);
+	}
+	else
+		return (0);
+	return (1);
 }
 
 int	Location::isValidParameter(std::string content, size_t pos)
@@ -72,7 +96,7 @@ std::string	Location::removeBracket(std::string content)
 {
 	size_t	pos = content.length() - 1;
 
-	while (!isalnum(content[pos]) && pos > 0)
+	while (pos > 0 && !isalnum(content[pos]) && content[pos] != '/' && content[pos] != '.')
 		pos--;
 	return (content.substr(0, pos + 1));
 }

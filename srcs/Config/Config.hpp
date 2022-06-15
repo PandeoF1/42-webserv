@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Config.hpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: marvin <marvin@student.42.fr>              +#+  +:+       +#+        */
+/*   By: tnard <tnard@student.42lyon.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/06/07 16:21:22 by nard              #+#    #+#             */
-/*   Updated: 2022/06/14 14:27:14 by marvin           ###   ########.fr       */
+/*   Updated: 2022/06/15 14:42:24 by tnard            ###   ########lyon.fr   */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -33,6 +33,10 @@ class Config {
 
 		void					setData(std::string index, std::string value);
 		void					setLocation(std::string index, Location value);
+
+		/* Print all data from config */
+		static void				print(std::map<int, Config>);
+
 		std::map<std::string, std::string>	getData(void) const;
 
 		/* Return the map of the config file */	
@@ -40,7 +44,7 @@ class Config {
 		/* Return the pos of the last bracket */
 		static int			findEndBracket(std::string content, size_t pos);
 		/* Check the value of the parameter */
-		int			isValidValue(std::string param, std::string value);
+		int					isValidValue(std::string param, std::string value);
 		/* Return the content of the pos bracket */
 		static std::string	getBracket(std::string content, size_t pos);
 		/* Return the line of the pos in content */
@@ -69,6 +73,8 @@ class Config {
 		static int			isValidPort(std::string	port);
 		/* Check if the list of methods is valid */
 		static int			isValidMethods(std::string	value);
+		/* Return the number of value */
+		static int			getNumberOfValue(std::string value);
 	private:
 
 		static int	_verbose;
@@ -116,7 +122,7 @@ class Config {
 						number[len--] = cp % 10 + '0';
 						cp /= 10;
 					}
-					static std::string s = std::string("[Config] Syntax invalid at line : " + std::string(number) + "!");
+					static std::string s = std::string("[Config] Syntax invalid at line : " + std::string(RED) + std::string(number) + std::string(RST) + "!");
 					return (s.c_str());
 				}
 		};
