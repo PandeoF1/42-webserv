@@ -1,12 +1,12 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   server.hpp                                         :+:      :+:    :+:   */
+/*   Server.hpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: asaffroy <asaffroy@student.42lyon.fr>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/06/07 17:36:09 by asaffroy          #+#    #+#             */
-/*   Updated: 2022/06/08 11:57:39 by asaffroy         ###   ########lyon.fr   */
+/*   Updated: 2022/06/20 10:09:07 by asaffroy         ###   ########lyon.fr   */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -24,6 +24,7 @@
 #include <netinet/in.h>
 #include <sys/time.h>
 #include <vector>
+#include <map>
 
 class Server
 {
