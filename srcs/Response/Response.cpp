@@ -217,7 +217,7 @@ void	Response::fill_content_with_error_code(int code)
 
 	_request.set_code(code);
 	try {
-		content = file.getFile("errors_pages/" + std::to_string(code) + ".html");
+		content = file.getFile("errors_pages/" + int_to_string(code) + ".html");
 	}
 	catch (std::exception &e) { // edit avec le bon code erreur
 		content = "<h1>404 Not Found</h1>";
@@ -286,20 +286,52 @@ void	Response::autoindex(std::string directory, std::string indexFile)
 	}
 }
 
+std::vector<std::string>	Response::split_with_space(std::string line)
+{
+	std::string 				delimiter = " ";
+	std::vector<std::string>	words;
+	size_t 			pos;
+	int 			u = 0, i = 0;
+
+	if (line.size() == 0)
+		return (words);
+	while ((i = line.find_first_of(delimiter)) != std::string::npos)
+	{
+		words.push_back(line.substr(0, i));
+		line.erase(0, i + 1);
+		u++;
+	}
+	words.push_back(line);
+	return (words);
+}
+
+std::string	Response::get_index_file(std::string directory, std::string indexs_from_config)
+{
+	std::vector<std::string>	indexs;
+
+	indexs = split_with_space(indexs_from_config);
+	if (indexs.size() == 0)
+		return ("index.html");
+	for (int i = 0; !indexs[i].empty(); i++)
+		if (File::getType(directory + _request.get_target_path() + indexs[i]) != -1)
+			return (indexs[i]);
+	return ("index.html");
+}
+
 void	Response::content_fill_from_file(void)
 {
 	std::string	content;
-	std::string directory = "www";
-
 	//A recup de la config plus tard
+	std::string directory = "www";
+	std::string indexs_from_config = "index.html index.php coucou.html"; // verif la fonction get_index_file si espace a la fin si fonctionne toujours pour le dernier index
+
 	std::string indexFile = "";
 	if (_request.get_target_path()[_request.get_target_path().find_first_of("/") + 1] == ' ' || _request.get_target_path()[_request.get_target_path().find_first_of("/") + 1] == '\0')
-		indexFile = "index.html";
+		indexFile = get_index_file(directory, indexs_from_config);
 
 	switch(File::getType(directory + _request.get_target_path() + indexFile))
 	{
 		case -1: //Not exist
-			std::cout << RED << "Not exist" << RST << std::endl;
 			fill_content_with_error_code(404);
 			break;
 		case 1: //Directory
@@ -309,15 +341,25 @@ void	Response::content_fill_from_file(void)
 				std::cout << target_path_with_slash << std::endl;
 				_request.set_target_path_force(target_path_with_slash);
 			}
-			if (File::getType(directory + _request.get_target_path() + "index.html") == -1)
+			if (File::getType(directory + _request.get_target_path() + get_index_file(directory, indexs_from_config)) == -1)
 			{
 				autoindex(directory, indexFile);
 				break;
 			} else
-				indexFile = "index.html";
+				indexFile = get_index_file(directory, indexs_from_config);
 		case 2: //File
-			std::cout << RED << "File" << RST << std::endl;
-			content += File::getFile(directory + _request.get_target_path() + indexFile);
+			std::cout << RED << "File: " << directory + _request.get_target_path() + indexFile << RST << std::endl;
+			
+			try
+			{
+				content += File::getFile(directory + _request.get_target_path() + indexFile);
+			}
+			catch(const std::exception& e)
+			{
+				fill_content_with_error_code(404);
+				break ;
+			}
+			
 			_content = content;
 			_content_length = _content.length();
 			_extension = get_extension(_request.get_target_path() + indexFile);
@@ -329,10 +371,10 @@ void	Response::create_response(void)
 {
 	content_fill_from_file();
 	_response = "HTTP/1.1 ";
-	_response += std::to_string(_request.get_code()) + " " + get_text_code() + "\r\n";
+	_response += int_to_string(_request.get_code()) + " " + get_text_code() + "\r\n";
 	_response += "Server: Webserv/1.0.0\r\n";
 	_response += "Content-Type: " + get_content_type() + "\r\n";
-	_response += "Content-Length: " + std::to_string(_content_length) + "\r\n\r\n";
+	_response += "Content-Length: " + int_to_string(_content_length) + "\r\n\r\n";
 	_response += _content + "\r\n";
 
 	std::cout << _response;
@@ -341,4 +383,13 @@ void	Response::create_response(void)
 std::string		Response::get_response(void) const
 {
 	return (_response);
+}
+
+std::string	Response::int_to_string(int integer)
+{
+	std::stringstream ss;
+	std::string return_string;
+
+	ss << integer;
+	return (ss.str());
 }
