@@ -19,7 +19,7 @@ class Response
 		void						content_fill_from_file(void);
 		void						fill_content_with_error_code(int code);
 		std::string					get_content_type(void) const;
-		std::string					get_text_code(void) const;
+		std::string					get_text_code(int code) const;
 		std::string					get_extension(std::string file) const;
 		void						autoindex(std::string directory, std::string indexFile);
 		std::vector<std::string>	split_file_and_directory(std::string line);

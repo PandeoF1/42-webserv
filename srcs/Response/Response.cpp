@@ -167,7 +167,7 @@ std::string	Response::get_content_type(void) const
 	return ("text/plain");
 }
 
-std::string	Response::get_text_code(void) const
+std::string	Response::get_text_code(int code) const
 {
 	switch(_request.get_code())
 	{
@@ -217,11 +217,14 @@ void	Response::fill_content_with_error_code(int code)
 
 	_request.set_code(code);
 	try {
-		content = file.getFile("errors_pages/" + int_to_string(code) + ".html");
+		if (code >= 500)
+			content = file.getFile("utils/errors_pages/50x.html");
+		else
+			content = file.getFile("utils/errors_pages/" + int_to_string(code) + ".html");
 	}
-	catch (std::exception &e) { // edit avec le bon code erreur
-		content = "<h1>404 Not Found</h1>";
-	}	
+	catch (std::exception &e) {
+		content = "<h1>" + int_to_string(code) + " " + get_text_code(code) + "</h1>";
+	}
 	_content = content;
 	_content_length = content.length();
 	_extension = ".html";
@@ -232,14 +235,13 @@ std::vector<std::string>	Response::split_file_and_directory(std::string line)
 	std::string 				delimiter = "\n";
 	std::vector<std::string>	words;
 	size_t 			pos;
-	int 			u = 0, i = 0;
+	int 			i = 0;
 	if (line.size() == 0)
 		return (words);
 	while ((i = line.find_first_of(delimiter)) != std::string::npos)
 	{
 		words.push_back(line.substr(0, i));
 		line.erase(0, i + 1);
-		u++;
 	}
 	words.push_back(line);
 	words[words.size() - 1].erase(words[words.size() - 1].size() - 1, 1);
@@ -257,7 +259,7 @@ void	Response::autoindex(std::string directory, std::string indexFile)
 		std::string	templateFile;
 		try
 		{
-			templateFile = File::getFile("template_pages/autoindex.html");
+			templateFile = File::getFile("utils/template_pages/autoindex.html");
 		}
 		catch(const std::exception& e)
 		{
@@ -291,7 +293,7 @@ std::vector<std::string>	Response::split_with_space(std::string line)
 	std::string 				delimiter = " ";
 	std::vector<std::string>	words;
 	size_t 			pos;
-	int 			u = 0, i = 0;
+	int 			i = 0;
 
 	if (line.size() == 0)
 		return (words);
@@ -299,7 +301,6 @@ std::vector<std::string>	Response::split_with_space(std::string line)
 	{
 		words.push_back(line.substr(0, i));
 		line.erase(0, i + 1);
-		u++;
 	}
 	words.push_back(line);
 	return (words);
@@ -312,7 +313,7 @@ std::string	Response::get_index_file(std::string directory, std::string indexs_f
 	indexs = split_with_space(indexs_from_config);
 	if (indexs.size() == 0)
 		return ("index.html");
-	for (int i = 0; !indexs[i].empty(); i++)
+	for (int i = 0; i < indexs.size(); i++)
 		if (File::getType(directory + _request.get_target_path() + indexs[i]) != -1)
 			return (indexs[i]);
 	return ("index.html");
@@ -320,6 +321,11 @@ std::string	Response::get_index_file(std::string directory, std::string indexs_f
 
 void	Response::content_fill_from_file(void)
 {
+	if (_request.get_code() >= 300)
+	{
+		fill_content_with_error_code(_request.get_code());
+		return ;
+	}
 	std::string	content;
 	//A recup de la config plus tard
 	std::string directory = "www";
@@ -371,7 +377,7 @@ void	Response::create_response(void)
 {
 	content_fill_from_file();
 	_response = "HTTP/1.1 ";
-	_response += int_to_string(_request.get_code()) + " " + get_text_code() + "\r\n";
+	_response += int_to_string(_request.get_code()) + " " + get_text_code(_request.get_code()) + "\r\n";
 	_response += "Server: Webserv/1.0.0\r\n";
 	_response += "Content-Type: " + get_content_type() + "\r\n";
 	_response += "Content-Length: " + int_to_string(_content_length) + "\r\n\r\n";
