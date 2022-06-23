@@ -81,8 +81,7 @@ void start_servers(void)
             printf("select error");  
         }  
              
-        //If something happened on the master socket , 
-        //then its an incoming connection
+        //If something happened on the master socket , then its an incoming connection
 		for (int i = 0; i < NB_PORTS; i++)
 		{
 			if (FD_ISSET(servers[i]->get_master_socket(), &readfds))
@@ -123,8 +122,7 @@ void start_servers(void)
             sd = client_socket[k];
             if (FD_ISSET( sd , &readfds))  
             {  
-                //Check if it was for closing , and also read the 
-                //incoming message
+                //Check if it was for closing , and also read the incoming message
                 if ((valread = recv( sd , buffer, BUFLEN, 0)) == 0)  
                 {  
                     //Somebody disconnected , get his details and print  
@@ -155,8 +153,7 @@ void start_servers(void)
 				}              
                 else 
                 {  
-                    //set the string terminating NULL byte on the end 
-                    //of the data read 
+                    //set the string terminating NULL byte on the end of the data read 
                     buffer[valread] = '\0';  
 					for (int l = 0; l < NB_PORTS; l++)
 					{
@@ -165,7 +162,17 @@ void start_servers(void)
 							Request request(buffer, *servers[l]);
 							
 							Response response(request);
-							send(sd, response.get_response().c_str(), response.get_response().size(), 0);
+							send(sd, response.get_response().c_str(), response.get_response().size(), MSG_NOSIGNAL);
+							if (request.get_headers()["connection"] == "close")
+							{
+								client_socket[k] = 0;
+								for (int l = 0; l < NB_PORTS; l++)
+								{
+									if (servers[l]->find_client(sd))
+										servers[l]->remove_client(sd);
+								}
+								close( sd );
+							}
 						}
 					}
 				}  

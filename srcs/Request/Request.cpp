@@ -5,10 +5,11 @@ Request::Request(char *request, Server &server) :
 	_return_code(200)
 {
 	(void)_server;
+	// _headers["connection"] = "keep-alive";
 	std::string new_request = request;
 	_default_request = new_request;
-	std::cout << "New request from port: " << server.get_port() << std::endl;
-	std::cout << _default_request << std::endl;
+	//std::cout<< "New request from port: " << server.get_port() << std::endl;
+	std::cout<< _default_request << std::endl;
 	parse();
 }
 
@@ -42,7 +43,7 @@ void    Request::parse()
 			if (parsed_line != "")
 			{
 				_headers[parsed_line] = line.substr(line.find_first_of(':') + 1, line.size() - line.find_first_of(':'));
-				// std::cout << "look }" << _headers[parsed_line] << std::endl;
+				// std::cout<< "look }" << _headers[parsed_line] << std::endl;
 			}
 		}
 		i++;
@@ -51,10 +52,16 @@ void    Request::parse()
 	{
 		int after_space = _headers["host"].find_first_not_of(' ');
 		if (_headers["host"][after_space] == '\r' || _headers["host"][after_space] == std::string::npos)
+		{
+			std::cout << RED << "Error: host not valid" << RST << std::endl;
 			_return_code = 400;
+		}
 	} else if (_headers["host"].size() == 0)
+	{
+		std::cout << RED << "Error: host not valid" << RST << std::endl;
 		_return_code = 400;
-	std::cout << _target_path << std::endl;
+	}
+	//std::cout<< _target_path << std::endl;
 }
 
 std::string    Request::checkMethod(std::string line)
@@ -180,7 +187,6 @@ std::string	Request::parse_line(std::string line)
 	header_lines.push_back("connection:");
 	header_lines.push_back("accept:");
 	header_lines.push_back("referer:");
-	header_lines.push_back("connection:");
 
 	for (std::vector<std::string>::iterator it = header_lines.begin() ; it != header_lines.end(); ++it)
 	{
@@ -209,15 +215,21 @@ void    Request::check_first_line_words(std::string line)
 			words.push_back(line.substr(0, line.size()));
 	}
 
-	if ((words.size() != 3 && words.size() != 4) || (words[2].find("HTTP/1.1") == std::string::npos))
+	if ((words.size() != 3 && words.size() != 4))
 	{
-		if (words[2].find("HTTP/1.1") == std::string::npos)
-			std::cerr << RED << "First line has not HTTP/1.1 in third argument" << RST << std::endl;
-		else
-			std::cerr << RED << "First line not contains 3 or 4 words" << RST << std::endl;
+		std::cerr << RED << "First line not contains 3 or 4 words" << RST << std::endl;
 		_return_code = 400;
 		return ;
 	}
+
+	if (words[2].find("HTTP/1.1") == std::string::npos)
+	{
+		std::cerr << RED << "First line has not HTTP/1.1 in third argument" << RST << std::endl;
+		_return_code = 400;
+		return ;
+	}
+
+	return ;
 }
 
 void	Request::check_http_version(std::string line) {
@@ -257,4 +269,8 @@ int Request::get_code() const {
 
 void	Request::set_code(int code) {
 	_return_code = code;
+}
+
+std::map<std::string, std::string>	Request::get_headers() const {
+	return (_headers);
 }

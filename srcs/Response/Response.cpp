@@ -290,19 +290,34 @@ void	Response::autoindex(std::string directory, std::string indexFile)
 
 std::vector<std::string>	Response::split_with_space(std::string line)
 {
-	std::string 				delimiter = " ";
 	std::vector<std::string>	words;
-	size_t 			pos;
-	int 			i = 0;
 
 	if (line.size() == 0)
 		return (words);
-	while ((i = line.find_first_of(delimiter)) != std::string::npos)
+	int k = 0;
+	int j = -1;
+	for (int i = 0; i < line.size(); i++)
 	{
-		words.push_back(line.substr(0, i));
-		line.erase(0, i + 1);
+		if (line[i] == ' ' || line[i] == '\t')
+		{
+			//to prevent segfault from starting at words[1] instead of words[0]
+			if (i != 0)
+				k++;
+			while (line[i] == ' ' || line[i] == '\t')
+				i++;
+			i--;
+		}
+		else
+		{
+			//to create a new word in the vector
+			if (j != k)
+			{
+				j = k;
+				words.push_back("");
+			}
+			words[k].push_back(line[i]);
+		}
 	}
-	words.push_back(line);
 	return (words);
 }
 
@@ -329,7 +344,7 @@ void	Response::content_fill_from_file(void)
 	std::string	content;
 	//A recup de la config plus tard
 	std::string directory = "www";
-	std::string indexs_from_config = "index.html index.php coucou.html"; // verif la fonction get_index_file si espace a la fin si fonctionne toujours pour le dernier index
+	std::string indexs_from_config = "index.html		    index.php 				coucou.html"; // verif la fonction get_index_file si espace a la fin si fonctionne toujours pour le dernier index
 
 	std::string indexFile = "";
 	if (_request.get_target_path()[_request.get_target_path().find_first_of("/") + 1] == ' ' || _request.get_target_path()[_request.get_target_path().find_first_of("/") + 1] == '\0')
@@ -344,7 +359,7 @@ void	Response::content_fill_from_file(void)
 			if (_request.get_target_path().find_last_of('/') != _request.get_target_path().size() - 1)
 			{
 				std::string	target_path_with_slash = _request.get_target_path() + "/";
-				std::cout << target_path_with_slash << std::endl;
+				std::cout<< target_path_with_slash << std::endl;
 				_request.set_target_path_force(target_path_with_slash);
 			}
 			if (File::getType(directory + _request.get_target_path() + get_index_file(directory, indexs_from_config)) == -1)
@@ -354,8 +369,12 @@ void	Response::content_fill_from_file(void)
 			} else
 				indexFile = get_index_file(directory, indexs_from_config);
 		case 2: //File
-			std::cout << RED << "File: " << directory + _request.get_target_path() + indexFile << RST << std::endl;
-			
+			std::cout<< RED << "File: " << directory + _request.get_target_path() + indexFile << RST << std::endl;
+			// if (File::getFileSize(File::getFile(directory + _request.get_target_path() + indexFile)) > (Response::string_to_int(_config["client_body_buffer_size"]) * 1000000))
+			// {
+			// 	fill_content_with_error_code(413);
+			// 	break;
+			// }
 			try
 			{
 				content += File::getFile(directory + _request.get_target_path() + indexFile);
@@ -383,7 +402,7 @@ void	Response::create_response(void)
 	_response += "Content-Length: " + int_to_string(_content_length) + "\r\n\r\n";
 	_response += _content + "\r\n";
 
-	std::cout << _response;
+	std::cout<< _response;
 }
 
 std::string		Response::get_response(void) const
@@ -398,4 +417,14 @@ std::string	Response::int_to_string(int integer)
 
 	ss << integer;
 	return (ss.str());
+}
+
+int Response::string_to_int(std::string str)
+{
+	std::stringstream ss;
+	int return_int;
+
+	ss << str;
+	ss >> return_int;
+	return (return_int);
 }

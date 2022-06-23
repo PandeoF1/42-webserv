@@ -6,7 +6,7 @@
 /*   By: asaffroy <asaffroy@student.42lyon.fr>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/06/06 15:56:12 by nard              #+#    #+#             */
-/*   Updated: 2022/06/20 12:07:05 by asaffroy         ###   ########lyon.fr   */
+/*   Updated: 2022/06/22 16:33:49 by asaffroy         ###   ########lyon.fr   */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -31,6 +31,7 @@
 #include <map>
 #include <iostream>
 #include <sstream>
+#define MSG_NOSIGNAL 0x2000
 
 #include "../srcs/File/File.hpp"
 #include "../srcs/Server/Server.hpp"

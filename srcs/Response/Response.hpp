@@ -26,6 +26,7 @@ class Response
 		std::vector<std::string>	split_with_space(std::string line);
 		std::string					get_index_file(std::string directory, std::string indexs_from_config);
 		std::string					int_to_string(int integer);
+		int  						string_to_int(std::string string);
 	public:
 		Response(Request &request);
 		~Response(void);

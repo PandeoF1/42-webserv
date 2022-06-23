@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Config.cpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: tnard <tnard@student.42lyon.fr>            +#+  +:+       +#+        */
+/*   By: asaffroy <asaffroy@student.42lyon.fr>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/06/07 16:21:18 by nard              #+#    #+#             */
-/*   Updated: 2022/06/15 14:27:08 by tnard            ###   ########lyon.fr   */
+/*   Updated: 2022/06/22 12:52:58 by asaffroy         ###   ########lyon.fr   */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -22,13 +22,13 @@ int Config::_verbose = 0;
 Config::Config(void)
 {
 	if (_verbose)
-		std::cout << "Config constructor called" << std::endl;
+		std::cout<< "Config constructor called" << std::endl;
 }
 
 Config::~Config(void)
 {
 	if (_verbose)
-		std::cout << "Config destructor called" << std::endl;
+		std::cout<< "Config destructor called" << std::endl;
 }
 
 std::map<int, Config> Config::createConfig(std::string path)
@@ -373,23 +373,23 @@ void		Config::setData(std::string index, std::string value)
 
 void		Config::print(std::map<int, Config> config)
 {
-	std::cout << "------------- Show Config -------------" << std::endl;
+	std::cout<< "------------- Show Config -------------" << std::endl;
 	for(size_t x = 0; x < config.size(); x++)
 	{
-		std::cout << "    ---------- Config (" << x << ") ----------" << std::endl;
+		std::cout<< "    ---------- Config (" << x << ") ----------" << std::endl;
 		for (size_t y = 0; y < Server_Valid_Param_Length; y++)
-			std::cout << "    " << Server_Valid_Param[y] << " | " << config[x][Server_Valid_Param[y]] << std::endl;
+			std::cout<< "    " << Server_Valid_Param[y] << " | " << config[x][Server_Valid_Param[y]] << std::endl;
 		for (size_t y = 0; y < config[x].getLocation().size(); y++)
 		{
-			std::cout << "        ---------- Location (" << y << ") ----------" << std::endl;
+			std::cout<< "        ---------- Location (" << y << ") ----------" << std::endl;
 			for (size_t z = 0; z < Location_Valid_Param_Length; z++)
 			{
 				if (config[x].getLocation()[y][Location_Valid_Param[z]].length() != 0)
-					std::cout << "        " << Location_Valid_Param[z] << " | " << config[x].getLocation()[y][Location_Valid_Param[z]] << std::endl;
+					std::cout<< "        " << Location_Valid_Param[z] << " | " << config[x].getLocation()[y][Location_Valid_Param[z]] << std::endl;
 			}
 		}
 	}
-	std::cout << "------------- End Config -------------" << std::endl;
+	std::cout<< "------------- End Config -------------" << std::endl;
 }
 
 int			Config::getNumberOfValue(std::string value)
