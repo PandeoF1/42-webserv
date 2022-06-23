@@ -420,38 +420,46 @@ std::string		Config::getPathBefore(std::string path)
 
 Location		Config::returnPath(Config config, std::string value)
 {
+	if (config.getLocation_str()[value].getData().size() != 0)
+		return (config.getLocation_str()[value]);
 	while ((value = Config::getPathBefore(value)) != "/")
 	{
+		std::cout << value << std::endl;
 		if (config.getLocation_str()[value].getData().size() != 0)
 		{
-			std::cout << config.getLocation_str()[value].getData().size() << std::endl;
-			//std::cout << value << " " << config.getLocation_str()[value].getData()["index"].size() << std::endl;
+			std::cout << value << " " << config.getLocation_str()[value].getData()["index"].size() << std::endl;
 			//if (config.getLocation_str()[value].getData()["index"].empty())
-				return (config.getLocation_str()[value]);
-			//std::string new_path = config.getLocation_str()[value].getData()["index"];
-			//for (int i  = 0; i < new_path.size(); i++)
-			//{
-			//	while (i < new_path.size() && (new_path[i] == ' ' || new_path[i] == '	'))
-			//		i++;
-			//	int	tmp1 = i;
-			//	while (i < new_path.size() && new_path[i] != ' ' && new_path[i] != '	')
-			//		i++;
-			//	if (tmp1 != new_path.size())
-			//	{
-			//		std::string valuee = new_path.substr(0, i);
-			//		std::cout << tmp1 << " " << i << std::endl;
-			//		std::cout << valuee << "." << std::endl;
-			//	}
-			//	//while (i < new_path.size() && (new_path[i] == ' ' || new_path[i] == '	'))
-			//	//	i++;
-			//}
-			//exit(0);
-			//while (config.getLocation_str()[config.getLocation_str()[value]["index"]].getData().size() == 0)
-			//{
-			//}
+			return (config.getLocation_str()[value]);
+			std::string new_path = config.getLocation_str()[value].getData()["index"];
+			for (int i  = 0; i < new_path.size(); i++)
+			{
+				while (i < new_path.size() && (new_path[i] == ' ' || new_path[i] == '	'))
+					i++;
+				int	tmp1 = i;
+				std::string tmp;
+				while (i < new_path.size() && new_path[i] != ' ' && new_path[i] != '	')
+					tmp += new_path[i], i++;
+				if (value[value.size() - 1] == '/')
+					std::cout << value + tmp << std::endl;
+				else
+					std::cout << value + "/" + tmp  << std::endl;
+				try
+				{
+					
+				}
+				catch (std::exception &e)
+				{
+					std::cout << "Error : " << e.what() << std::endl;
+				}
+				//while (i < new_path.size() && (new_path[i] == ' ' || new_path[i] == '	'))
+				//	i++;
+			}
+			exit(0);
+			while (config.getLocation_str()[config.getLocation_str()[value]["index"]].getData().size() == 0)
+			{
+			}
 		}
 	}
 	std::cout << value << std::endl;
 	throw std::logic_error("Config::returnPath : Path not found");
-	exit(0);	
 }
