@@ -319,7 +319,16 @@ void	Response::autoindex(std::string directory, std::string indexFile)
 		}
 		i = templateFile.find("$files_and_directories");
 		templateFile.erase(i, 23);
-		templateFile.insert(i, temp);
+		std::string parent_directory;
+		if (_request.get_target_path() == "/")
+			parent_directory = "";
+		else
+			parent_directory = "";
+		std::cout << RED << "COUCOU:  " << parent_directory << RST << std::endl;
+
+		std::string main_directory = "<li><a href=\"/\">Main Directory</a></li>";
+		templateFile.insert(i, main_directory);
+		templateFile.insert(i + main_directory.size(), temp);
 		
 		_content = templateFile;
 		_content_length = _content.length();
@@ -389,12 +398,20 @@ void	Response::content_fill_from_file(void)
 	if (_request.get_target_path()[_request.get_target_path().find_first_of("/") + 1] == ' ' || _request.get_target_path()[_request.get_target_path().find_first_of("/") + 1] == '\0')
 		indexFile = get_index_file(directory, indexs_from_config);
 
+	// std::cout << RED << directory + _request.get_target_path() << RST << std::endl;
+	std::cout << RED << directory + _request.get_target_path() + indexFile << RST << std::endl;
 	switch(File::getType(directory + _request.get_target_path() + indexFile))
 	{
 		case -1: //Not exist
-			fill_content_with_error_code(404);
-			break;
+			std::cout << RED << "Not exist" << RST << std::endl;
+			if (_request.get_target_path() != "/")
+			{
+				fill_content_with_error_code(404);
+				break;
+			}
+			indexFile = "";
 		case 1: //Directory
+			std::cout << RED << "Directory" << RST << std::endl;
 			if (_request.get_target_path().find_last_of('/') != _request.get_target_path().size() - 1)
 			{
 				std::string	target_path_with_slash = _request.get_target_path() + "/";
@@ -408,12 +425,12 @@ void	Response::content_fill_from_file(void)
 			} else
 				indexFile = get_index_file(directory, indexs_from_config);
 		case 2: //File
-			std::cout<< RED << "File: " << directory + _request.get_target_path() + indexFile << RST << std::endl;
-			// if (File::getFileSize(File::getFile(directory + _request.get_target_path() + indexFile)) > (Response::Utils::string_to_int(_config["client_body_buffer_size"]) * 1000000))
-			// {
-			// 	fill_content_with_error_code(413);
-			// 	break;
-			// }
+			std::cout << RED << "File" << RST << std::endl;
+			if (File::getFileSize(directory + _request.get_target_path() + indexFile) > (Utils::string_to_int(_server.get_config()["client_body_buffer_size"]) * 1000000))
+			{
+				fill_content_with_error_code(413);
+				break;
+			}
 			try
 			{
 				content += File::getFile(directory + _request.get_target_path() + indexFile);
