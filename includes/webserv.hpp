@@ -3,7 +3,7 @@
 /*                                                        :::      ::::::::   */
 /*   webserv.hpp                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: asaffroy <asaffroy@student.42lyon.fr>      +#+  +:+       +#+        */
+/*   By: tnard <tnard@student.42lyon.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/06/06 15:56:12 by nard              #+#    #+#             */
 /*   Updated: 2022/06/22 16:33:49 by asaffroy         ###   ########lyon.fr   */
@@ -11,6 +11,7 @@
 /* ************************************************************************** */
 
 #pragma once
+
 /* File */
 #include <iostream>
 #include <string>
@@ -33,13 +34,26 @@
 #include <sstream>
 #define MSG_NOSIGNAL 0x2000
 
+#include <stdio.h>
+#include <iostream>
+#include <string.h> 
+#include <stdlib.h>
+#include <errno.h>
+#include <unistd.h>
+#include <arpa/inet.h>
+#include <sys/types.h>
+#include <sys/socket.h>
+#include <netinet/in.h>
+#include <sys/time.h>
+#include <vector>
+
+#include "../srcs/Server/Server.hpp"
 #include "../srcs/File/File.hpp"
 #include "../srcs/Server/Server.hpp"
 #include "../srcs/Config/Config.hpp"
 #include "../srcs/Config/Location/Location.hpp"
 #include "../srcs/Request/Request.hpp"
 #include "../srcs/Response/Response.hpp"
-#include "../srcs/Server/Server.hpp"
 #include "../srcs/URL/URL.hpp"
 
 #define				Location_Name "location"

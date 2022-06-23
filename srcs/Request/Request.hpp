@@ -1,6 +1,7 @@
 #pragma once
-#include "../Server/Server.hpp"
 
+#include "../../includes/webserv.hpp"
+class Server;
 class Request
 {
 	private:
