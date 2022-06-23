@@ -216,14 +216,35 @@ void	Response::fill_content_with_error_code(int code)
 	std::string content;
 
 	_request.set_code(code);
-	try {
-		if (code >= 500)
-			content = file.getFile("utils/errors_pages/50x.html");
+	try
+	{
+		if (_config["error_" + int_to_string(code)].empty())
+		{
+			try {
+				if (code >= 500)
+					content = file.getFile("utils/errors_pages/50x.html");
+				else
+					content = file.getFile("utils/errors_pages/" + int_to_string(code) + ".html");
+			}
+			catch (std::exception &e) {
+				content = "<h1>" + int_to_string(code) + " " + get_text_code(code) + "</h1>";
+			}
+		}
 		else
-			content = file.getFile("utils/errors_pages/" + int_to_string(code) + ".html");
+			content = file.getFile(_config["error_" + int_to_string(code)]);
+
 	}
-	catch (std::exception &e) {
-		content = "<h1>" + int_to_string(code) + " " + get_text_code(code) + "</h1>";
+	catch(std::exception& e)
+	{
+		try {
+			if (code >= 500)
+				content = file.getFile("utils/errors_pages/50x.html");
+			else
+				content = file.getFile("utils/errors_pages/" + int_to_string(code) + ".html");
+		}
+		catch (std::exception &e) {
+			content = "<h1>" + int_to_string(code) + " " + get_text_code(code) + "</h1>";
+		}
 	}
 	_content = content;
 	_content_length = content.length();
