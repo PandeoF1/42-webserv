@@ -429,11 +429,11 @@ void	Response::content_fill_from_file(void)
 		// location = _server.get_config();
 	}
 	std::string indexs_from_config = location["index"];
-	std::string root = location["root"]; //FOIREUX
+	// std::string root = location["root"]; //FOIREUX
 
 	//A recup de la config plus tard
 	// std::string indexs_from_config = "index.html		    index.php 				coucou.html";
-	// std::string root = "www";
+	std::string root = "www";
 
 	std::string indexFile = "";
 	if (_request.get_target_path()[_request.get_target_path().find_first_of("/") + 1] == ' ' || _request.get_target_path()[_request.get_target_path().find_first_of("/") + 1] == '\0')
@@ -459,7 +459,6 @@ void	Response::content_fill_from_file(void)
 			if (_request.get_target_path().find_last_of('/') != _request.get_target_path().size() - 1)
 			{
 				std::string	target_path_with_slash = _request.get_target_path() + "/";
-				std::cout<< target_path_with_slash << std::endl;
 				_request.set_target_path_force(target_path_with_slash);
 			}
 			if (File::getType(root + _request.get_target_path() + get_index_file(root, indexs_from_config)) == -1)
