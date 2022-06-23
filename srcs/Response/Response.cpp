@@ -252,7 +252,6 @@ void	Response::fill_content_with_error_code(int code)
 		else
 		{
 			std::string	error_page = get_error_page(config["error_" + Utils::int_to_string(code)]);
-			// std::cout << error_page << std::endl;
 			content = file.getFile(error_page);
 		}
 
@@ -304,7 +303,6 @@ void	Response::autoindex(std::string directory, std::string indexFile)
 		return ;
 	}
 
-	std::cout << RED << "hereee" << RST << std::endl;
 	if (listedDirectory.size() == 0)
 		fill_content_with_error_code(403);
 	else
@@ -410,6 +408,15 @@ std::string	Response::get_redirection(void) const
 	return (this->_redirection);
 }
 
+std::string	Response::inLocationOrConfig(Location location, Config config, std::string what)
+{
+	if (!location[what].empty())
+		return (location[what]);
+	else if (!config[what].empty())
+		return (config[what]);
+	return ("");
+}
+
 void	Response::content_fill_from_file(void)
 {
 	if (_request.get_code() >= 300)
@@ -418,28 +425,28 @@ void	Response::content_fill_from_file(void)
 		return ;
 	}
 	std::string	content;
-
 	Location location;
-	std::cout << _request.get_target_path() << std::endl;
+	bool	isLocation = true;
+
+	std::string root, indexs_from_config;
+;
 	try {
 		location = Config::returnPath(_server.get_config(), _request.get_target_path());
 	}
 	catch (const std::exception& e)
 	{
-		// location = _server.get_config();
+		isLocation = false;
 	}
-	std::string indexs_from_config = location["index"];
-	// std::string root = location["root"]; //FOIREUX
 
-	//A recup de la config plus tard
-	// std::string indexs_from_config = "index.html		    index.php 				coucou.html";
-	std::string root = "www";
+	if ((root = inLocationOrConfig(location, _server.get_config(), "root")).empty())
+		root = "www";
+	if ((indexs_from_config = inLocationOrConfig(location, _server.get_config(), "index")).empty())
+		indexs_from_config = "index.html";
 
 	std::string indexFile = "";
 	if (_request.get_target_path()[_request.get_target_path().find_first_of("/") + 1] == ' ' || _request.get_target_path()[_request.get_target_path().find_first_of("/") + 1] == '\0')
 		indexFile = get_index_file(root, indexs_from_config);
 
-	std::cout << indexs_from_config << std::endl;
 	if (!location["redirect"].empty())
 	{
 		set_redirection(location["redirect"]);

@@ -30,6 +30,8 @@ class Response
 		std::string					get_index_file(std::string directory, std::string indexs_from_config) const;
 		std::string					get_error_page(std::string paths_from_config) const;
 		std::string					get_redirection(void) const;
+		std::string					inLocationOrConfig(Location location, Config config, std::string what);
+
 	public:
 		Response(Request &request, Server &server);
 		~Response(void);
