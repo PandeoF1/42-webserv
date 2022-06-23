@@ -22,9 +22,9 @@
 	{
 		std::cerr << e.what() << std::endl;
 	}
-	std::cout << f.getPath() << std::endl;
-	std::cout << f.listDirectory("srcs") << std::endl;
-	std::cout << f.checkPath("./") << std::endl;
+	std::cout<< f.getPath() << std::endl;
+	std::cout<< f.listDirectory("srcs") << std::endl;
+	std::cout<< f.checkPath("./") << std::endl;
 	try // Dir does not exist
 	{
 		File::checkPath("/gfdgfd/");
@@ -33,7 +33,7 @@
 	{
 		std::cerr << e.what() << '\n';
 	}
-	std::cout << File::checkFile("main.cpp") << std::endl;
+	std::cout<< File::checkFile("main.cpp") << std::endl;
 	try // Check if file exist
 	{
 		File::checkFile("main.hpp");

@@ -1,6 +1,6 @@
 #include "Response.hpp"
 
-Response::Response(Request &request) : _request(request)
+Response::Response(Request &request, Server &server) : _request(request), _server(server)
 {
 	_content = "";
 	set_extension();
@@ -210,20 +210,59 @@ std::string	Response::get_text_code(int code) const
 	}
 }
 
+std::string	Response::get_error_page(std::string paths_from_config)
+{
+	std::vector<std::string>	paths;
+
+	paths = split_with_space(paths_from_config);
+	if (paths.size() == 0)
+		return ("");
+	for (int i = 0; i < paths.size(); i++)
+		if (File::getType(paths[i]) == 2)
+			return (paths[i]);
+	return ("");
+}
+
 void	Response::fill_content_with_error_code(int code)
 {
 	File file;
 	std::string content;
+	Config config = _server.get_config();
 
 	_request.set_code(code);
-	try {
-		if (code >= 500)
-			content = file.getFile("utils/errors_pages/50x.html");
+	try
+	{
+		if (config["error_" + Utils::int_to_string(code)].empty())
+		{
+			try {
+				if (code >= 500)
+					content = file.getFile("utils/errors_pages/50x.html");
+				else
+					content = file.getFile("utils/errors_pages/" + Utils::int_to_string(code) + ".html");
+			}
+			catch (std::exception &e) {
+				content = "<h1>" + Utils::int_to_string(code) + " " + get_text_code(code) + "</h1>";
+			}
+		}
 		else
-			content = file.getFile("utils/errors_pages/" + int_to_string(code) + ".html");
+		{
+			std::string	error_page = get_error_page(config["error_" + Utils::int_to_string(code)]);
+			std::cout << error_page << std::endl;
+			content = file.getFile(error_page);
+		}
+
 	}
-	catch (std::exception &e) {
-		content = "<h1>" + int_to_string(code) + " " + get_text_code(code) + "</h1>";
+	catch(std::exception& e)
+	{
+		try {
+			if (code >= 500)
+				content = file.getFile("utils/errors_pages/50x.html");
+			else
+				content = file.getFile("utils/errors_pages/" + Utils::int_to_string(code) + ".html");
+		}
+		catch (std::exception &e) {
+			content = "<h1>" + Utils::int_to_string(code) + " " + get_text_code(code) + "</h1>";
+		}
 	}
 	_content = content;
 	_content_length = content.length();
@@ -290,19 +329,34 @@ void	Response::autoindex(std::string directory, std::string indexFile)
 
 std::vector<std::string>	Response::split_with_space(std::string line)
 {
-	std::string 				delimiter = " ";
 	std::vector<std::string>	words;
-	size_t 			pos;
-	int 			i = 0;
 
 	if (line.size() == 0)
 		return (words);
-	while ((i = line.find_first_of(delimiter)) != std::string::npos)
+	int k = 0;
+	int j = -1;
+	for (int i = 0; i < line.size(); i++)
 	{
-		words.push_back(line.substr(0, i));
-		line.erase(0, i + 1);
+		if (line[i] == ' ' || line[i] == '\t')
+		{
+			//to prevent segfault from starting at words[1] instead of words[0]
+			if (i != 0)
+				k++;
+			while (line[i] == ' ' || line[i] == '\t')
+				i++;
+			i--;
+		}
+		else
+		{
+			//to create a new word in the vector
+			if (j != k)
+			{
+				j = k;
+				words.push_back("");
+			}
+			words[k].push_back(line[i]);
+		}
 	}
-	words.push_back(line);
 	return (words);
 }
 
@@ -329,7 +383,7 @@ void	Response::content_fill_from_file(void)
 	std::string	content;
 	//A recup de la config plus tard
 	std::string directory = "www";
-	std::string indexs_from_config = "index.html index.php coucou.html"; // verif la fonction get_index_file si espace a la fin si fonctionne toujours pour le dernier index
+	std::string indexs_from_config = "index.html		    index.php 				coucou.html"; // verif la fonction get_index_file si espace a la fin si fonctionne toujours pour le dernier index
 
 	std::string indexFile = "";
 	if (_request.get_target_path()[_request.get_target_path().find_first_of("/") + 1] == ' ' || _request.get_target_path()[_request.get_target_path().find_first_of("/") + 1] == '\0')
@@ -344,7 +398,7 @@ void	Response::content_fill_from_file(void)
 			if (_request.get_target_path().find_last_of('/') != _request.get_target_path().size() - 1)
 			{
 				std::string	target_path_with_slash = _request.get_target_path() + "/";
-				std::cout << target_path_with_slash << std::endl;
+				std::cout<< target_path_with_slash << std::endl;
 				_request.set_target_path_force(target_path_with_slash);
 			}
 			if (File::getType(directory + _request.get_target_path() + get_index_file(directory, indexs_from_config)) == -1)
@@ -354,8 +408,12 @@ void	Response::content_fill_from_file(void)
 			} else
 				indexFile = get_index_file(directory, indexs_from_config);
 		case 2: //File
-			std::cout << RED << "File: " << directory + _request.get_target_path() + indexFile << RST << std::endl;
-			
+			std::cout<< RED << "File: " << directory + _request.get_target_path() + indexFile << RST << std::endl;
+			// if (File::getFileSize(File::getFile(directory + _request.get_target_path() + indexFile)) > (Response::Utils::string_to_int(_config["client_body_buffer_size"]) * 1000000))
+			// {
+			// 	fill_content_with_error_code(413);
+			// 	break;
+			// }
 			try
 			{
 				content += File::getFile(directory + _request.get_target_path() + indexFile);
@@ -377,25 +435,16 @@ void	Response::create_response(void)
 {
 	content_fill_from_file();
 	_response = "HTTP/1.1 ";
-	_response += int_to_string(_request.get_code()) + " " + get_text_code(_request.get_code()) + "\r\n";
+	_response += Utils::Utils::int_to_string(_request.get_code()) + " " + get_text_code(_request.get_code()) + "\r\n";
 	_response += "Server: Webserv/1.0.0\r\n";
 	_response += "Content-Type: " + get_content_type() + "\r\n";
-	_response += "Content-Length: " + int_to_string(_content_length) + "\r\n\r\n";
+	_response += "Content-Length: " + Utils::Utils::int_to_string(_content_length) + "\r\n\r\n";
 	_response += _content + "\r\n";
 
-	std::cout << _response;
+	std::cout<< _response;
 }
 
 std::string		Response::get_response(void) const
 {
 	return (_response);
-}
-
-std::string	Response::int_to_string(int integer)
-{
-	std::stringstream ss;
-	std::string return_string;
-
-	ss << integer;
-	return (ss.str());
 }

@@ -6,7 +6,7 @@
 /*   By: jbosquet <jbosquet@student.42lyon.fr>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/06/07 17:26:39 by asaffroy          #+#    #+#             */
-/*   Updated: 2022/06/09 01:25:49 by jbosquet         ###   ########.fr       */
+/*   Updated: 2022/06/23 11:53:30 by jbosquet         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,10 +14,17 @@
 
 Server::Server(){}
 
+Server::~Server(){}
+
 void Server::set_port(int port_entry)
 {
 	this->_port = port_entry;
 	ft_create_serv();
+}
+
+void	Server::set_config(Config *config)
+{
+	this->_config = config;
 }
 
 int Server::get_master_socket() const
@@ -84,7 +91,7 @@ void Server::ft_create_serv()
 
 	//type of socket created 
 	_address.sin_family = AF_INET;
-	_address.sin_addr.s_addr = INADDR_ANY;
+	_address.sin_addr.s_addr = inet_addr(get_config()["ip"].c_str());
 	_address.sin_port = htons(_port);
 
 	//bind the socket to localhost port 8888 
@@ -101,4 +108,9 @@ void Server::ft_create_serv()
 		perror("listen");
 		exit(EXIT_FAILURE);
 	}
+}
+
+Config	Server::get_config() const
+{
+	return (*this->_config);
 }
