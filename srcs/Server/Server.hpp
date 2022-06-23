@@ -6,7 +6,7 @@
 /*   By: jbosquet <jbosquet@student.42lyon.fr>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/06/07 17:36:09 by asaffroy          #+#    #+#             */
-/*   Updated: 2022/06/23 10:49:06 by jbosquet         ###   ########.fr       */
+/*   Updated: 2022/06/23 11:07:20 by jbosquet         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -32,6 +32,7 @@ class Server
 
 		int					get_master_socket() const;
 		int					get_port() const;
+		Config				get_config() const;
 		struct sockaddr_in	get_address() const;
 		void 				set_port(int port_entry);
 		void 				set_config(Config *config);

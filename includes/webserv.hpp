@@ -6,7 +6,7 @@
 /*   By: jbosquet <jbosquet@student.42lyon.fr>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/06/06 15:56:12 by nard              #+#    #+#             */
-/*   Updated: 2022/06/23 10:44:35 by jbosquet         ###   ########.fr       */
+/*   Updated: 2022/06/23 11:36:04 by jbosquet         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -66,8 +66,8 @@ static std::string	Location_Valid_Param[] = {"allow_methods", "root", "alias", "
 #define				Location_Buffer 3
 
 
-static std::string	Server_Valid_Param[] = {"server_name", "listen", "root", "index", "allow_methods"};
-#define				Server_Valid_Param_Length 5
+static std::string	Server_Valid_Param[] = {"server_name", "listen", "root", "index", "allow_methods", "error_400", "error_403", "error_404", "error_405", "error_413", "error_50x"};
+#define				Server_Valid_Param_Length 11
 #define				Server_IP 1
 #define				Server_Root 2
 #define				Server_Methods 4

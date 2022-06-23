@@ -210,28 +210,46 @@ std::string	Response::get_text_code(int code) const
 	}
 }
 
+std::string	Response::get_error_page(std::string paths_from_config)
+{
+	std::vector<std::string>	paths;
+
+	paths = split_with_space(paths_from_config);
+	if (paths.size() == 0)
+		return ("");
+	for (int i = 0; i < paths.size(); i++)
+		if (File::getType(paths[i]) == 2)
+			return (paths[i]);
+	return ("");
+}
+
 void	Response::fill_content_with_error_code(int code)
 {
 	File file;
 	std::string content;
+	Config config = _server.get_config();
 
 	_request.set_code(code);
 	try
 	{
-		if (_config["error_" + int_to_string(code)].empty())
+		if (config["error_" + Utils::int_to_string(code)].empty())
 		{
 			try {
 				if (code >= 500)
 					content = file.getFile("utils/errors_pages/50x.html");
 				else
-					content = file.getFile("utils/errors_pages/" + int_to_string(code) + ".html");
+					content = file.getFile("utils/errors_pages/" + Utils::int_to_string(code) + ".html");
 			}
 			catch (std::exception &e) {
-				content = "<h1>" + int_to_string(code) + " " + get_text_code(code) + "</h1>";
+				content = "<h1>" + Utils::int_to_string(code) + " " + get_text_code(code) + "</h1>";
 			}
 		}
 		else
-			content = file.getFile(_config["error_" + int_to_string(code)]);
+		{
+			std::string	error_page = get_error_page(config["error_" + Utils::int_to_string(code)]);
+			std::cout << error_page << std::endl;
+			content = file.getFile(error_page);
+		}
 
 	}
 	catch(std::exception& e)
@@ -240,10 +258,10 @@ void	Response::fill_content_with_error_code(int code)
 			if (code >= 500)
 				content = file.getFile("utils/errors_pages/50x.html");
 			else
-				content = file.getFile("utils/errors_pages/" + int_to_string(code) + ".html");
+				content = file.getFile("utils/errors_pages/" + Utils::int_to_string(code) + ".html");
 		}
 		catch (std::exception &e) {
-			content = "<h1>" + int_to_string(code) + " " + get_text_code(code) + "</h1>";
+			content = "<h1>" + Utils::int_to_string(code) + " " + get_text_code(code) + "</h1>";
 		}
 	}
 	_content = content;
@@ -417,10 +435,10 @@ void	Response::create_response(void)
 {
 	content_fill_from_file();
 	_response = "HTTP/1.1 ";
-	_response += Utils::int_to_string(_request.get_code()) + " " + get_text_code(_request.get_code()) + "\r\n";
+	_response += Utils::Utils::int_to_string(_request.get_code()) + " " + get_text_code(_request.get_code()) + "\r\n";
 	_response += "Server: Webserv/1.0.0\r\n";
 	_response += "Content-Type: " + get_content_type() + "\r\n";
-	_response += "Content-Length: " + Utils::int_to_string(_content_length) + "\r\n\r\n";
+	_response += "Content-Length: " + Utils::Utils::int_to_string(_content_length) + "\r\n\r\n";
 	_response += _content + "\r\n";
 
 	std::cout<< _response;
