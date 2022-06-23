@@ -20,6 +20,11 @@ void	Response::set_extension(void)
 		_extension = "";
 }
 
+void	Response::set_redirection(std::string redir_path)
+{
+	_redirection = redir_path;
+}
+
 std::string	Response::get_extension(std::string file) const
 {
 	int i = file.find_last_of('.');
@@ -210,7 +215,7 @@ std::string	Response::get_text_code(int code) const
 	}
 }
 
-std::string	Response::get_error_page(std::string paths_from_config)
+std::string	Response::get_error_page(std::string paths_from_config) const
 {
 	std::vector<std::string>	paths;
 
@@ -247,7 +252,7 @@ void	Response::fill_content_with_error_code(int code)
 		else
 		{
 			std::string	error_page = get_error_page(config["error_" + Utils::int_to_string(code)]);
-			std::cout << error_page << std::endl;
+			// std::cout << error_page << std::endl;
 			content = file.getFile(error_page);
 		}
 
@@ -269,7 +274,7 @@ void	Response::fill_content_with_error_code(int code)
 	_extension = ".html";
 }
 
-std::vector<std::string>	Response::split_file_and_directory(std::string line)
+std::vector<std::string>	Response::split_file_and_directory(std::string line) const
 {
 	std::string 				delimiter = "\n";
 	std::vector<std::string>	words;
@@ -289,8 +294,17 @@ std::vector<std::string>	Response::split_file_and_directory(std::string line)
 
 void	Response::autoindex(std::string directory, std::string indexFile)
 {
-	std::vector<std::string> listedDirectory = split_file_and_directory(File::listDirectory(directory + _request.get_target_path() + indexFile));
+	std::vector<std::string> listedDirectory;
+		
+	try {
+		listedDirectory = split_file_and_directory(File::listDirectory(directory + _request.get_target_path() + indexFile));
+	}
+	catch (std::exception &e) {
+		fill_content_with_error_code(403);
+		return ;
+	}
 
+	std::cout << RED << "hereee" << RST << std::endl;
 	if (listedDirectory.size() == 0)
 		fill_content_with_error_code(403);
 	else
@@ -310,6 +324,7 @@ void	Response::autoindex(std::string directory, std::string indexFile)
 		templateFile.erase(i, 5);
 		templateFile.insert(i, _request.get_target_path() + indexFile);
 
+		//Fill temp with files and directories
 		std::string temp;
 		for (i = 0; i < listedDirectory.size(); i++)
 		{
@@ -319,16 +334,24 @@ void	Response::autoindex(std::string directory, std::string indexFile)
 		}
 		i = templateFile.find("$files_and_directories");
 		templateFile.erase(i, 23);
+
+		//Main directory
+		std::string main_directory = "<li><a href=\"/\">Main Directory</a></li>";
+		templateFile.insert(i, main_directory);
+		i += main_directory.size();
+
+		//Parent directory
 		std::string parent_directory;
 		if (_request.get_target_path() == "/")
 			parent_directory = "";
 		else
-			parent_directory = "";
-		std::cout << RED << "COUCOU:  " << parent_directory << RST << std::endl;
+			parent_directory = "<li><a href=\"" +  URL::encode(Config::getPathBefore(Config::getPathBefore(_request.get_target_path() + indexFile))) + "\">Parent Directory</a></li>";
 
-		std::string main_directory = "<li><a href=\"/\">Main Directory</a></li>";
-		templateFile.insert(i, main_directory);
-		templateFile.insert(i + main_directory.size(), temp);
+		templateFile.insert(i, parent_directory);
+		i += parent_directory.size();
+
+		//Insert the list of files and directories
+		templateFile.insert(i, temp);
 		
 		_content = templateFile;
 		_content_length = _content.length();
@@ -336,7 +359,7 @@ void	Response::autoindex(std::string directory, std::string indexFile)
 	}
 }
 
-std::vector<std::string>	Response::split_with_space(std::string line)
+std::vector<std::string>	Response::split_with_space(std::string line) const
 {
 	std::vector<std::string>	words;
 
@@ -369,7 +392,7 @@ std::vector<std::string>	Response::split_with_space(std::string line)
 	return (words);
 }
 
-std::string	Response::get_index_file(std::string directory, std::string indexs_from_config)
+std::string	Response::get_index_file(std::string directory, std::string indexs_from_config) const
 {
 	std::vector<std::string>	indexs;
 
@@ -382,6 +405,11 @@ std::string	Response::get_index_file(std::string directory, std::string indexs_f
 	return ("index.html");
 }
 
+std::string	Response::get_redirection(void) const
+{
+	return (this->_redirection);
+}
+
 void	Response::content_fill_from_file(void)
 {
 	if (_request.get_code() >= 300)
@@ -390,20 +418,37 @@ void	Response::content_fill_from_file(void)
 		return ;
 	}
 	std::string	content;
+
+	Location location;
+	std::cout << _request.get_target_path() << std::endl;
+	try {
+		location = Config::returnPath(_server.get_config(), _request.get_target_path());
+	}
+	catch (const std::exception& e)
+	{
+		// location = _server.get_config();
+	}
+	std::string indexs_from_config = location["index"];
+	std::string root = location["root"]; //FOIREUX
+
 	//A recup de la config plus tard
-	std::string directory = "www";
-	std::string indexs_from_config = "index.html		    index.php 				coucou.html"; // verif la fonction get_index_file si espace a la fin si fonctionne toujours pour le dernier index
+	// std::string indexs_from_config = "index.html		    index.php 				coucou.html";
+	// std::string root = "www";
 
 	std::string indexFile = "";
 	if (_request.get_target_path()[_request.get_target_path().find_first_of("/") + 1] == ' ' || _request.get_target_path()[_request.get_target_path().find_first_of("/") + 1] == '\0')
-		indexFile = get_index_file(directory, indexs_from_config);
+		indexFile = get_index_file(root, indexs_from_config);
 
-	// std::cout << RED << directory + _request.get_target_path() << RST << std::endl;
-	std::cout << RED << directory + _request.get_target_path() + indexFile << RST << std::endl;
-	switch(File::getType(directory + _request.get_target_path() + indexFile))
+	std::cout << indexs_from_config << std::endl;
+	if (!location["redirect"].empty())
+	{
+		set_redirection(location["redirect"]);
+		_request.set_code(301);
+		return ;
+	}
+	switch(File::getType(root + _request.get_target_path() + indexFile))
 	{
 		case -1: //Not exist
-			std::cout << RED << "Not exist" << RST << std::endl;
 			if (_request.get_target_path() != "/")
 			{
 				fill_content_with_error_code(404);
@@ -411,29 +456,27 @@ void	Response::content_fill_from_file(void)
 			}
 			indexFile = "";
 		case 1: //Directory
-			std::cout << RED << "Directory" << RST << std::endl;
 			if (_request.get_target_path().find_last_of('/') != _request.get_target_path().size() - 1)
 			{
 				std::string	target_path_with_slash = _request.get_target_path() + "/";
 				std::cout<< target_path_with_slash << std::endl;
 				_request.set_target_path_force(target_path_with_slash);
 			}
-			if (File::getType(directory + _request.get_target_path() + get_index_file(directory, indexs_from_config)) == -1)
+			if (File::getType(root + _request.get_target_path() + get_index_file(root, indexs_from_config)) == -1)
 			{
-				autoindex(directory, indexFile);
+				autoindex(root, indexFile);
 				break;
 			} else
-				indexFile = get_index_file(directory, indexs_from_config);
+				indexFile = get_index_file(root, indexs_from_config);
 		case 2: //File
-			std::cout << RED << "File" << RST << std::endl;
-			if (File::getFileSize(directory + _request.get_target_path() + indexFile) > (Utils::string_to_int(_server.get_config()["client_body_buffer_size"]) * 1000000))
+			if (File::getFileSize(root + _request.get_target_path() + indexFile) > (Utils::string_to_int(_server.get_config()["client_body_buffer_size"]) * 1000000))
 			{
 				fill_content_with_error_code(413);
 				break;
 			}
 			try
 			{
-				content += File::getFile(directory + _request.get_target_path() + indexFile);
+				content += File::getFile(root + _request.get_target_path() + indexFile);
 			}
 			catch(const std::exception& e)
 			{
@@ -455,7 +498,10 @@ void	Response::create_response(void)
 	_response += Utils::Utils::int_to_string(_request.get_code()) + " " + get_text_code(_request.get_code()) + "\r\n";
 	_response += "Server: Webserv/1.0.0\r\n";
 	_response += "Content-Type: " + get_content_type() + "\r\n";
-	_response += "Content-Length: " + Utils::Utils::int_to_string(_content_length) + "\r\n\r\n";
+	_response += "Content-Length: " + Utils::Utils::int_to_string(_content_length) + "\r\n";
+	if (_request.get_code() == 301)
+		_response += "Location: " + get_redirection() + "\r\n";
+	_response += "\r\n";
 	_response += _content + "\r\n";
 
 	std::cout<< _response;

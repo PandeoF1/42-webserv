@@ -6,7 +6,7 @@
 /*   By: jbosquet <jbosquet@student.42lyon.fr>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/06/06 15:56:12 by nard              #+#    #+#             */
-/*   Updated: 2022/06/23 14:37:20 by jbosquet         ###   ########.fr       */
+/*   Updated: 2022/06/23 15:48:03 by jbosquet         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -58,8 +58,8 @@
 #include "../srcs/Utils/Utils.hpp"
 
 #define				Location_Name "location"
-static std::string	Location_Valid_Param[] = {"allow_methods", "root", "alias", "client_body_buffer_size", "index", "cgi_pass"};
-#define				Location_Valid_Param_Length 6
+static std::string	Location_Valid_Param[] = {"allow_methods", "root", "alias", "client_body_buffer_size", "index", "cgi_pass", "redirect"};
+#define				Location_Valid_Param_Length 7
 #define				Location_Methods 0
 #define				Location_Root 1
 #define				Location_Cgi 5
