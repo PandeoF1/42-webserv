@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Location.cpp                                       :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: tnard <tnard@student.42lyon.fr>            +#+  +:+       +#+        */
+/*   By: asaffroy <asaffroy@student.42lyon.fr>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/06/06 15:52:24 by nard              #+#    #+#             */
-/*   Updated: 2022/06/15 15:35:40 by tnard            ###   ########lyon.fr   */
+/*   Updated: 2022/06/22 12:52:58 by asaffroy         ###   ########lyon.fr   */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,12 +17,12 @@ int Location::_verbose = 0;
 Location::Location(void)
 {
 	if (_verbose)
-		std::cout << "Location constructor called" << std::endl;
+		std::cout<< "Location constructor called" << std::endl;
 }
 
 Location::~Location(void){
 	if (_verbose)
-		std::cout << "Location destructor called" << std::endl;
+		std::cout<< "Location destructor called" << std::endl;
 }
 
 Location	Location::extractLocation(std::string content, size_t pos)

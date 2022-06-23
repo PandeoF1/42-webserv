@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   File.cpp                                           :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: jbosquet <jbosquet@student.42lyon.fr>      +#+  +:+       +#+        */
+/*   By: asaffroy <asaffroy@student.42lyon.fr>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/06/06 15:52:24 by nard              #+#    #+#             */
-/*   Updated: 2022/06/15 16:21:34 by jbosquet         ###   ########.fr       */
+/*   Updated: 2022/06/22 12:52:58 by asaffroy         ###   ########lyon.fr   */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -25,19 +25,19 @@ File::File(std::string path) : _path(path)
 		this->setPath(this->_path + '/');
 	File::checkPath(path);
 	if (_verbose)
-		std::cout << "File constructor called" << std::endl;
+		std::cout<< "File constructor called" << std::endl;
 }
 
 File::File(void) : _path("./")
 {
 	File::checkPath(_path);
 	if (_verbose)
-		std::cout << "File constructor called" << std::endl;
+		std::cout<< "File constructor called" << std::endl;
 }
 
 File::~File(void){
 	if (_verbose)
-		std::cout << "File destructor called" << std::endl;
+		std::cout<< "File destructor called" << std::endl;
 }
 
 std::string File::getPath(void)
@@ -54,7 +54,7 @@ void File::setPath(std::string path)
 int	File::checkPath(std::string path)
 {
 	if (_verbose)
-		std::cout << "File::checkPath called" << std::endl;
+		std::cout<< "File::checkPath called" << std::endl;
 	if (access(path.c_str(), F_OK) != -1)
 		return (1);
 	throw DirectoryNotAccessible();
@@ -64,7 +64,7 @@ int	File::checkPath(std::string path)
 int	File::checkFile(std::string path)
 {
 	if (_verbose)
-		std::cout << "File::checkFile called" << std::endl;
+		std::cout<< "File::checkFile called" << std::endl;
 	if (access(path.c_str(), F_OK) != -1)
 		return (1);
 	throw FileNotAccessible();
@@ -115,7 +115,7 @@ std::string File::listDirectory(void)
 std::string File::getFile(std::string file)
 {
 	if (_verbose)
-		std::cout << "Film::getFile called" << std::endl;
+		std::cout<< "Film::getFile called" << std::endl;
 	if (file.empty() || file.length() == 0)
 		throw File::FileInvalid();
 	std::ifstream myfile(file.c_str());

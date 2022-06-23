@@ -8,6 +8,7 @@
 class Response
 {
 	private:
+		Server			&_server;
 		Request			&_request;
 		std::string		_extension;
 		std::string		_content;
@@ -25,9 +26,9 @@ class Response
 		std::vector<std::string>	split_file_and_directory(std::string line);
 		std::vector<std::string>	split_with_space(std::string line);
 		std::string					get_index_file(std::string directory, std::string indexs_from_config);
-		std::string					int_to_string(int integer);
+		std::string					get_error_page(std::string paths_from_config);
 	public:
-		Response(Request &request);
+		Response(Request &request, Server &server);
 		~Response(void);
 
 		std::string		get_response(void) const;
