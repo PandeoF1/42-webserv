@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   main.cpp                                           :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: jbosquet <jbosquet@student.42lyon.fr>      +#+  +:+       +#+        */
+/*   By: tnard <tnard@student.42lyon.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/06/06 15:54:51 by nard              #+#    #+#             */
-/*   Updated: 2022/06/15 15:16:15 by jbosquet         ###   ########.fr       */
+/*   Updated: 2022/06/23 11:22:40 by tnard            ###   ########lyon.fr   */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,7 +15,8 @@
 int main(void)
 {
 	std::map<int, Config> config = Config::createConfig("config.conf");
-	Config::print(config);
-	start_servers();
+	Config::returnPath(config[0], "/post_body/post_body/post_body/post_body");
+	//Config::print(config);
+	//start_servers();
  	return (0);
 }
