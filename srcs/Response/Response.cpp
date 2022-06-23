@@ -1,6 +1,6 @@
 #include "Response.hpp"
 
-Response::Response(Request &request) : _request(request)
+Response::Response(Request &request, Server &server) : _request(request), _server(server)
 {
 	_content = "";
 	set_extension();
@@ -391,7 +391,7 @@ void	Response::content_fill_from_file(void)
 				indexFile = get_index_file(directory, indexs_from_config);
 		case 2: //File
 			std::cout<< RED << "File: " << directory + _request.get_target_path() + indexFile << RST << std::endl;
-			// if (File::getFileSize(File::getFile(directory + _request.get_target_path() + indexFile)) > (Response::string_to_int(_config["client_body_buffer_size"]) * 1000000))
+			// if (File::getFileSize(File::getFile(directory + _request.get_target_path() + indexFile)) > (Response::Utils::string_to_int(_config["client_body_buffer_size"]) * 1000000))
 			// {
 			// 	fill_content_with_error_code(413);
 			// 	break;
@@ -417,10 +417,10 @@ void	Response::create_response(void)
 {
 	content_fill_from_file();
 	_response = "HTTP/1.1 ";
-	_response += int_to_string(_request.get_code()) + " " + get_text_code(_request.get_code()) + "\r\n";
+	_response += Utils::int_to_string(_request.get_code()) + " " + get_text_code(_request.get_code()) + "\r\n";
 	_response += "Server: Webserv/1.0.0\r\n";
 	_response += "Content-Type: " + get_content_type() + "\r\n";
-	_response += "Content-Length: " + int_to_string(_content_length) + "\r\n\r\n";
+	_response += "Content-Length: " + Utils::int_to_string(_content_length) + "\r\n\r\n";
 	_response += _content + "\r\n";
 
 	std::cout<< _response;
@@ -429,23 +429,4 @@ void	Response::create_response(void)
 std::string		Response::get_response(void) const
 {
 	return (_response);
-}
-
-std::string	Response::int_to_string(int integer)
-{
-	std::stringstream ss;
-	std::string return_string;
-
-	ss << integer;
-	return (ss.str());
-}
-
-int Response::string_to_int(std::string str)
-{
-	std::stringstream ss;
-	int return_int;
-
-	ss << str;
-	ss >> return_int;
-	return (return_int);
 }

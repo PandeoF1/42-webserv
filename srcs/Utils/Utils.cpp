@@ -1,21 +1,32 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   main.cpp                                           :+:      :+:    :+:   */
+/*   Utils.cpp                                          :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: jbosquet <jbosquet@student.42lyon.fr>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2022/06/06 15:54:51 by nard              #+#    #+#             */
-/*   Updated: 2022/06/23 10:30:08 by jbosquet         ###   ########.fr       */
+/*   Created: 2022/06/23 10:39:11 by jbosquet          #+#    #+#             */
+/*   Updated: 2022/06/23 10:42:39 by jbosquet         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "includes/webserv.hpp"
+#include "Utils.hpp"
 
-int main(void)
+std::string Utils::int_to_string(int integer)
 {
-	std::map<int, Config> config = Config::createConfig("config.conf");
-	Config::print(config);
-	Server::start_servers(config);
- 	return (0);
+	std::stringstream ss;
+	std::string return_string;
+
+	ss << integer;
+	return (ss.str());
+}
+
+int Utils::string_to_int(std::string str)
+{
+	std::stringstream ss;
+	int return_int;
+
+	ss << str;
+	ss >> return_int;
+	return (return_int);
 }

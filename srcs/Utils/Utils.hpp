@@ -1,21 +1,25 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   main.cpp                                           :+:      :+:    :+:   */
+/*   Utils.hpp                                          :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: jbosquet <jbosquet@student.42lyon.fr>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2022/06/06 15:54:51 by nard              #+#    #+#             */
-/*   Updated: 2022/06/23 10:30:08 by jbosquet         ###   ########.fr       */
+/*   Created: 2022/06/23 10:36:59 by jbosquet          #+#    #+#             */
+/*   Updated: 2022/06/23 10:44:41 by jbosquet         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "includes/webserv.hpp"
+#pragma once
 
-int main(void)
+#include "../../includes/webserv.hpp"
+
+class Utils 
 {
-	std::map<int, Config> config = Config::createConfig("config.conf");
-	Config::print(config);
-	Server::start_servers(config);
- 	return (0);
-}
+
+    public:
+        static int string_to_int(std::string string);
+        static std::string int_to_string(int integer);
+
+};
+

@@ -15,18 +15,18 @@
 #define FALSE  0 
 #define PORT 80
 #define PORT2 8765
-#define NB_PORTS 2
+// #define configs.size() 2
 #define MAX_CLIENTS 500000
 #define BUFLEN 65536
 
-void start_servers(void)
+void Server::start_servers(std::map<int, Config> configs)
 {  
-	int ports_tab[NB_PORTS] = {PORT, PORT2};
-	Server *servers[NB_PORTS];
-	for (int i = 0; i < NB_PORTS; i++)
+	Server servers[configs.size()];
+	for (int i = 0; i < configs.size(); i++)
 	{
-		servers[i] = new Server();
-		servers[i]->set_port(ports_tab[i]);
+		servers[i] = Server();
+		servers[i].set_config(&configs[i]);
+		servers[i].set_port(Utils::string_to_int(configs[i]["port"]));
 	}
 
     int new_socket , client_socket[MAX_CLIENTS] ,
@@ -51,11 +51,11 @@ void start_servers(void)
      
 		max_sd = 0;
         //add master socket to set
-		for (int i = 0; i < NB_PORTS; i++)
+		for (int i = 0; i < configs.size(); i++)
 		{
-			FD_SET(servers[i]->get_master_socket() , &readfds);
-			if (servers[i]->get_master_socket() > max_sd)
-				max_sd = servers[i]->get_master_socket();
+			FD_SET(servers[i].get_master_socket() , &readfds);
+			if (servers[i].get_master_socket() > max_sd)
+				max_sd = servers[i].get_master_socket();
 		}
         //add child sockets to set 
         for ( i = 0 ; i < max_clients ; i++)  
@@ -82,13 +82,13 @@ void start_servers(void)
         }  
              
         //If something happened on the master socket , then its an incoming connection
-		for (int i = 0; i < NB_PORTS; i++)
+		for (int i = 0; i < configs.size(); i++)
 		{
-			if (FD_ISSET(servers[i]->get_master_socket(), &readfds))
+			if (FD_ISSET(servers[i].get_master_socket(), &readfds))
 			{
-				struct sockaddr_in address = servers[i]->get_address();
+				struct sockaddr_in address = servers[i].get_address();
 				int addrlen = sizeof(address);
-				if ((new_socket = accept(servers[i]->get_master_socket(),
+				if ((new_socket = accept(servers[i].get_master_socket(),
 						(struct sockaddr *)&address, (socklen_t*)&addrlen))<0)  
 				{  
 					perror("accept");  
@@ -98,7 +98,7 @@ void start_servers(void)
 				//inform user of socket number - used in send and receive commands
 				if (!client_socket[max_clients - 1])
 				{
-					printf("New connection on Port : %d, socket fd is %d , ip is : %s , port : %d\n" , servers[i]->get_port(),  new_socket , inet_ntoa(address.sin_addr) , ntohs(address.sin_port));  
+					printf("New connection on Port : %d, socket fd is %d , ip is : %s , port : %d\n" , servers[i].get_port(),  new_socket , inet_ntoa(address.sin_addr) , ntohs(address.sin_port));  
 				}
 					
 				//add new socket to array of sockets 
@@ -108,7 +108,7 @@ void start_servers(void)
 					if( client_socket[j] == 0 )  
 					{  
 						client_socket[j] = new_socket;
-						servers[i]->add_client(new_socket); 
+						servers[i].add_client(new_socket); 
 						printf("Adding to list of sockets, on master_socket %d\n" , i);  
 							
 						break;  
@@ -129,11 +129,11 @@ void start_servers(void)
                     printf("Host disconnected , fd %d\n" , client_socket[k]);                       
                     //Close the socket and mark as 0 in list for reuse 
                     client_socket[k] = 0;
-					for (int l = 0; l < NB_PORTS; l++)
+					for (int l = 0; l < configs.size(); l++)
 					{
-						if (servers[l]->find_client(sd))
+						if (servers[l].find_client(sd))
 						{
-							servers[l]->remove_client(sd);
+							servers[l].remove_client(sd);
 						}
 					}
                     close( sd );
@@ -142,11 +142,11 @@ void start_servers(void)
 				{
 					std::cerr << "Error: couldn't handle request." << std::endl;
 					client_socket[k] = 0;
-					for (int l = 0; l < NB_PORTS; l++)
+					for (int l = 0; l < configs.size(); l++)
 					{
-						if (servers[l]->find_client(sd))
+						if (servers[l].find_client(sd))
 						{
-							servers[l]->remove_client(sd);
+							servers[l].remove_client(sd);
 						}
 					}
                     close( sd );
@@ -155,21 +155,21 @@ void start_servers(void)
                 {  
                     //set the string terminating NULL byte on the end of the data read 
                     buffer[valread] = '\0';  
-					for (int l = 0; l < NB_PORTS; l++)
+					for (int l = 0; l < configs.size(); l++)
 					{
-						if (servers[l]->find_client(sd))
+						if (servers[l].find_client(sd))
 						{
-							Request request(buffer, *servers[l]);
+							Request request(buffer, servers[l]);
 							
-							Response response(request);
+							Response response(request, servers[l]);
 							send(sd, response.get_response().c_str(), response.get_response().size(), MSG_NOSIGNAL);
 							if (request.get_headers()["connection"] == "close")
 							{
 								client_socket[k] = 0;
-								for (int l = 0; l < NB_PORTS; l++)
+								for (int l = 0; l < configs.size(); l++)
 								{
-									if (servers[l]->find_client(sd))
-										servers[l]->remove_client(sd);
+									if (servers[l].find_client(sd))
+										servers[l].remove_client(sd);
 								}
 								close( sd );
 							}

@@ -6,7 +6,7 @@
 /*   By: jbosquet <jbosquet@student.42lyon.fr>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/06/07 17:26:39 by asaffroy          #+#    #+#             */
-/*   Updated: 2022/06/09 01:25:49 by jbosquet         ###   ########.fr       */
+/*   Updated: 2022/06/23 10:50:40 by jbosquet         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,10 +14,17 @@
 
 Server::Server(){}
 
+Server::~Server(){}
+
 void Server::set_port(int port_entry)
 {
 	this->_port = port_entry;
 	ft_create_serv();
+}
+
+void	Server::set_config(Config *config)
+{
+	this->_config = config;
 }
 
 int Server::get_master_socket() const
