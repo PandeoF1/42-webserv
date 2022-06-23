@@ -6,7 +6,7 @@
 /*   By: tnard <tnard@student.42lyon.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/06/07 16:21:22 by nard              #+#    #+#             */
-/*   Updated: 2022/06/15 14:42:24 by tnard            ###   ########lyon.fr   */
+/*   Updated: 2022/06/23 10:40:31 by tnard            ###   ########lyon.fr   */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -75,6 +75,10 @@ class Config {
 		static int			isValidMethods(std::string	value);
 		/* Return the number of value */
 		static int			getNumberOfValue(std::string value);
+		/* Return the path without a / in less (ex : /test/hey to: /test/) */
+		static std::string	getPathBefore(std::string path);
+		/* Return the location from the path */
+		static Location		returnPath(Config config, std::string path);
 	private:
 
 		static int	_verbose;

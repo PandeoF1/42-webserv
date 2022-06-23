@@ -405,3 +405,51 @@ int			Config::getNumberOfValue(std::string value)
 	}
 	return (nb);
 }
+
+std::string		Config::getPathBefore(std::string path)
+{
+	if (path == "" || path == "/")
+		return ("/");
+	size_t	x = path.length() - 1;
+	while (x > 0 && path[x] != '/')
+		x--;
+	if (path.substr(0, x) == "")
+		return ("/");
+	return (path.substr(0, x));
+}
+
+Location		Config::returnPath(Config config, std::string value)
+{
+	while ((value = Config::getPathBefore(value)) != "/")
+	{
+		if (config.getLocation_str()[value].getData().size() != 0)
+		{
+			//std::cout << value << " " << config.getLocation_str()[value].getData()["index"].size() << std::endl;
+			//if (config.getLocation_str()[value].getData()["index"].empty())
+				return (config.getLocation_str()[value]);
+			//std::string new_path = config.getLocation_str()[value].getData()["index"];
+			//for (int i  = 0; i < new_path.size(); i++)
+			//{
+			//	while (i < new_path.size() && (new_path[i] == ' ' || new_path[i] == '	'))
+			//		i++;
+			//	int	tmp1 = i;
+			//	while (i < new_path.size() && new_path[i] != ' ' && new_path[i] != '	')
+			//		i++;
+			//	if (tmp1 != new_path.size())
+			//	{
+			//		std::string valuee = new_path.substr(0, i);
+			//		std::cout << tmp1 << " " << i << std::endl;
+			//		std::cout << valuee << "." << std::endl;
+			//	}
+			//	//while (i < new_path.size() && (new_path[i] == ' ' || new_path[i] == '	'))
+			//	//	i++;
+			//}
+			//exit(0);
+			//while (config.getLocation_str()[config.getLocation_str()[value]["index"]].getData().size() == 0)
+			//{
+			//}
+		}
+	}
+	throw std::logic_error("Config::returnPath : Path not found");
+	exit(0);	
+}
