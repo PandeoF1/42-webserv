@@ -169,6 +169,16 @@ std::string	Response::get_content_type(void) const
 		return ("video/3gpp2");
 	if (!_extension.compare(".7z"))
 		return ("application/x-7z-compressed");
+	if (!_extension.compare(".mp3"))
+		return ("audio/mpeg");
+	if (!_extension.compare(".mp4"))
+		return ("video/mp4");
+	if (!_extension.compare(".m4a"))
+		return ("audio/mp4");
+	if (!_extension.compare(".m4v"))
+		return ("video/mp4");
+	if (!_extension.compare(".mov"))
+		return ("video/quicktime");
 	return ("text/plain");
 }
 
@@ -232,6 +242,7 @@ void	Response::fill_content_with_error_code(int code)
 {
 	File file;
 	std::string content;
+	std::string used_extension = ".html";
 	Config config = _server.get_config();
 
 	_request.set_code(code);
@@ -253,6 +264,7 @@ void	Response::fill_content_with_error_code(int code)
 		{
 			std::string	error_page = get_error_page(config["error_" + Utils::int_to_string(code)]);
 			content = file.getFile(error_page);
+			used_extension = get_extension(error_page);
 		}
 
 	}
@@ -270,7 +282,7 @@ void	Response::fill_content_with_error_code(int code)
 	}
 	_content = content;
 	_content_length = content.length();
-	_extension = ".html";
+	_extension = used_extension;
 }
 
 std::vector<std::string>	Response::split_file_and_directory(std::string line) const
@@ -291,7 +303,7 @@ std::vector<std::string>	Response::split_file_and_directory(std::string line) co
 	return (words);
 }
 
-void	Response::autoindex(std::string directory, std::string indexFile)
+void	Response::autoindex(std::string directory, std::string indexFile, Location location)
 {
 	std::vector<std::string> listedDirectory;
 		
@@ -305,6 +317,8 @@ void	Response::autoindex(std::string directory, std::string indexFile)
 
 	if (listedDirectory.size() == 0)
 		fill_content_with_error_code(403);
+	else if (location["autoindex"] != "on")
+		fill_content_with_error_code(404);
 	else
 	{
 		std::string	templateFile;
@@ -327,7 +341,7 @@ void	Response::autoindex(std::string directory, std::string indexFile)
 		for (i = 0; i < listedDirectory.size(); i++)
 		{
 			std::stringstream ss;
-			ss << File::getFileSize("www" + _request.get_target_path() + indexFile + listedDirectory[i]);
+			ss << File::getFileSize(directory + _request.get_target_path() + indexFile + listedDirectory[i]);
 			temp += "<li><a href=\"" + URL::encode(_request.get_target_path() + indexFile + listedDirectory[i]) + "\">" + listedDirectory[i] + " - " + ss.str() + " byte(s)" + "</a></li>";
 		}
 		i = templateFile.find("$files_and_directories");
@@ -438,6 +452,13 @@ void	Response::content_fill_from_file(void)
 		isLocation = false;
 	}
 
+	if (!location["redirect"].empty())
+	{
+		set_redirection(location["redirect"]);
+		_request.set_code(301);
+		return ;
+	}
+
 	if ((root = inLocationOrConfig(location, _server.get_config(), "root")).empty())
 		root = "www";
 	if ((indexs_from_config = inLocationOrConfig(location, _server.get_config(), "index")).empty())
@@ -447,12 +468,6 @@ void	Response::content_fill_from_file(void)
 	if (_request.get_target_path()[_request.get_target_path().find_first_of("/") + 1] == ' ' || _request.get_target_path()[_request.get_target_path().find_first_of("/") + 1] == '\0')
 		indexFile = get_index_file(root, indexs_from_config);
 
-	if (!location["redirect"].empty())
-	{
-		set_redirection(location["redirect"]);
-		_request.set_code(301);
-		return ;
-	}
 	switch(File::getType(root + _request.get_target_path() + indexFile))
 	{
 		case -1: //Not exist
@@ -470,7 +485,7 @@ void	Response::content_fill_from_file(void)
 			}
 			if (File::getType(root + _request.get_target_path() + get_index_file(root, indexs_from_config)) == -1)
 			{
-				autoindex(root, indexFile);
+				autoindex(root, indexFile, location);
 				break;
 			} else
 				indexFile = get_index_file(root, indexs_from_config);
@@ -510,7 +525,7 @@ void	Response::create_response(void)
 	_response += "\r\n";
 	_response += _content + "\r\n";
 
-	std::cout<< _response;
+	// std::cout<< _response;
 }
 
 std::string		Response::get_response(void) const
