@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Config.cpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: marvin <marvin@student.42.fr>              +#+  +:+       +#+        */
+/*   By: jbosquet <jbosquet@student.42lyon.fr>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/06/07 16:21:18 by nard              #+#    #+#             */
-/*   Updated: 2022/06/24 18:27:07 by marvin           ###   ########.fr       */
+/*   Updated: 2022/06/24 18:25:15 by jbosquet         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -428,9 +428,11 @@ Location		Config::returnPath(Config config, std::string value)
 	if (config.getLocation_str()[value].getData().size() != 0)
 		return (config.getLocation_str()[value]);
 	while ((value = Config::getPathBefore(value)) != "/")
+<<<<<<< HEAD
+=======
+	{
+>>>>>>> jbosquet
 		if (config.getLocation_str()[value].getData().size() != 0)
 			return (config.getLocation_str()[value]);
-	if (config.getLocation_str()["/"].getData().size() != 0)
-			return (config.getLocation_str()["/"]);
 	throw std::logic_error("Config::returnPath : Path not found");
 }
