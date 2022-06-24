@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Location.cpp                                       :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: asaffroy <asaffroy@student.42lyon.fr>      +#+  +:+       +#+        */
+/*   By: marvin <marvin@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/06/06 15:52:24 by nard              #+#    #+#             */
-/*   Updated: 2022/06/22 12:52:58 by asaffroy         ###   ########lyon.fr   */
+/*   Updated: 2022/06/24 17:20:53 by marvin           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -71,8 +71,32 @@ int	Location::isValidValue(std::string param, std::string value)
 		if (atoi(value.c_str()) < Buffer_Min || atoi(value.c_str()) > Buffer_Max)
 			throw Config::SyntaxInvalidValue(Location_Valid_Param[Location_Buffer], value);
 		for (size_t x = 0; x < value.length(); x++)
-			if (!isnumber(value[x]))
+			if (!isdigit(value[x]))
 				throw Config::SyntaxInvalidValue(Location_Valid_Param[Location_Buffer], value);
+	}
+	else if (param == Location_Valid_Param[Location_autoindex])
+	{
+		if (value == "on" || value == "off")
+			return (0);
+		else
+			throw Config::SyntaxInvalidValue(Location_Valid_Param[Location_autoindex], value);
+	}
+	else if (param == Location_Valid_Param[Location_Return])
+	{
+		size_t		pos = 0;
+		std::string	code, path;
+		while (pos < value.length() && (value[pos] == ' ' || value[pos] == '	'))
+			pos++;
+		while (pos < value.length() && isdigit(value[pos]))
+			code += value[pos], pos++;
+		if (pos == value.length() || (value[pos] != ' ' && value[pos] != '	'))
+			throw Config::SyntaxInvalidValue(Location_Valid_Param[Location_Return], value);
+		while (pos < value.length() && (value[pos] == ' ' || value[pos] == '	'))
+			pos++;
+		while (pos < value.length())
+			path += value[pos], pos++;
+		this->setLocation("return_code", code);
+		this->setLocation("return_path", path);
 	}
 	else
 		return (0);
