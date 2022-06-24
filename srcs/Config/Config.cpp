@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Config.cpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: jbosquet <jbosquet@student.42lyon.fr>      +#+  +:+       +#+        */
+/*   By: marvin <marvin@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/06/07 16:21:18 by nard              #+#    #+#             */
-/*   Updated: 2022/06/23 15:09:40 by jbosquet         ###   ########.fr       */
+/*   Updated: 2022/06/24 17:19:31 by marvin           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -215,11 +215,16 @@ void					Config::setLocation(std::string index, Location value)
 
 std::string		Config::removeWhiteSpace(std::string content)
 {
-	size_t		pos = 0;
+	size_t		pos1 = 0;
 
-	while (pos < content.length() && (content[pos] == ' ' || content[pos] == '	'))
-		pos++;
-	return (content.substr(pos));
+	while (pos1 < content.length() && (content[pos1] == ' ' || content[pos1] == '	'))
+		pos1++;
+	
+	content = content.substr(pos1);
+	size_t	pos2 = content.length() - 1;
+	while (pos2 > 0 && (content[pos2] == ' ' || content[pos2] == '	'))
+		pos2--;
+	return (content.substr(0, pos2 + 1));
 }
 
 int			Config::isValidParameter(std::string content, size_t pos)
@@ -423,43 +428,7 @@ Location		Config::returnPath(Config config, std::string value)
 	if (config.getLocation_str()[value].getData().size() != 0)
 		return (config.getLocation_str()[value]);
 	while ((value = Config::getPathBefore(value)) != "/")
-	{
-		std::cout << value << std::endl;
 		if (config.getLocation_str()[value].getData().size() != 0)
-		{
-			std::cout << value << " " << config.getLocation_str()[value].getData()["index"].size() << std::endl;
-			//if (config.getLocation_str()[value].getData()["index"].empty())
 			return (config.getLocation_str()[value]);
-			std::string new_path = config.getLocation_str()[value].getData()["index"];
-			for (int i  = 0; i < new_path.size(); i++)
-			{
-				while (i < new_path.size() && (new_path[i] == ' ' || new_path[i] == '	'))
-					i++;
-				int	tmp1 = i;
-				std::string tmp;
-				while (i < new_path.size() && new_path[i] != ' ' && new_path[i] != '	')
-					tmp += new_path[i], i++;
-				if (value[value.size() - 1] == '/')
-					std::cout << value + tmp << std::endl;
-				else
-					std::cout << value + "/" + tmp  << std::endl;
-				try
-				{
-					
-				}
-				catch (std::exception &e)
-				{
-					std::cout << "Error : " << e.what() << std::endl;
-				}
-				//while (i < new_path.size() && (new_path[i] == ' ' || new_path[i] == '	'))
-				//	i++;
-			}
-			exit(0);
-			while (config.getLocation_str()[config.getLocation_str()[value]["index"]].getData().size() == 0)
-			{
-			}
-		}
-	}
-	std::cout << value << std::endl;
 	throw std::logic_error("Config::returnPath : Path not found");
 }
