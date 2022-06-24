@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Config.cpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: marvin <marvin@student.42.fr>              +#+  +:+       +#+        */
+/*   By: jbosquet <jbosquet@student.42lyon.fr>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/06/07 16:21:18 by nard              #+#    #+#             */
-/*   Updated: 2022/06/24 17:19:31 by marvin           ###   ########.fr       */
+/*   Updated: 2022/06/24 18:25:15 by jbosquet         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -428,7 +428,44 @@ Location		Config::returnPath(Config config, std::string value)
 	if (config.getLocation_str()[value].getData().size() != 0)
 		return (config.getLocation_str()[value]);
 	while ((value = Config::getPathBefore(value)) != "/")
+<<<<<<< HEAD
+=======
+	{
+>>>>>>> jbosquet
 		if (config.getLocation_str()[value].getData().size() != 0)
 			return (config.getLocation_str()[value]);
+<<<<<<< HEAD
+=======
+			std::string new_path = config.getLocation_str()[value].getData()["index"];
+			for (int i  = 0; i < new_path.size(); i++)
+			{
+				while (i < new_path.size() && (new_path[i] == ' ' || new_path[i] == '	'))
+					i++;
+				int	tmp1 = i;
+				std::string tmp;
+				while (i < new_path.size() && new_path[i] != ' ' && new_path[i] != '	')
+					tmp += new_path[i], i++;
+				if (value[value.size() - 1] == '/')
+					std::cout << value + tmp << std::endl;
+				else
+					std::cout << value + "/" + tmp  << std::endl;
+				try
+				{
+					
+				}
+				catch (std::exception &e)
+				{
+					std::cout << "Error : " << e.what() << std::endl;
+				}
+				//while (i < new_path.size() && (new_path[i] == ' ' || new_path[i] == '	'))
+				//	i++;
+			}
+			exit(0);
+			while (config.getLocation_str()[config.getLocation_str()[value]["index"]].getData().size() == 0)
+			{
+			}
+		}
+	}
+>>>>>>> jbosquet
 	throw std::logic_error("Config::returnPath : Path not found");
 }
