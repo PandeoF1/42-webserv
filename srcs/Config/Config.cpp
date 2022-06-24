@@ -6,7 +6,7 @@
 /*   By: jbosquet <jbosquet@student.42lyon.fr>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/06/07 16:21:18 by nard              #+#    #+#             */
-/*   Updated: 2022/06/23 15:09:40 by jbosquet         ###   ########.fr       */
+/*   Updated: 2022/06/24 18:04:15 by jbosquet         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -424,7 +424,6 @@ Location		Config::returnPath(Config config, std::string value)
 		return (config.getLocation_str()[value]);
 	while ((value = Config::getPathBefore(value)) != "/")
 	{
-		std::cout << value << std::endl;
 		if (config.getLocation_str()[value].getData().size() != 0)
 		{
 			std::cout << value << " " << config.getLocation_str()[value].getData()["index"].size() << std::endl;
@@ -460,6 +459,5 @@ Location		Config::returnPath(Config config, std::string value)
 			}
 		}
 	}
-	std::cout << value << std::endl;
 	throw std::logic_error("Config::returnPath : Path not found");
 }
