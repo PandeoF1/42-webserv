@@ -1,15 +1,3 @@
-/* ************************************************************************** */
-/*                                                                            */
-/*                                                        :::      ::::::::   */
-/*   webserv.hpp                                        :+:      :+:    :+:   */
-/*                                                    +:+ +:+         +:+     */
-/*   By: jbosquet <jbosquet@student.42lyon.fr>      +#+  +:+       +#+        */
-/*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2022/06/06 15:56:12 by nard              #+#    #+#             */
-/*   Updated: 2022/06/23 15:48:03 by jbosquet         ###   ########.fr       */
-/*                                                                            */
-/* ************************************************************************** */
-
 #pragma once
 
 /* File */
@@ -32,7 +20,10 @@
 #include <map>
 #include <iostream>
 #include <sstream>
-#define MSG_NOSIGNAL 0x2000
+
+#ifndef MSG_NOSIGNAL
+# define MSG_NOSIGNAL 0x2000
+#endif
 
 #include <stdio.h>
 #include <iostream>
@@ -58,12 +49,14 @@
 #include "../srcs/Utils/Utils.hpp"
 
 #define				Location_Name "location"
-static std::string	Location_Valid_Param[] = {"allow_methods", "root", "alias", "client_body_buffer_size", "index", "cgi_pass", "redirect"};
-#define				Location_Valid_Param_Length 7
+static std::string	Location_Valid_Param[] = {"allow_methods", "root", "alias", "client_body_buffer_size", "index", "cgi_pass", "autoindex", "return"};
+#define				Location_Valid_Param_Length 8
 #define				Location_Methods 0
 #define				Location_Root 1
 #define				Location_Cgi 5
 #define				Location_Buffer 3
+#define             Location_autoindex 6
+#define             Location_Return 7
 
 
 static std::string	Server_Valid_Param[] = {"server_name", "listen", "root", "index", "allow_methods", "client_body_buffer_size", "error_400", "error_403", "error_404", "error_405", "error_413", "error_50x"};
