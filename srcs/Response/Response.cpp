@@ -33,7 +33,17 @@ std::string	Response::get_extension(std::string file) const
 	return ("text/plain");
 }
 
-std::string	Response::get_content_type(void) const
+std::string Response::check_accept_type(std::string str)
+{
+	if (!content_type_map[str])
+	{
+		fill_content_with_error_code(406);
+		return ("");
+	}
+	return (str);
+}
+
+std::string	Response::get_content_type(void)
 {
 	if (!_extension.compare(".aac"))
 		return ("audio/aac");
@@ -158,7 +168,7 @@ std::string	Response::get_content_type(void) const
 	if (!_extension.compare(".xlsx"))
 		return ("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
 	if (!_extension.compare(".xml"))
-		return ("application/xml");
+		check_accept_type("application/xml");
 	if (!_extension.compare(".xul"))
 		return ("application/vnd.mozilla.xul+xml");
 	if (!_extension.compare(".zip"))
@@ -216,6 +226,8 @@ std::string	Response::get_text_code(int code) const
 			return ("Not Found");
 		case 405:
 			return ("Method Not Allowed");
+		case 406:
+			return ("Not Acceptable");
 		case 500:
 			return ("Internal Server Error");
 		case 501:
@@ -505,7 +517,6 @@ void	Response::content_fill_from_file(void)
 	{
 
 		case -1: //Not exist
-			std::cout << RED << "SA ME FAIT CHIER" << RST << std::endl;
 			if (_request.get_target_path() != "/")
 			{
 				fill_content_with_error_code(404);
@@ -568,7 +579,7 @@ void	Response::create_response(void)
 	_response += "\r\n";
 	_response += _content + "\r\n";
 
-	// std::cout<< _response;
+	//std::cout<< _response;
 }
 
 std::string		Response::get_response(void) const

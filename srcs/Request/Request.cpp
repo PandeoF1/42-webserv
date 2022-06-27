@@ -61,6 +61,23 @@ void    Request::parse()
 		std::cout << RED << "Error: host not valid" << RST << std::endl;
 		_return_code = 400;
 	}
+	if (!_headers["accept"].empty())
+	{
+		std::vector<std::string>	accept_vector = Utils::split_with_comma(_headers["accept"]);
+		for (size_t i = 0; i != accept_vector.size(); i++)
+		{
+			if (accept_vector[i] == "*/*")
+				break;
+		}
+		//std::cout << i << "|" << accept_vector.size() << std::endl;
+		// if (i != accept_vector.size())
+		// 	return;
+		for (i = 0; i != accept_vector.size(); i++)
+		{
+			if (!(accept_vector[i][0] && accept_vector[i][0] == 'q' && accept_vector[i][1] && accept_vector[i][1] == '=') && accept_vector[i] != "*/*")
+				content_type_map[accept_vector[i]] = 1;
+		}
+	}
 	//std::cout<< _target_path << std::endl;
 }
 
