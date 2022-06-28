@@ -27,15 +27,14 @@ std::vector<std::string>	Utils::split_with_comma(std::string line)
 		return (words);
 	int k = 0;
 	int j = -1;
-	//std::cout << "line: " << line << std::endl;
 	for (int i = 0; i < line.size(); i++)
 	{
-		if (line[i] == ';' || line[i] == ',' || line[i] == ' ')
+		if (line[i] == ' ' || line[i] == '\t' || line[i] == ',' || line[i] == ';' || line[i] == '\r' || line[i] == '\n')
 		{
 			//to prevent segfault from starting at words[1] instead of words[0]
 			if (i != 0)
 				k++;
-			while (line[i] == ';' || line[i] == ',' || line[i] == ' ')
+			while (line[i] == ' ' || line[i] == '\t' || line[i] == ',' || line[i] == ';' || line [i] == '\r' || line [i] == '\n')
 				i++;
 			i--;
 		}
@@ -49,7 +48,6 @@ std::vector<std::string>	Utils::split_with_comma(std::string line)
 			}
 			words[k].push_back(line[i]);
 		}
-		//std::cout << line[i] << std::endl;
 	}
 	return (words);
 }

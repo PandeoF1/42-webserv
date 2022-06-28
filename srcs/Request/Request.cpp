@@ -16,6 +16,10 @@ Request::Request(char *request, Server &server) :
 Request::~Request(void) {
 }
 
+std::map<std::string, int>	Request::get_content_type_map() {
+	return (_content_type_map);
+}
+
 void    Request::parse()
 {
 	std::istringstream  requestString(_default_request);
@@ -64,20 +68,29 @@ void    Request::parse()
 	if (!_headers["accept"].empty())
 	{
 		std::vector<std::string>	accept_vector = Utils::split_with_comma(_headers["accept"]);
+		if (accept_vector.empty())
+		{
+			_content_type_map["*/*"] = 1;
+			return ;
+		}
 		for (size_t i = 0; i != accept_vector.size(); i++)
 		{
+			std::cout << "|" << accept_vector[i] << "|" << std::endl;
 			if (accept_vector[i] == "*/*")
-				break;
+			{
+				_content_type_map["*/*"] = 1;
+				std::cout << "*/*" << std::endl;
+				return ;
+			}
 		}
-		//std::cout << i << "|" << accept_vector.size() << std::endl;
-		// if (i != accept_vector.size())
-		// 	return;
 		for (i = 0; i != accept_vector.size(); i++)
 		{
-			if (!(accept_vector[i][0] && accept_vector[i][0] == 'q' && accept_vector[i][1] && accept_vector[i][1] == '=') && accept_vector[i] != "*/*")
-				content_type_map[accept_vector[i]] = 1;
+			if (!(accept_vector[i][0] && accept_vector[i][0] == 'q' && accept_vector[i][1] && accept_vector[i][1] == '='))
+				_content_type_map[accept_vector[i]] = 1;
 		}
 	}
+	else
+		_content_type_map["*/*"] = 1;
 	//std::cout<< _target_path << std::endl;
 }
 
