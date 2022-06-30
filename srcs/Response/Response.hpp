@@ -21,7 +21,8 @@ class Response
 		void						set_return(std::string return_path);
 		void						content_fill_from_file(void);
 		void						fill_content_with_error_code(int code);
-		std::string					get_content_type(void) const;
+		std::string					check_accept_type(std::string str);
+		std::string					get_content_type(void);
 		std::string					get_text_code(int code) const;
 		std::string					get_extension(std::string file) const;
 		void						autoindex(std::string directory, std::string indexFile, Location location);
@@ -31,7 +32,7 @@ class Response
 		std::string					get_error_page(std::string paths_from_config) const;
 		std::string					get_return(void) const;
 		std::string					inLocationOrConfig(Location location, Config config, std::string what);
-	std::string						get_directory_index(std::string directory, std::string indexs_from_config);
+		std::string					get_directory_index(std::string directory, std::string indexs_from_config);
 
 	public:
 		Response(Request &request, Server &server);
