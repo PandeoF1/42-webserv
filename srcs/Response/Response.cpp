@@ -35,25 +35,28 @@ std::string	Response::get_extension(std::string file) const
 
 std::string Response::check_accept_type(std::string str)
 {
-	if (_request.get_content_type_map()["*/*"])
-		return (str);
-	if (!_request.get_content_type_map()[str])
+	if (ACCEPT == 1)
 	{
-		if (str.find_first_of('/') == std::string::npos)
+		if (_request.get_content_type_map()["*/*"])
+			return (str);
+		if (!_request.get_content_type_map()[str])
 		{
-			fill_content_with_error_code(406);
-			return ("");
-		}
-		else
-		{
-			std::string temp = str.substr(0, str.find_first_of('/') + 1);
-			temp += "*";
-			if (!_request.get_content_type_map()[temp])
+			if (str.find_first_of('/') == std::string::npos)
 			{
 				fill_content_with_error_code(406);
 				return ("");
 			}
-			return (str);
+			else
+			{
+				std::string temp = str.substr(0, str.find_first_of('/') + 1);
+				temp += "*";
+				if (!_request.get_content_type_map()[temp])
+				{
+					fill_content_with_error_code(406);
+					return ("");
+				}
+				return (str);
+			}
 		}
 	}
 	return (str);
