@@ -10,6 +10,7 @@ class Request
 		std::map<std::string, int>		 	_content_type_map;
 		Server                              &_server;
 		std::string							_target_path;
+		std::string							_target_path_queries;
 		std::string                         _default_request;
 		int                                 _return_code;
 

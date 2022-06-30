@@ -8,7 +8,7 @@ Request::Request(std::string request, Server &server) :
 	// _headers["connection"] = "keep-alive";
 	std::string new_request = request;
 	_default_request = new_request;
-	// std::cout<< _default_request << std::endl;
+	std::cout<< _default_request << std::endl;
 	parse();
 }
 
@@ -190,6 +190,12 @@ void    Request::set_target_path(std::string line)
 	for (i = line.find_first_of(' '); line[i] && line[i] == ' '; i++);
 	for (j = 0; line[i + j] && line[i + j] != ' '; j++);
 	_target_path = URL::decode(line.substr(i, j));
+	if (_target_path.find("?") != std::string::npos)
+	{
+		i = _target_path.find("?");
+		_target_path_queries = _target_path.substr(i + 1, i  - _target_path.size());
+		_target_path = _target_path.substr(0, i);
+	}
 }
 
 void    Request::set_target_path_force(std::string line)
