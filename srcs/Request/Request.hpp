@@ -23,7 +23,7 @@ class Request
 		std::string	parse_line(std::string line);
 
 	public:
-		Request(char *request, Server &server);
+		Request(std::string request, Server &server);
 		~Request(void);
 
 		std::map<std::string, int>			get_content_type_map();

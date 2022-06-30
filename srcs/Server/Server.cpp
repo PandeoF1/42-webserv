@@ -91,7 +91,7 @@ void Server::ft_create_serv()
 	printf("Listener on port %d \n", _port);
 
 	//try to specify maximum of 3 pending connections for the master socket 
-	if (listen(_master_socket, 3) < 0)
+	if (listen(_master_socket, 100) < 0)
 	{
 		perror("listen");
 		exit(EXIT_FAILURE);

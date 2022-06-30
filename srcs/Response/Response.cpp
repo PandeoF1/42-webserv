@@ -507,7 +507,9 @@ void	Response::content_fill_from_file(void)
 	try {
 		location = Config::returnPath(_server.get_config(), URL::encode(_request.get_target_path()));
 	}
-	catch (const std::exception& e){ std::cout << RED << "JE PETE A L'EXCEPTION" << RST << std::endl;}
+	catch (const std::exception& e){ 
+		// std::cout << RED << "JE PETE A L'EXCEPTION" << RST << std::endl;
+	}
 
 	if (!location["return"].empty())
 	{
@@ -526,7 +528,7 @@ void	Response::content_fill_from_file(void)
 	if ((indexs_from_config = inLocationOrConfig(location, _server.get_config(), "index")).empty())
 		indexs_from_config = "index.html";
 
-	std::cout << GRN << location["index"] << RST << std::endl;
+	// std::cout << GRN << location["index"] << RST << std::endl;
 
 	std::string indexFile = "";
 	if (_request.get_target_path()[_request.get_target_path().find_first_of("/") + 1] == ' ' || _request.get_target_path()[_request.get_target_path().find_first_of("/") + 1] == '\0')

@@ -25,7 +25,7 @@
 # define MSG_NOSIGNAL 0x2000
 #endif
 
-# define ACCEPT 1
+# define ACCEPT 0
 
 #include <stdio.h>
 #include <iostream>

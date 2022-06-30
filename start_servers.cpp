@@ -16,7 +16,7 @@
 #define PORT 80
 #define PORT2 8765
 // #define configs.size() 2
-#define MAX_CLIENTS 500000
+#define MAX_CLIENTS 50000
 #define BUFLEN 65536
 
 void Server::start_servers(std::map<int, Config> configs)
@@ -29,18 +29,13 @@ void Server::start_servers(std::map<int, Config> configs)
 		servers[i].set_port(Utils::string_to_int(configs[i]["port"]));
 	}
 
-    int new_socket , client_socket[MAX_CLIENTS] ,
-          max_clients = MAX_CLIENTS , activity, i , valread , sd;
-    int max_sd;
+    int new_socket, client_socket[MAX_CLIENTS], max_clients = MAX_CLIENTS, activity, i, valread , sd, max_sd;
 	//initialise all client_socket[] to 0 so not checked
 	for (i = 0; i < max_clients; i++)
-	{
 		client_socket[i] = 0;  
-	}
 
-    puts("Waiting for connections ..."); 
-	//a message 
 	char 	buffer[BUFLEN];
+	std::string test[MAX_CLIENTS];
 
 	fd_set readfds;
 
@@ -92,14 +87,14 @@ void Server::start_servers(std::map<int, Config> configs)
 						(struct sockaddr *)&address, (socklen_t*)&addrlen))<0)  
 				{  
 					perror("accept");  
-					exit(EXIT_FAILURE);  
+					exit(EXIT_FAILURE);
 				}  
 				
 				//inform user of socket number - used in send and receive commands
-				if (!client_socket[max_clients - 1])
-				{
-					printf("New connection on Port : %d, socket fd is %d , ip is : %s , port : %d\n" , servers[i].get_port(),  new_socket , inet_ntoa(address.sin_addr) , ntohs(address.sin_port));  
-				}
+				// if (!client_socket[max_clients - 1])
+				// {
+				// 	printf("New connection on Port : %d, socket fd is %d , ip is : %s , port : %d\n" , servers[i].get_port(),  new_socket , inet_ntoa(address.sin_addr) , ntohs(address.sin_port));  
+				// }
 					
 				//add new socket to array of sockets 
 				for (int j = 0; j < max_clients; j++)  
@@ -109,7 +104,7 @@ void Server::start_servers(std::map<int, Config> configs)
 					{  
 						client_socket[j] = new_socket;
 						servers[i].add_client(new_socket); 
-						printf("Adding to list of sockets, on master_socket %d\n" , i);  
+						// printf("Adding to list of sockets, on master_socket %d\n" , i);  
 							
 						break;  
 					}  
@@ -120,9 +115,10 @@ void Server::start_servers(std::map<int, Config> configs)
         for (int k = 0; k < max_clients; k++)  
         {  
             sd = client_socket[k];
+			memset(buffer, 0, BUFLEN);
             if (FD_ISSET( sd , &readfds))  
             {  
-                //Check if it was for closing , and also read the incoming message
+                //Check if it was for closing , and also read the incoming message)
                 if ((valread = recv( sd , buffer, BUFLEN, 0)) == 0)  
                 {  
                     //Somebody disconnected , get his details and print  
@@ -130,52 +126,60 @@ void Server::start_servers(std::map<int, Config> configs)
                     //Close the socket and mark as 0 in list for reuse 
                     client_socket[k] = 0;
 					for (int l = 0; l < configs.size(); l++)
-					{
 						if (servers[l].find_client(sd))
-						{
 							servers[l].remove_client(sd);
-						}
-					}
                     close( sd );
+					test[k] = "";
+					break ;
                 }
 				else if (valread < 0)
 				{
-					std::cerr << "Error: couldn't handle request." << std::endl;
+					std::cerr << "Error: couldn't handle request. errno: " << errno << std::endl;
 					client_socket[k] = 0;
 					for (int l = 0; l < configs.size(); l++)
-					{
 						if (servers[l].find_client(sd))
-						{
 							servers[l].remove_client(sd);
-						}
-					}
+					test[k] = "";
                     close( sd );
+					break ;
 				}              
                 else 
-                {  
+                {
                     //set the string terminating NULL byte on the end of the data read 
-                    buffer[valread] = '\0';  
+					buffer[valread] = '\0';
+					std::string tmp = buffer;
+					if (test[k].size() > 0)
+						test[k] += tmp;
+					else
+						test[k] = buffer;
+					if (test[k].find("\r\n\r\n") == std::string::npos)
+						break ;
+
 					for (int l = 0; l < configs.size(); l++)
 					{
 						if (servers[l].find_client(sd))
 						{
-							Request request(buffer, servers[l]);
+							Request request(test[k], servers[l]);
 							
 							Response response(request, servers[l]);
 							send(sd, response.get_response().c_str(), response.get_response().size(), MSG_NOSIGNAL);
-							if (request.get_headers()["connection"] == "close")
+							test[k] = "";
+							if (!request.get_headers()["connection"].empty())
 							{
-								client_socket[k] = 0;
-								for (int l = 0; l < configs.size(); l++)
+								if (Utils::split_with_comma(request.get_headers()["connection"])[0] == "close")
 								{
-									if (servers[l].find_client(sd))
-										servers[l].remove_client(sd);
+									client_socket[k] = 0;
+									for (int l = 0; l < configs.size(); l++)
+										if (servers[l].find_client(sd))
+											servers[l].remove_client(sd);
+									test[k] = "";
+									close( sd );
 								}
-								close( sd );
 							}
+							break;
 						}
 					}
-				}  
+				}
             }  
         }  
     }  

@@ -1,6 +1,6 @@
 #include "../../includes/webserv.hpp"
 
-Request::Request(char *request, Server &server) :  
+Request::Request(std::string request, Server &server) :  
 	_server(server),
 	_return_code(200)
 {
@@ -8,8 +8,7 @@ Request::Request(char *request, Server &server) :
 	// _headers["connection"] = "keep-alive";
 	std::string new_request = request;
 	_default_request = new_request;
-	//std::cout<< "New request from port: " << server.get_port() << std::endl;
-	std::cout<< _default_request << std::endl;
+	// std::cout<< _default_request << std::endl;
 	parse();
 }
 
@@ -77,11 +76,9 @@ void    Request::parse()
 			}
 			for (size_t i = 0; i != accept_vector.size(); i++)
 			{
-				std::cout << "|" << accept_vector[i] << "|" << std::endl;
 				if (accept_vector[i] == "*/*")
 				{
 					_content_type_map["*/*"] = 1;
-					std::cout << "*/*" << std::endl;
 					return ;
 				}
 			}
