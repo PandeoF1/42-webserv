@@ -134,7 +134,7 @@ void Server::start_servers(std::map<int, Config> configs)
                 }
 				else if (valread < 0)
 				{
-					std::cerr << "Error: couldn't handle request. errno: " << errno << std::endl;
+					std::cerr << "Error: couldn't handle request." << std::endl;
 					client_socket[k] = 0;
 					for (int l = 0; l < configs.size(); l++)
 						if (servers[l].find_client(sd))

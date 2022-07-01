@@ -266,7 +266,7 @@ std::string	Response::get_error_page(std::string paths_from_config) const
 {
 	std::vector<std::string>	paths;
 
-	paths = split_with_space(paths_from_config);
+	paths = Utils::split_with_space(paths_from_config);
 	if (paths.size() == 0)
 		return ("");
 	for (int i = 0; i < paths.size(); i++)
@@ -412,44 +412,11 @@ void	Response::autoindex(std::string directory, std::string indexFile, Location 
 	}
 }
 
-std::vector<std::string>	Response::split_with_space(std::string line) const
-{
-	std::vector<std::string>	words;
-
-	if (line.size() == 0)
-		return (words);
-	int k = 0;
-	int j = -1;
-	for (int i = 0; i < line.size(); i++)
-	{
-		if (line[i] == ' ' || line[i] == '\t')
-		{
-			//to prevent segfault from starting at words[1] instead of words[0]
-			if (i != 0)
-				k++;
-			while (line[i] == ' ' || line[i] == '\t')
-				i++;
-			i--;
-		}
-		else
-		{
-			//to create a new word in the vector
-			if (j != k)
-			{
-				j = k;
-				words.push_back("");
-			}
-			words[k].push_back(line[i]);
-		}
-	}
-	return (words);
-}
-
 std::string	Response::get_index_file(std::string directory, std::string indexs_from_config) const
 {
 	std::vector<std::string>	indexs;
 
-	indexs = split_with_space(indexs_from_config);
+	indexs = Utils::split_with_space(indexs_from_config);
 	if (indexs.size() == 0)
 		return ("index.html");
 	for (int i = 0; i < indexs.size(); i++)
@@ -464,7 +431,7 @@ std::string	Response::get_directory_index(std::string directory, std::string ind
 {
 	std::vector<std::string>	indexs;
 
-	indexs = split_with_space(indexs_from_config);
+	indexs = Utils::split_with_space(indexs_from_config);
 	if (indexs.size() == 0)
 		return ("index.html");
 	for (int i = 0; i < indexs.size(); i++)

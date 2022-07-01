@@ -27,7 +27,6 @@ class Response
 		std::string					get_extension(std::string file) const;
 		void						autoindex(std::string directory, std::string indexFile, Location location);
 		std::vector<std::string>	split_file_and_directory(std::string line) const;
-		std::vector<std::string>	split_with_space(std::string line) const;
 		std::string					get_index_file(std::string directory, std::string indexs_from_config) const;
 		std::string					get_error_page(std::string paths_from_config) const;
 		std::string					get_return(void) const;
