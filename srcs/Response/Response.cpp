@@ -513,10 +513,8 @@ void	Response::content_fill_from_file(void)
 
 	if (!location["return"].empty())
 	{
-		// std::string return_path = location["return_path"];
-		// int			return_code = location["return_code"];
-		std::string return_path = location["return"];
-		int			return_code = 301;
+		std::string return_path = location["return_path"];
+		int			return_code = Utils::string_to_int(location["return_code"]);
 
 		set_return(return_path);
 		_request.set_code(return_code);
