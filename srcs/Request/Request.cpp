@@ -5,10 +5,9 @@ Request::Request(std::string request, Server &server) :
 	_return_code(200)
 {
 	(void)_server;
-	// _headers["connection"] = "keep-alive";
 	std::string new_request = request;
 	_default_request = new_request;
-	std::cout<< _default_request << std::endl;
+	// std::cout<< _default_request << std::endl;
 	parse();
 }
 
@@ -34,9 +33,9 @@ void    Request::parse()
 			if (_return_code != 400)
 				check_http_version(line);
 			if (_return_code != 400)
-				set_method(line);
-			if (_return_code != 400)
 				set_target_path(line);
+			if (_return_code != 400)
+				set_method(line);
 		}
 		if (i > 0)
 		{
@@ -44,10 +43,7 @@ void    Request::parse()
 				line[j] = ::tolower(line[j]);
 			parsed_line = parse_line(line);
 			if (parsed_line != "")
-			{
 				_headers[parsed_line] = line.substr(line.find_first_of(':') + 1, line.size() - line.find_first_of(':'));
-				// std::cout<< "look }" << _headers[parsed_line] << std::endl;
-			}
 		}
 		i++;
 	}
@@ -91,16 +87,31 @@ void    Request::parse()
 		else
 			_content_type_map["*/*"] = 1;
 	}
-	//std::cout<< _target_path << std::endl;
 }
 
 std::string    Request::checkMethod(std::string line)
 {
 	std::vector<std::string>    methods;
+	Location location;
 
-	methods.push_back("GET ");
-	methods.push_back("POST ");
-	methods.push_back("DELETE ");
+	try {
+		location = Config::returnPath(_server.get_config(), URL::encode(get_target_path()));
+	
+		if (location["allow_methods"].empty())	//Allow methods from webserv.hpp if not found in location
+		{
+			for (int i = 0; i < Methods_List_Length; i++)
+				methods.push_back(Methods_List[i] + " ");
+		} else {
+			std::vector<std::string>	allow_methods = Utils::split_with_space(location["allow_methods"]);
+
+			for (size_t i = 0; i != allow_methods.size(); i++)
+				methods.push_back(allow_methods[i] + " ");
+		}
+	}
+	catch (const std::exception& e){
+		for (int i = 0; i < Methods_List_Length; i++)
+			methods.push_back(Methods_List[i] + " ");
+	}
 
 	for (int i = 0; line[i] != ' '; i++)
 		if (std::islower(line[i]))
