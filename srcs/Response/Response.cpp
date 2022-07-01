@@ -589,10 +589,10 @@ void	Response::create_response(void)
 {
 	content_fill_from_file();
 	_response = "HTTP/1.1 ";
-	_response += Utils::Utils::int_to_string(_request.get_code()) + " " + get_text_code(_request.get_code()) + "\r\n";
+	_response += Utils::int_to_string(_request.get_code()) + " " + get_text_code(_request.get_code()) + "\r\n";
 	_response += "Server: Webserv/1.0.0\r\n";
 	_response += "Content-Type: " + get_content_type() + "\r\n";
-	_response += "Content-Length: " + Utils::Utils::int_to_string(_content_length) + "\r\n";
+	_response += "Content-Length: " + Utils::int_to_string(_content_length) + "\r\n";
 	if (_request.get_code() >= 301 && _request.get_code() <= 308)
 		_response += "Location: " + get_return() + "\r\n";
 	_response += "\r\n";
