@@ -1,19 +1,21 @@
 #include "../../includes/webserv.hpp"
 
-Request::Request(char *request, Server &server) :  
+Request::Request(std::string request, Server &server) :  
 	_server(server),
 	_return_code(200)
 {
 	(void)_server;
-	// _headers["connection"] = "keep-alive";
 	std::string new_request = request;
 	_default_request = new_request;
-	//std::cout<< "New request from port: " << server.get_port() << std::endl;
-	std::cout<< _default_request << std::endl;
+	// std::cout<< _default_request << std::endl;
 	parse();
 }
 
 Request::~Request(void) {
+}
+
+std::map<std::string, int>	Request::get_content_type_map() {
+	return (_content_type_map);
 }
 
 void    Request::parse()
@@ -31,9 +33,9 @@ void    Request::parse()
 			if (_return_code != 400)
 				check_http_version(line);
 			if (_return_code != 400)
-				set_method(line);
-			if (_return_code != 400)
 				set_target_path(line);
+			if (_return_code != 400)
+				set_method(line);
 		}
 		if (i > 0)
 		{
@@ -41,10 +43,7 @@ void    Request::parse()
 				line[j] = ::tolower(line[j]);
 			parsed_line = parse_line(line);
 			if (parsed_line != "")
-			{
 				_headers[parsed_line] = line.substr(line.find_first_of(':') + 1, line.size() - line.find_first_of(':'));
-				// std::cout<< "look }" << _headers[parsed_line] << std::endl;
-			}
 		}
 		i++;
 	}
@@ -61,16 +60,58 @@ void    Request::parse()
 		std::cout << RED << "Error: host not valid" << RST << std::endl;
 		_return_code = 400;
 	}
-	//std::cout<< _target_path << std::endl;
+	if (ACCEPT == 1)
+	{
+		if (!_headers["accept"].empty())
+		{
+			std::vector<std::string>	accept_vector = Utils::split_with_comma(_headers["accept"]);
+			if (accept_vector.empty())
+			{
+				_content_type_map["*/*"] = 1;
+				return ;
+			}
+			for (size_t i = 0; i != accept_vector.size(); i++)
+			{
+				if (accept_vector[i] == "*/*")
+				{
+					_content_type_map["*/*"] = 1;
+					return ;
+				}
+			}
+			for (i = 0; i != accept_vector.size(); i++)
+			{
+				if (!(accept_vector[i][0] && accept_vector[i][0] == 'q' && accept_vector[i][1] && accept_vector[i][1] == '='))
+					_content_type_map[accept_vector[i]] = 1;
+			}
+		}
+		else
+			_content_type_map["*/*"] = 1;
+	}
 }
 
 std::string    Request::checkMethod(std::string line)
 {
 	std::vector<std::string>    methods;
+	Location location;
 
-	methods.push_back("GET ");
-	methods.push_back("POST ");
-	methods.push_back("DELETE ");
+	try {
+		location = Config::returnPath(_server.get_config(), URL::encode(get_target_path()));
+	
+		if (location["allow_methods"].empty())	//Allow methods from webserv.hpp if not found in location
+		{
+			for (int i = 0; i < Methods_List_Length; i++)
+				methods.push_back(Methods_List[i] + " ");
+		} else {
+			std::vector<std::string>	allow_methods = Utils::split_with_space(location["allow_methods"]);
+
+			for (size_t i = 0; i != allow_methods.size(); i++)
+				methods.push_back(allow_methods[i] + " ");
+		}
+	}
+	catch (const std::exception& e){
+		for (int i = 0; i < Methods_List_Length; i++)
+			methods.push_back(Methods_List[i] + " ");
+	}
 
 	for (int i = 0; line[i] != ' '; i++)
 		if (std::islower(line[i]))
@@ -160,6 +201,12 @@ void    Request::set_target_path(std::string line)
 	for (i = line.find_first_of(' '); line[i] && line[i] == ' '; i++);
 	for (j = 0; line[i + j] && line[i + j] != ' '; j++);
 	_target_path = URL::decode(line.substr(i, j));
+	if (_target_path.find("?") != std::string::npos)
+	{
+		i = _target_path.find("?");
+		_target_path_queries = _target_path.substr(i + 1, i  - _target_path.size());
+		_target_path = _target_path.substr(0, i);
+	}
 }
 
 void    Request::set_target_path_force(std::string line)

@@ -1,7 +1,6 @@
 #include "URL.hpp"
 
 URL::URL() {
-	std::cout<< "coucou" << std::endl;
 }
 
 URL::~URL() {

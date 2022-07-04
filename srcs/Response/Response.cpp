@@ -33,153 +33,182 @@ std::string	Response::get_extension(std::string file) const
 	return ("text/plain");
 }
 
-std::string	Response::get_content_type(void) const
+std::string Response::check_accept_type(std::string str)
+{
+	if (ACCEPT == 1)
+	{
+		if (_request.get_content_type_map()["*/*"])
+			return (str);
+		if (!_request.get_content_type_map()[str])
+		{
+			if (str.find_first_of('/') == std::string::npos)
+			{
+				fill_content_with_error_code(406);
+				return ("");
+			}
+			else
+			{
+				std::string temp = str.substr(0, str.find_first_of('/') + 1);
+				temp += "*";
+				if (!_request.get_content_type_map()[temp])
+				{
+					fill_content_with_error_code(406);
+					return ("");
+				}
+				return (str);
+			}
+		}
+	}
+	return (str);
+}
+
+std::string	Response::get_content_type(void)
 {
 	if (!_extension.compare(".aac"))
-		return ("audio/aac");
+		return (check_accept_type("audio/aac"));
 	if (!_extension.compare(".abw"))
-		return ("application/x-abiword");
+		return (check_accept_type("application/x-abiword"));
 	if (!_extension.compare(".arc"))
-		return ("application/octet-stream");
+		return (check_accept_type("application/octet-stream"));
 	if (!_extension.compare(".avi"))
-		return ("video/x-msvideo");
+		return (check_accept_type("video/x-msvideo"));
 	if (!_extension.compare(".azw"))
-		return ("application/vnd.amazon.ebook");
+		return (check_accept_type("application/vnd.amazon.ebook"));
 	if (!_extension.compare(".bin"))
-		return ("application/octet-stream");
+		return (check_accept_type("application/octet-stream"));
 	if (!_extension.compare(".bmp"))
-		return ("image/bmp");
+		return (check_accept_type("image/bmp"));
 	if (!_extension.compare(".bz"))
-		return ("application/x-bzip");
+		return (check_accept_type("application/x-bzip"));
 	if (!_extension.compare(".bz2"))
-		return ("application/x-bzip2");
+		return (check_accept_type("application/x-bzip2"));
 	if (!_extension.compare(".csh"))
-		return ("application/x-csh");
+		return (check_accept_type("application/x-csh"));
 	if (!_extension.compare(".css"))
-		return ("text/css");
+		return (check_accept_type("text/css"));
 	if (!_extension.compare(".csv"))
-		return ("text/csv");
+		return (check_accept_type("text/csv"));
 	if (!_extension.compare(".doc"))
-		return ("application/msword");
+		return (check_accept_type("application/msword"));
 	if (!_extension.compare(".docx"))
-		return ("application/vnd.openxmlformats-officedocument.wordprocessingml.document");
+		return (check_accept_type("application/vnd.openxmlformats-officedocument.wordprocessingml.document"));
 	if (!_extension.compare(".eot"))
-		return ("application/vnd.ms-fontobject");
+		return (check_accept_type("application/vnd.ms-fontobject"));
 	if (!_extension.compare(".epub"))
-		return ("application/epub+zip");
+		return (check_accept_type("application/epub+zip"));
 	if (!_extension.compare(".gif"))
-		return ("image/gif");
+		return (check_accept_type("image/gif"));
 	if (!_extension.compare(".htm"))
-		return ("text/html");
+		return (check_accept_type("text/html"));
 	if (!_extension.compare(".html"))
-		return ("text/html");
+		return (check_accept_type("text/html"));
 	if (!_extension.compare(".ico"))
-		return ("image/x-icon");
+		return (check_accept_type("image/x-icon"));
 	if (!_extension.compare(".ics"))
-		return ("text/calendar");
+		return (check_accept_type("text/calendar"));
 	if (!_extension.compare(".jar"))
-		return ("application/java-archive");
+		return (check_accept_type("application/java-archive"));
 	if (!_extension.compare(".jpeg"))
-		return ("image/jpeg");
+		return (check_accept_type("image/jpeg"));
 	if (!_extension.compare(".jpg"))
-		return ("image/jpeg");
+		return (check_accept_type("image/jpeg"));
 	if (!_extension.compare(".js"))
-		return ("application/javascript");
+		return (check_accept_type("application/javascript"));
 	if (!_extension.compare(".json"))
-		return ("application/json");
+		return (check_accept_type("application/json"));
 	if (!_extension.compare(".mid"))
-		return ("audio/midi");
+		return (check_accept_type("audio/midi"));
 	if (!_extension.compare(".midi"))
-		return ("audio/midi");
+		return (check_accept_type("audio/midi"));
 	if (!_extension.compare(".mpeg"))
-		return ("video/mpeg");
+		return (check_accept_type("video/mpeg"));
 	if (!_extension.compare(".mpkg"))
-		return ("application/vnd.apple.installer+xml");
+		return (check_accept_type("application/vnd.apple.installer+xml"));
 	if (!_extension.compare(".odp"))
-		return ("application/vnd.oasis.opendocument.presentation");
+		return (check_accept_type("application/vnd.oasis.opendocument.presentation"));
 	if (!_extension.compare(".ods"))
-		return ("application/vnd.oasis.opendocument.spreadsheet");
+		return (check_accept_type("application/vnd.oasis.opendocument.spreadsheet"));
 	if (!_extension.compare(".odt"))
-		return ("application/vnd.oasis.opendocument.text");
+		return (check_accept_type("application/vnd.oasis.opendocument.text"));
 	if (!_extension.compare(".oga"))
-		return ("audio/ogg");
+		return (check_accept_type("audio/ogg"));
 	if (!_extension.compare(".ogv"))
-		return ("video/ogg");
+		return (check_accept_type("video/ogg"));
 	if (!_extension.compare(".ogx"))
-		return ("application/ogg");
+		return (check_accept_type("application/ogg"));
 	if (!_extension.compare(".otf"))
-		return ("font/otf");
+		return (check_accept_type("font/otf"));
 	if (!_extension.compare(".png"))
-		return ("image/png");
+		return (check_accept_type("image/png"));
 	if (!_extension.compare(".pdf"))
-		return ("application/pdf");
+		return (check_accept_type("application/pdf"));
 	if (!_extension.compare(".ppt"))
-		return ("application/vnd.ms-powerpoint");
+		return (check_accept_type("application/vnd.ms-powerpoint"));
 	if (!_extension.compare(".pptx"))
-		return ("application/vnd.openxmlformats-officedocument.presentationml.presentation");
+		return (check_accept_type("application/vnd.openxmlformats-officedocument.presentationml.presentation"));
 	if (!_extension.compare(".rar"))
-		return ("application/x-rar-compressed");
+		return (check_accept_type("application/x-rar-compressed"));
 	if (!_extension.compare(".rtf"))
-		return ("application/rtf");
+		return (check_accept_type("application/rtf"));
 	if (!_extension.compare(".sh"))
-		return ("application/x-sh");
+		return (check_accept_type("application/x-sh"));
 	if (!_extension.compare(".svg"))
-		return ("image/svg+xml");
+		return (check_accept_type("image/svg+xml"));
 	if (!_extension.compare(".swf"))
-		return ("application/x-shockwave-flash");
+		return (check_accept_type("application/x-shockwave-flash"));
 	if (!_extension.compare(".tar"))
-		return ("application/x-tar");
+		return (check_accept_type("application/x-tar"));
 	if (!_extension.compare(".tif"))
-		return ("image/tiff");
+		return (check_accept_type("image/tiff"));
 	if (!_extension.compare(".tiff"))
-		return ("image/tiff");
+		return (check_accept_type("image/tiff"));
 	if (!_extension.compare(".ts"))
-		return ("application/typescript");
+		return (check_accept_type("application/typescript"));
 	if (!_extension.compare(".ttf"))
-		return ("font/ttf");
+		return (check_accept_type("font/ttf"));
 	if (!_extension.compare(".vsd"))
-		return ("application/vnd.visio");
+		return (check_accept_type("application/vnd.visio"));
 	if (!_extension.compare(".wav"))
-		return ("audio/x-wav");
+		return (check_accept_type("audio/x-wav"));
 	if (!_extension.compare(".weba"))
-		return ("audio/webm");
+		return (check_accept_type("audio/webm"));
 	if (!_extension.compare(".webm"))
-		return ("video/webm");
+		return (check_accept_type("video/webm"));
 	if (!_extension.compare(".webp"))
-		return ("image/webp");
+		return (check_accept_type("image/webp"));
 	if (!_extension.compare(".woff"))
-		return ("font/woff");
+		return (check_accept_type("font/woff"));
 	if (!_extension.compare(".woff2"))
-		return ("font/woff2");
+		return (check_accept_type("font/woff2"));
 	if (!_extension.compare(".xhtml"))
-		return ("application/xhtml+xml");
+		return (check_accept_type("application/xhtml+xml"));
 	if (!_extension.compare(".xls"))
-		return ("application/vnd.ms-excel");
+		return (check_accept_type("application/vnd.ms-excel"));
 	if (!_extension.compare(".xlsx"))
-		return ("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
+		return (check_accept_type("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"));
 	if (!_extension.compare(".xml"))
-		return ("application/xml");
+		return (check_accept_type("application/xml"));
 	if (!_extension.compare(".xul"))
-		return ("application/vnd.mozilla.xul+xml");
+		return (check_accept_type("application/vnd.mozilla.xul+xml"));
 	if (!_extension.compare(".zip"))
-		return ("application/zip");
+		return (check_accept_type("application/zip"));
 	if (!_extension.compare(".3gp"))
-		return ("video/3gpp");
+		return (check_accept_type("video/3gpp"));
 	if (!_extension.compare(".3g2"))
-		return ("video/3gpp2");
+		return (check_accept_type("video/3gpp2"));
 	if (!_extension.compare(".7z"))
-		return ("application/x-7z-compressed");
+		return (check_accept_type("application/x-7z-compressed"));
 	if (!_extension.compare(".mp3"))
-		return ("audio/mpeg");
+		return (check_accept_type("audio/mpeg"));
 	if (!_extension.compare(".mp4"))
-		return ("video/mp4");
+		return (check_accept_type("video/mp4"));
 	if (!_extension.compare(".m4a"))
-		return ("audio/mp4");
+		return (check_accept_type("audio/mp4"));
 	if (!_extension.compare(".m4v"))
-		return ("video/mp4");
+		return (check_accept_type("video/mp4"));
 	if (!_extension.compare(".mov"))
-		return ("video/quicktime");
-	return ("text/plain");
+		return (check_accept_type("video/quicktime"));
+	return (check_accept_type("text/plain"));
 }
 
 std::string	Response::get_text_code(int code) const
@@ -216,6 +245,8 @@ std::string	Response::get_text_code(int code) const
 			return ("Not Found");
 		case 405:
 			return ("Method Not Allowed");
+		case 406:
+			return ("Not Acceptable");
 		case 500:
 			return ("Internal Server Error");
 		case 501:
@@ -235,7 +266,7 @@ std::string	Response::get_error_page(std::string paths_from_config) const
 {
 	std::vector<std::string>	paths;
 
-	paths = split_with_space(paths_from_config);
+	paths = Utils::split_with_space(paths_from_config);
 	if (paths.size() == 0)
 		return ("");
 	for (int i = 0; i < paths.size(); i++)
@@ -381,44 +412,11 @@ void	Response::autoindex(std::string directory, std::string indexFile, Location 
 	}
 }
 
-std::vector<std::string>	Response::split_with_space(std::string line) const
-{
-	std::vector<std::string>	words;
-
-	if (line.size() == 0)
-		return (words);
-	int k = 0;
-	int j = -1;
-	for (int i = 0; i < line.size(); i++)
-	{
-		if (line[i] == ' ' || line[i] == '\t')
-		{
-			//to prevent segfault from starting at words[1] instead of words[0]
-			if (i != 0)
-				k++;
-			while (line[i] == ' ' || line[i] == '\t')
-				i++;
-			i--;
-		}
-		else
-		{
-			//to create a new word in the vector
-			if (j != k)
-			{
-				j = k;
-				words.push_back("");
-			}
-			words[k].push_back(line[i]);
-		}
-	}
-	return (words);
-}
-
 std::string	Response::get_index_file(std::string directory, std::string indexs_from_config) const
 {
 	std::vector<std::string>	indexs;
 
-	indexs = split_with_space(indexs_from_config);
+	indexs = Utils::split_with_space(indexs_from_config);
 	if (indexs.size() == 0)
 		return ("index.html");
 	for (int i = 0; i < indexs.size(); i++)
@@ -433,7 +431,7 @@ std::string	Response::get_directory_index(std::string directory, std::string ind
 {
 	std::vector<std::string>	indexs;
 
-	indexs = split_with_space(indexs_from_config);
+	indexs = Utils::split_with_space(indexs_from_config);
 	if (indexs.size() == 0)
 		return ("index.html");
 	for (int i = 0; i < indexs.size(); i++)
@@ -476,14 +474,14 @@ void	Response::content_fill_from_file(void)
 	try {
 		location = Config::returnPath(_server.get_config(), URL::encode(_request.get_target_path()));
 	}
-	catch (const std::exception& e){ std::cout << RED << "JE PETE A L'EXCEPTION" << RST << std::endl;}
+	catch (const std::exception& e){ 
+		// std::cout << RED << "JE PETE A L'EXCEPTION" << RST << std::endl;
+	}
 
 	if (!location["return"].empty())
 	{
-		// std::string return_path = location["return_path"];
-		// int			return_code = location["return_code"];
-		std::string return_path = location["return"];
-		int			return_code = 301;
+		std::string return_path = location["return_path"];
+		int			return_code = Utils::string_to_int(location["return_code"]);
 
 		set_return(return_path);
 		_request.set_code(return_code);
@@ -495,7 +493,7 @@ void	Response::content_fill_from_file(void)
 	if ((indexs_from_config = inLocationOrConfig(location, _server.get_config(), "index")).empty())
 		indexs_from_config = "index.html";
 
-	std::cout << GRN << location["index"] << RST << std::endl;
+	// std::cout << GRN << location["index"] << RST << std::endl;
 
 	std::string indexFile = "";
 	if (_request.get_target_path()[_request.get_target_path().find_first_of("/") + 1] == ' ' || _request.get_target_path()[_request.get_target_path().find_first_of("/") + 1] == '\0')
@@ -505,7 +503,6 @@ void	Response::content_fill_from_file(void)
 	{
 
 		case -1: //Not exist
-			std::cout << RED << "SA ME FAIT CHIER" << RST << std::endl;
 			if (_request.get_target_path() != "/")
 			{
 				fill_content_with_error_code(404);
@@ -630,7 +627,7 @@ void	Response::create_response(void)
 {
 	content_fill_from_file();
 	_response = "HTTP/1.1 ";
-	_response += Utils::Utils::int_to_string(_request.get_code()) + " " + get_text_code(_request.get_code()) + "\r\n";
+	_response += Utils::int_to_string(_request.get_code()) + " " + get_text_code(_request.get_code()) + "\r\n";
 	_response += "Server: Webserv/1.0.0\r\n";
 	_response += "Content-Length: " + Utils::Utils::int_to_string(_content_length) + "\r\n";
 	if (_request.get_code() >= 301 && _request.get_code() <= 308)
