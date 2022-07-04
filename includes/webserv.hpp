@@ -39,7 +39,8 @@
 #include <netinet/in.h>
 #include <sys/time.h>
 #include <vector>
-
+#include <sys/types.h>
+#include <sys/wait.h>
 #include "../srcs/Server/Server.hpp"
 #include "../srcs/File/File.hpp"
 #include "../srcs/Server/Server.hpp"

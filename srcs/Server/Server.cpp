@@ -15,6 +15,16 @@ void	Server::set_config(Config *config)
 	this->_config = config;
 }
 
+void	Server::set_envp(char **envp)
+{
+	this->_envp = envp;
+}
+
+char	**Server::get_envp(void) const
+{
+	return (this->_envp);
+}
+
 int Server::get_master_socket() const
 {
 	return (this->_master_socket);
