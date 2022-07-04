@@ -19,12 +19,24 @@
 #define MAX_CLIENTS 500000
 #define BUFLEN 65536
 
-void Server::start_servers(std::map<int, Config> configs)
+static	int	status = 1;
+
+void	sig_int(int sig)
+{
+	(void)sig;
+	write(2, "\b\b", 2);
+	std::cout << "Shutdown in progress..." << std::endl;
+	status = 0;
+}
+
+void Server::start_servers(std::map<int, Config> configs, char **envp)
 {  
+	signal(SIGINT, sig_int);
 	Server servers[configs.size()];
 	for (int i = 0; i < configs.size(); i++)
 	{
 		servers[i] = Server();
+		servers[i].set_envp(envp);
 		servers[i].set_config(&configs[i]);
 		servers[i].set_port(Utils::string_to_int(configs[i]["port"]));
 	}
@@ -43,9 +55,9 @@ void Server::start_servers(std::map<int, Config> configs)
 	char 	buffer[BUFLEN];
 
 	fd_set readfds;
-
-    while(TRUE)  
-    {  
+	
+    while(status)  
+    {
         //clear the socket set 
         FD_ZERO(&readfds);  
      
@@ -75,6 +87,8 @@ void Server::start_servers(std::map<int, Config> configs)
         //wait for an activity on one of the sockets , timeout is NULL , 
         //so wait indefinitely
         activity = select( max_sd + 1 , &readfds , NULL , NULL , NULL);
+		if (status == 0)
+			break;
 		// puts("selection artisanale");
         if ((activity < 0) && (errno!=EINTR))  
         {  

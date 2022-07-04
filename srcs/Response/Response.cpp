@@ -533,14 +533,79 @@ void	Response::content_fill_from_file(void)
 			else
 				indexFile = get_index_file(root, indexs_from_config);
 		case 2: //File
-			if (File::getFileSize(root + _request.get_target_path() + indexFile) > (Utils::string_to_int(_server.get_config()["client_body_buffer_size"]) * 1000000))
+			std::cout << File::getFileSize(root + _request.get_target_path() + indexFile) << std::endl;
+			std::cout << "'"<<_server.get_config()["client_body_buffer_size"] << "'" << std::endl;
+			if (_server.get_config()["client_body_buffer_size"].empty() && File::getFileSize(root + _request.get_target_path() + indexFile) > 100 * 1000000)
+			{
+				fill_content_with_error_code(413);
+				break;
+			}
+			else if (!_server.get_config()["client_body_buffer_size"].empty() && File::getFileSize(root + _request.get_target_path() + indexFile) > (Utils::string_to_int(_server.get_config()["client_body_buffer_size"]) * 1000000))
 			{
 				fill_content_with_error_code(413);
 				break;
 			}
 			try
 			{
-				content += File::getFile(root + _request.get_target_path() + indexFile);
+				if (_request.get_target_path().find(".php") != std::string::npos)
+				{
+					std::cout << "Hey, PHP" << std::endl;
+					std::map<std::string, std::string>	envp = Utils::envToMap(_server.get_envp());
+
+					char	**arg;
+					int		fd[2];
+					int		fd1[2];
+					int		fd2[2];
+
+					pipe(fd);
+					pipe(fd1);
+					pipe(fd2);
+					arg = (char **)malloc(sizeof(char *) * 2);
+					arg[0] = strdup("/usr/bin/php-cgi");
+					arg[1] = NULL;
+					std::cout << "Command : " << arg[0] << " " << arg[1] << std::endl;
+					int pid = 0;
+					if ((pid = fork()) == 0)
+					{
+						dup2(fd2[0], 0);
+						dup2(fd[1], 1);
+						dup2(fd1[1], 2);
+						close(fd[0]);
+						close(fd[1]);
+						close(fd1[0]);
+						close(fd1[1]);
+						close(fd2[0]);
+						close(fd2[1]);
+						std::cout << "Return error : " << execve("/usr/bin/php-cgi", arg, _server.get_envp()) << std::endl;
+						exit(-1);
+					}
+					write(fd2[1], File::getFile(root + _request.get_target_path() + indexFile).c_str(), File::getFileSize(root + _request.get_target_path() + indexFile));
+					close(fd2[1]);
+					int	exit_code = 0;
+					waitpid(pid, &exit_code, 0);
+					close(fd[1]);
+					close(fd1[1]);
+					close(fd2[0]);
+					std::string res = Utils::read_fd(fd[0]);
+					std::string err = Utils::read_fd(fd1[0]);
+					close(fd[0]);
+					close(fd1[0]);
+					std::cout.flush();
+					std::cerr << "Exit code : " << exit_code << std::endl;
+					std::cerr << "Return : " << res << std::endl;
+					std::cerr << "Error : " << err << std::endl;
+					std::cout.flush();
+					free(arg[0]);
+					free(arg);
+					if (res.find("Content-type") == std::string::npos || exit_code != 0)
+					{
+						fill_content_with_error_code(500);
+						break;
+					}
+					content += res;
+				}
+				else
+					content += File::getFile(root + _request.get_target_path() + indexFile);
 			}
 			catch(const std::exception& e)
 			{
@@ -549,7 +614,13 @@ void	Response::content_fill_from_file(void)
 			}
 			
 			_content = content;
-			_content_length = _content.length();
+			if (_request.get_target_path().find(".php") != std::string::npos)
+			{
+				int	tmp = content.find("\r\n\r\n");
+				_content_length = content.length() - tmp - 4;
+			}
+			else
+				_content_length = _content.length();
 			_extension = get_extension(_request.get_target_path() + indexFile);
 			break;
 	}
@@ -561,14 +632,17 @@ void	Response::create_response(void)
 	_response = "HTTP/1.1 ";
 	_response += Utils::Utils::int_to_string(_request.get_code()) + " " + get_text_code(_request.get_code()) + "\r\n";
 	_response += "Server: Webserv/1.0.0\r\n";
-	_response += "Content-Type: " + get_content_type() + "\r\n";
 	_response += "Content-Length: " + Utils::Utils::int_to_string(_content_length) + "\r\n";
 	if (_request.get_code() >= 301 && _request.get_code() <= 308)
 		_response += "Location: " + get_return() + "\r\n";
-	_response += "\r\n";
+	if (_request.get_target_path().find(".php") == std::string::npos || _request.get_code() == 500)
+	{
+		_response += "Content-Type: " + get_content_type() + "\r\n";
+		_response += "\r\n";
+	}
 	_response += _content + "\r\n";
 
-	// std::cout<< _response;
+	//std::cout<< _response;
 }
 
 std::string		Response::get_response(void) const

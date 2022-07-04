@@ -18,3 +18,75 @@ int Utils::string_to_int(std::string str)
 	ss >> return_int;
 	return (return_int);
 }
+
+std::string	Utils::read_fd(int fd)
+{
+	char	buf[2048];
+	char	*value;
+	char	*tmp;
+	int		size = 0;
+	int		len = 0;
+
+	value = (char *)malloc(sizeof(char));
+	if (!value)
+		return (NULL);
+	len = read(fd, buf, 2048);
+	while (len > 0)
+	{
+		tmp = (char *)malloc((size + len + 1) * sizeof(char));
+		if (!tmp)
+			break ;
+		tmp = strncpy(tmp, value, size);
+		free(value);
+		strncpy(tmp + size, buf, len);
+		value = tmp;
+		size += len;
+		value[size] = '\0';
+		len = read(fd, buf, 2048);
+	}
+	if (len)
+		free(value);
+	std::string v = value;
+	free(value);
+	return (v);
+}
+
+std::map<std::string, std::string>	Utils::envToMap(char **env)
+{
+	std::map<std::string, std::string>	map;
+	char								*key;
+	char								*value;
+
+	while (*env)
+	{
+		key = *env;
+		value = *env;
+		while (value[0] != '=' && value[0] != '\0')
+			value++;
+		if (value[0] == '=')
+		{
+			value[0] = '\0';
+			value++;
+			map[key] = value;
+		}
+		env++;
+	}
+	return (map);
+}
+
+char	**Utils::mapToEnv(std::map<std::string, std::string> map)
+{
+	//char	**env;
+	//int		i;
+//
+	//env = (char **)malloc(sizeof(char *) * (map.size() + 1));
+	//i = 0;
+	//while (map.find(i) != map.end())
+	//{
+	//	env[i] = (char *)malloc(sizeof(char) * (map[i].size() + 1));
+	//	strcpy(env[i], map[i].c_str());
+	//	i++;
+	//}
+	//env[i] = NULL;
+	//return (env);
+}
