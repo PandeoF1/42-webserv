@@ -15,4 +15,3 @@ class Utils
 		static std::map<std::string, std::string>	envToMap(char **env);
 
 };
-

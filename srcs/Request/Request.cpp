@@ -14,8 +14,8 @@ Request::Request(std::string request, Server &server) :
 Request::~Request(void) {
 }
 
-std::map<std::string, int>	Request::get_content_type_map() {
-	return (_content_type_map);
+std::map<std::string, int>	Request::get_accepted_type() {
+	return (_accepted_type);
 }
 
 void    Request::parse()
@@ -47,6 +47,17 @@ void    Request::parse()
 		}
 		i++;
 	}
+	if (_default_request.find("\r\n\r\n") != std::string::npos)
+	{
+		size_t h = _default_request.find("\r\n\r\n");
+		line = "";
+		std::string temp = _default_request.substr(h + 4, _default_request.size() - h - 4);
+		std::istringstream content_chunk(temp);
+		_headers["my_content"] = "";
+		while (std::getline(content_chunk, line))
+			if (line != "")
+				_headers["my_content"] += line += "\r\n";
+	}
 	if (_headers["host"].size() > 0)
 	{
 		int after_space = _headers["host"].find_first_not_of(' ');
@@ -67,25 +78,25 @@ void    Request::parse()
 			std::vector<std::string>	accept_vector = Utils::split_with_comma(_headers["accept"]);
 			if (accept_vector.empty())
 			{
-				_content_type_map["*/*"] = 1;
+				_accepted_type["*/*"] = 1;
 				return ;
 			}
 			for (size_t i = 0; i != accept_vector.size(); i++)
 			{
 				if (accept_vector[i] == "*/*")
 				{
-					_content_type_map["*/*"] = 1;
+					_accepted_type["*/*"] = 1;
 					return ;
 				}
 			}
 			for (i = 0; i != accept_vector.size(); i++)
 			{
 				if (!(accept_vector[i][0] && accept_vector[i][0] == 'q' && accept_vector[i][1] && accept_vector[i][1] == '='))
-					_content_type_map[accept_vector[i]] = 1;
+					_accepted_type[accept_vector[i]] = 1;
 			}
 		}
 		else
-			_content_type_map["*/*"] = 1;
+			_accepted_type["*/*"] = 1;
 	}
 }
 
@@ -220,6 +231,8 @@ std::string	Request::parse_line(std::string line)
 
 	header_lines.push_back("host:");
 	header_lines.push_back("cache-control:");
+	header_lines.push_back("content-type:");
+	header_lines.push_back("content-length:");
 	header_lines.push_back("sec-ch-ua:");
 	header_lines.push_back("sec-ch-mobile:");
 	header_lines.push_back("sec-ch-ua-platform:");

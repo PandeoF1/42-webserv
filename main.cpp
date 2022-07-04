@@ -16,4 +16,3 @@ int main(int argc, char *argv[], char *envp[])
 	}
 	// std::map<int, Config> config = Config::createConfig("config.conf");
 	// Config::print(config);
-}
