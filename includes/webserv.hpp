@@ -20,6 +20,7 @@
 #include <map>
 #include <iostream>
 #include <sstream>
+#include <signal.h>
 
 #ifndef MSG_NOSIGNAL
 # define MSG_NOSIGNAL 0x2000

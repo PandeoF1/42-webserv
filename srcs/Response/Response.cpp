@@ -37,9 +37,9 @@ std::string Response::check_accept_type(std::string str)
 {
 	if (ACCEPT == 1)
 	{
-		if (_request.get_content_type_map()["*/*"])
+		if (_request.get_accepted_type()["*/*"])
 			return (str);
-		if (!_request.get_content_type_map()[str])
+		if (!_request.get_accepted_type()[str])
 		{
 			if (str.find_first_of('/') == std::string::npos)
 			{
@@ -50,7 +50,7 @@ std::string Response::check_accept_type(std::string str)
 			{
 				std::string temp = str.substr(0, str.find_first_of('/') + 1);
 				temp += "*";
-				if (!_request.get_content_type_map()[temp])
+				if (!_request.get_accepted_type()[temp])
 				{
 					fill_content_with_error_code(406);
 					return ("");

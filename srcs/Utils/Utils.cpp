@@ -83,6 +83,7 @@ std::vector<std::string>	Utils::split_with_space(std::string line)
 		}
 	}
 	return (words);
+}
 
 std::string	Utils::read_fd(int fd)
 {
@@ -139,11 +140,10 @@ std::map<std::string, std::string>	Utils::envToMap(char **env)
 	return (map);
 }
 
-char	**Utils::mapToEnv(std::map<std::string, std::string> map)
-{
+// char	**Utils::mapToEnv(std::map<std::string, std::string> map)
+// {
 	//char	**env;
 	//int		i;
-//
 	//env = (char **)malloc(sizeof(char *) * (map.size() + 1));
 	//i = 0;
 	//while (map.find(i) != map.end())
@@ -154,4 +154,4 @@ char	**Utils::mapToEnv(std::map<std::string, std::string> map)
 	//}
 	//env[i] = NULL;
 	//return (env);
-}
+// }
