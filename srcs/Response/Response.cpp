@@ -37,9 +37,9 @@ std::string Response::check_accept_type(std::string str)
 {
 	if (ACCEPT == 1)
 	{
-		if (_request.get_accepted_type()["*/*"])
+		if (_request.get_content_type_map()["*/*"])
 			return (str);
-		if (!_request.get_accepted_type()[str])
+		if (!_request.get_content_type_map()[str])
 		{
 			if (str.find_first_of('/') == std::string::npos)
 			{
@@ -50,7 +50,7 @@ std::string Response::check_accept_type(std::string str)
 			{
 				std::string temp = str.substr(0, str.find_first_of('/') + 1);
 				temp += "*";
-				if (!_request.get_accepted_type()[temp])
+				if (!_request.get_content_type_map()[temp])
 				{
 					fill_content_with_error_code(406);
 					return ("");
@@ -498,8 +498,7 @@ void	Response::content_fill_from_file(void)
 	std::string indexFile = "";
 	if (_request.get_target_path()[_request.get_target_path().find_first_of("/") + 1] == ' ' || _request.get_target_path()[_request.get_target_path().find_first_of("/") + 1] == '\0')
 		indexFile = get_index_file(root, indexs_from_config);
-
-	if (_request.get_method() == "GET")
+  if (_request.get_method() == "GET")
 	{
 		switch(File::getType(root + _request.get_target_path() + indexFile))
 		{
@@ -603,7 +602,6 @@ void	Response::content_fill_from_file(void)
 		int fd;
 		switch(File::getType(root + _request.get_target_path() + indexFile))
 		{
-
 			case -1: //Not exist
 				if ((fd = open((root + _request.get_target_path() + indexFile).c_str(), O_CREAT | O_WRONLY | O_TRUNC, 0644)) == -1)
 				{
@@ -666,11 +664,14 @@ void	Response::create_response(void)
 	_response = "HTTP/1.1 ";
 	_response += Utils::int_to_string(_request.get_code()) + " " + get_text_code(_request.get_code()) + "\r\n";
 	_response += "Server: Webserv/1.0.0\r\n";
-	_response += "Content-Type: " + get_content_type() + "\r\n";
-	_response += "Content-Length: " + Utils::int_to_string(_content_length) + "\r\n";
+	_response += "Content-Length: " + Utils::Utils::int_to_string(_content_length) + "\r\n";
 	if (_request.get_code() >= 301 && _request.get_code() <= 308)
 		_response += "Location: " + get_return() + "\r\n";
-	_response += "\r\n";
+	if (_request.get_target_path().find(".php") == std::string::npos || _request.get_code() == 500)
+	{
+		_response += "Content-Type: " + get_content_type() + "\r\n";
+		_response += "\r\n";
+	}
 	_response += _content + "\r\n";
 
 	//std::cout<< _response;
