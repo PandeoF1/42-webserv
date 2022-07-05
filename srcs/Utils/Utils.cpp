@@ -173,3 +173,16 @@ int	Utils::isSameExt(std::string path, std::string ext)
 		return (1);
 	return (0);
 }
+
+std::string Utils::removeFirstPath(std::string path, std::string toRemove, std::string toAdd)
+{
+	int		i = 0;
+
+	if (toAdd[toAdd.size()] != '/')
+		toAdd += "/";
+	if (toRemove[0] != '/')
+		toRemove = "/" + toRemove;
+	while (path[i] && toRemove[i] && path[i] == toRemove[i])
+		i++;
+	return (toAdd + path.substr(i));
+}

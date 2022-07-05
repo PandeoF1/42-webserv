@@ -7,7 +7,7 @@ Request::Request(std::string request, Server &server) :
 	(void)_server;
 	std::string new_request = request;
 	_default_request = new_request;
-	// std::cout<< _default_request << std::endl;
+	std::cout<< _default_request << std::endl;
 	parse();
 }
 
