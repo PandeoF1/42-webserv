@@ -18,7 +18,7 @@ Location	Location::extractLocation(std::string content, size_t pos)
 	Location	loc;
 
 	pos += std::string("location ").length();
-	loc.setLocation("name", Config::getDataBeforeLine(content, pos));
+	loc.setLocation("name", Location::removeBracket(Config::getDataBeforeLine(content, pos)));
 	pos += Config::getDataBeforeLine(content, pos).length() - 1;
 	std::string tmp = Config::getBracket(content, pos);
 	size_t		global_l = pos;

@@ -7,7 +7,7 @@ Request::Request(std::string request, Server &server) :
 	(void)_server;
 	std::string new_request = request;
 	_default_request = new_request;
-	// std::cout<< _default_request << std::endl;
+	std::cout<< _default_request << std::endl;
 	parse();
 }
 
@@ -333,4 +333,16 @@ void	Request::set_code(int code) {
 
 std::map<std::string, std::string>	Request::get_headers() const {
 	return (_headers);
+}
+
+std::string							Request::get_query_string() const {
+	return (_target_path_queries);
+}
+
+void								Request::setIp(char* ip) {
+	_ip = ip;
+}
+
+std::string							Request::getIp(void) const {
+	return (_ip);
 }

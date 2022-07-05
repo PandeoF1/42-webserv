@@ -13,6 +13,7 @@ class Request
 		std::string							_target_path_queries;
 		std::string                         _default_request;
 		int                                 _return_code;
+		std::string                         _ip;
 
 		void    parse();
 		void    set_method(std::string line);
@@ -28,11 +29,14 @@ class Request
 		~Request(void);
 
 		std::map<std::string, int>			get_accepted_type();
-
+		std::map<std::string, int>			get_content_type_map();
+		std::string							get_query_string() const;
 		std::string							get_target_path() const;
 		std::string							get_method() const;
 		std::map<std::string, std::string>  get_headers() const;
 		int									get_code() const;
 		void								set_code(int code);
+		void								setIp(char *ip);
+		std::string							getIp(void) const;
 		void								set_target_path_force(std::string line);
 };

@@ -21,7 +21,8 @@
 #include <iostream>
 #include <sstream>
 #include <signal.h>
-
+#include <sys/types.h>
+#include <sys/wait.h>
 #ifndef MSG_NOSIGNAL
 # define MSG_NOSIGNAL 0x2000
 #endif
@@ -53,14 +54,15 @@
 #include "../srcs/Utils/Utils.hpp"
 
 #define				Location_Name "location"
-static std::string	Location_Valid_Param[] = {"allow_methods", "root", "alias", "client_body_buffer_size", "index", "cgi_pass", "autoindex", "return"};
-#define				Location_Valid_Param_Length 8
+static std::string	Location_Valid_Param[] = {"allow_methods", "root", "alias", "client_body_buffer_size", "index", "cgi_pass", "autoindex", "return", "cgi_ext"};
+#define				Location_Valid_Param_Length 9
 #define				Location_Methods 0
 #define				Location_Root 1
 #define				Location_Cgi 5
 #define				Location_Buffer 3
 #define             Location_autoindex 6
 #define             Location_Return 7
+#define             Location_Cgi_Ext 8
 
 
 static std::string	Server_Valid_Param[] = {"server_name", "listen", "root", "index", "allow_methods", "client_body_buffer_size", "error_400", "error_403", "error_404", "error_405", "error_413", "error_406", "error_50x"};
