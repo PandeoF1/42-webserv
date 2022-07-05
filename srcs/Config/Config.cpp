@@ -74,6 +74,8 @@ Config		Config::extractConfig(std::string content)
 				throw Config::SyntaxInvalidAt(Config::getLineOfPos(content, pos));
 			pos += getDataBeforeLine(content, pos).length() - 1;
 			pos += Config::getBracket(content, pos).length();
+			if (!tmp["cgi_pass"].empty() && tmp["cgi_ext"].empty())
+				throw Config::SyntaxInvalidAt(Config::getLineOfPos(content, pos));
 		}
 		/* Else, check if it's a valid parameter */
 		else if (Config::isValidParameter(content, pos))

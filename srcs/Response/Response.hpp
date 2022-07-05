@@ -15,6 +15,7 @@ class Response
 		std::string		_response;
 		std::string		_return;
 		size_t			_content_length;
+		int				_cgi;
 
 		void						create_response(void);
 		void						set_extension(void);
