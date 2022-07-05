@@ -37,9 +37,9 @@ std::string Response::check_accept_type(std::string str)
 {
 	if (ACCEPT == 1)
 	{
-		if (_request.get_content_type_map()["*/*"])
+		if (_request.get_accepted_type()["*/*"])
 			return (str);
-		if (!_request.get_content_type_map()[str])
+		if (!_request.get_accepted_type()[str])
 		{
 			if (str.find_first_of('/') == std::string::npos)
 			{
@@ -50,7 +50,7 @@ std::string Response::check_accept_type(std::string str)
 			{
 				std::string temp = str.substr(0, str.find_first_of('/') + 1);
 				temp += "*";
-				if (!_request.get_content_type_map()[temp])
+				if (!_request.get_accepted_type()[temp])
 				{
 					fill_content_with_error_code(406);
 					return ("");
@@ -498,53 +498,151 @@ void	Response::content_fill_from_file(void)
 	std::string indexFile = "";
 	if (_request.get_target_path()[_request.get_target_path().find_first_of("/") + 1] == ' ' || _request.get_target_path()[_request.get_target_path().find_first_of("/") + 1] == '\0')
 		indexFile = get_index_file(root, indexs_from_config);
-
-	switch(File::getType(root + _request.get_target_path() + indexFile))
+  if (_request.get_method() == "GET")
 	{
+		switch(File::getType(root + _request.get_target_path() + indexFile))
+		{
 
-		case -1: //Not exist
-			if (_request.get_target_path() != "/")
-			{
-				fill_content_with_error_code(404);
+			case -1: //Not exist
+				if (_request.get_target_path() != "/")
+				{
+					fill_content_with_error_code(404);
+					break;
+				}
+				indexFile = "";
+			case 1: //Directory
+				if (_request.get_target_path().find_last_of('/') != _request.get_target_path().size() - 1)
+				{
+					std::string	target_path_with_slash = _request.get_target_path() + "/";
+					_request.set_target_path_force(target_path_with_slash);
+				}
+				// std::cout << RED << root + _request.get_target_path() + get_index_file(root, indexs_from_config) << RST << std::endl;
+				if (File::getType(root + get_directory_index(root, indexs_from_config)) == 1)
+				{
+					set_return(get_directory_index(root, indexs_from_config));
+					_request.set_code(301);
+					return ;
+				}
+				if (File::getType(root + _request.get_target_path() + get_index_file(root, indexs_from_config)) == -1)
+				{
+					autoindex(root, indexFile, location);
+					break;
+				} 
+				else
+					indexFile = get_index_file(root, indexs_from_config);
+			case 2: //File
+				if (File::getFileSize(root + _request.get_target_path() + indexFile) > (Utils::string_to_int(_server.get_config()["client_body_buffer_size"]) * 1000000))
+				{
+					fill_content_with_error_code(413);
+					break;
+				}
+				try
+				{
+					content += File::getFile(root + _request.get_target_path() + indexFile);
+				}
+				catch(const std::exception& e)
+				{
+					fill_content_with_error_code(403);
+					break ;
+				}
+				
+				_content = content;
+				_content_length = _content.length();
+				_extension = get_extension(_request.get_target_path() + indexFile);
 				break;
-			}
-			indexFile = "";
-		case 1: //Directory
-			if (_request.get_target_path().find_last_of('/') != _request.get_target_path().size() - 1)
-			{
-				std::string	target_path_with_slash = _request.get_target_path() + "/";
-				_request.set_target_path_force(target_path_with_slash);
-			}
-			// std::cout << RED << root + _request.get_target_path() + get_index_file(root, indexs_from_config) << RST << std::endl;
-			if (File::getType(root + get_directory_index(root, indexs_from_config)) == 1)
-			{
-				set_return(get_directory_index(root, indexs_from_config));
-				_request.set_code(301);
-				return ;
-			}
-			if (File::getType(root + _request.get_target_path() + get_index_file(root, indexs_from_config)) == -1)
-			{
-				autoindex(root, indexFile, location);
+		}
+	}
+	else if (_request.get_method() == "DELETE")
+	{
+		switch(File::getType(root + _request.get_target_path() + indexFile))
+		{
+
+			case -1: //Not exist
+				if (_request.get_target_path() != "/")
+				{
+					fill_content_with_error_code(404);
+					break;
+				}
+				indexFile = "";
+			case 1: //Directory
+				if (_request.get_target_path().find_last_of('/') != _request.get_target_path().size() - 1)
+				{
+					std::string	target_path_with_slash = _request.get_target_path() + "/";
+					_request.set_target_path_force(target_path_with_slash);
+				}
+				if (File::getType(root + get_directory_index(root, indexs_from_config)) == 1)
+				{
+					set_return(get_directory_index(root, indexs_from_config));
+					_request.set_code(301);
+					return ;
+				}
+				if (File::getType(root + _request.get_target_path() + get_index_file(root, indexs_from_config)) == -1)
+				{
+					autoindex(root, indexFile, location);
+					break;
+				} 
+				else
+					indexFile = get_index_file(root, indexs_from_config);
 				break;
-			} 
-			else
-				indexFile = get_index_file(root, indexs_from_config);
-		case 2: //File
-			std::cout << File::getFileSize(root + _request.get_target_path() + indexFile) << std::endl;
-			std::cout << "'"<<_server.get_config()["client_body_buffer_size"] << "'" << std::endl;
-			if (_server.get_config()["client_body_buffer_size"].empty() && File::getFileSize(root + _request.get_target_path() + indexFile) > 100 * 1000000)
-			{
-				fill_content_with_error_code(413);
+			case 2: //File
+				if (unlink((root + _request.get_target_path() + indexFile).c_str()) == -1)
+				{
+					fill_content_with_error_code(403);
+					break;
+				}
+			content += "File deleted";						
+			_content = content;
+			_content_length = _content.length();
+			_extension = get_extension(_request.get_target_path() + indexFile);
+			break;
+		}
+	}
+	else if (_request.get_method() == "PUT")
+	{
+		int fd;
+		switch(File::getType(root + _request.get_target_path() + indexFile))
+		{
+			case -1: //Not exist
+				if ((fd = open((root + _request.get_target_path() + indexFile).c_str(), O_CREAT | O_WRONLY | O_TRUNC, 0644)) == -1)
+				{
+					std::cerr << RED << "Failed to create file" << RST << std::endl;
+					break;
+				}
+				if (_request.get_headers()["content-type"].empty())
+				{
+					fill_content_with_error_code(400);
+					break;
+				}
+				write(fd, _request.get_headers()["my_content"].c_str(), _request.get_headers()["my_content"].length());
+				_request.set_code(201);
 				break;
-			}
-			else if (!_server.get_config()["client_body_buffer_size"].empty() && File::getFileSize(root + _request.get_target_path() + indexFile) > (Utils::string_to_int(_server.get_config()["client_body_buffer_size"]) * 1000000))
-			{
-				fill_content_with_error_code(413);
+			case 1: //Directory
+				if (_request.get_target_path().find_last_of('/') != _request.get_target_path().size() - 1)
+				{
+					std::string	target_path_with_slash = _request.get_target_path() + "/";
+					_request.set_target_path_force(target_path_with_slash);
+				}
+				if (File::getType(root + get_directory_index(root, indexs_from_config)) == 1)
+				{
+					set_return(get_directory_index(root, indexs_from_config));
+					_request.set_code(301);
+					return ;
+				}
+				if (File::getType(root + _request.get_target_path() + get_index_file(root, indexs_from_config)) == -1)
+				{
+					autoindex(root, indexFile, location);
+					break;
+				} 
+				else
+					indexFile = get_index_file(root, indexs_from_config);
 				break;
-			}
-			try
-			{
-				if (_request.get_target_path().find(".php") != std::string::npos)
+			case 2: //File
+				if ((fd = open((root + _request.get_target_path() + indexFile).c_str(), O_CREAT | O_WRONLY | O_TRUNC, 0644)) == -1)
+				{
+					std::cerr << RED << "Failed to change file" << RST << std::endl;
+					break;
+                }
+                if (_request.get_target_path().find(".php") != std::string::npos)
 				{
 					std::cout << "Hey, PHP" << std::endl;
 					std::map<int, std::string>	envp = Utils::envToMap(_server.get_envp());
@@ -645,25 +743,19 @@ void	Response::content_fill_from_file(void)
 					}
 					content += res;
 				}
-				else
-					content += File::getFile(root + _request.get_target_path() + indexFile);
-			}
-			catch(const std::exception& e)
-			{
-				fill_content_with_error_code(403);
-				break ;
-			}
-			
-			_content = content;
-			if (_request.get_target_path().find(".php") != std::string::npos)
-			{
-				int	tmp = content.find("\r\n\r\n");
-				_content_length = content.length() - tmp - 4;
-			}
-			else
-				_content_length = _content.length();
+				if (_request.get_headers()["content-type"].empty())
+				{
+					fill_content_with_error_code(400);
+					break;
+				}
+				//std::cout << _request.get_headers()["my_content"].length() << std::endl;
+				write(fd, _request.get_headers()["my_content"].c_str(), _request.get_headers()["my_content"].length());
+				_request.set_code(204);
+				break;
+			_content_length = _content.length();
 			_extension = get_extension(_request.get_target_path() + indexFile);
 			break;
+		}
 	}
 }
 

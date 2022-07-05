@@ -15,4 +15,3 @@ class Utils
 		static std::map<int, std::string>       envToMap(char **env);
 		static std::string                 	    lastPath(std::string path);
 };
-

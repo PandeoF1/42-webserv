@@ -7,7 +7,7 @@ class Request
 	private:
 		std::string                         _method;
 		std::map<std::string, std::string>  _headers;
-		std::map<std::string, int>		 	_content_type_map;
+		std::map<std::string, int>		 	_accepted_type;
 		Server                              &_server;
 		std::string							_target_path;
 		std::string							_target_path_queries;
@@ -28,6 +28,7 @@ class Request
 		Request(std::string request, Server &server);
 		~Request(void);
 
+		std::map<std::string, int>			get_accepted_type();
 		std::map<std::string, int>			get_content_type_map();
 		std::string							get_query_string() const;
 		std::string							get_target_path() const;
