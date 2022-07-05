@@ -321,3 +321,15 @@ void	Request::set_code(int code) {
 std::map<std::string, std::string>	Request::get_headers() const {
 	return (_headers);
 }
+
+std::string							Request::get_query_string() const {
+	return (_target_path_queries);
+}
+
+void								Request::setIp(char* ip) {
+	_ip = ip;
+}
+
+std::string							Request::getIp(void) const {
+	return (_ip);
+}

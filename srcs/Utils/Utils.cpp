@@ -83,6 +83,7 @@ std::vector<std::string>	Utils::split_with_space(std::string line)
 		}
 	}
 	return (words);
+}
 
 std::string	Utils::read_fd(int fd)
 {
@@ -116,42 +117,45 @@ std::string	Utils::read_fd(int fd)
 	return (v);
 }
 
-std::map<std::string, std::string>	Utils::envToMap(char **env)
+std::map<int, std::string>	Utils::envToMap(char **env)
 {
-	std::map<std::string, std::string>	map;
+	std::map<int, std::string>	map;
 	char								*key;
 	char								*value;
 
 	while (*env)
 	{
-		key = *env;
-		value = *env;
-		while (value[0] != '=' && value[0] != '\0')
-			value++;
-		if (value[0] == '=')
-		{
-			value[0] = '\0';
-			value++;
-			map[key] = value;
-		}
+		map[map.size()] = *env;
 		env++;
 	}
 	return (map);
 }
 
-char	**Utils::mapToEnv(std::map<std::string, std::string> map)
+char	**Utils::mapToEnv(std::map<int, std::string> map)
 {
-	//char	**env;
-	//int		i;
-//
-	//env = (char **)malloc(sizeof(char *) * (map.size() + 1));
-	//i = 0;
-	//while (map.find(i) != map.end())
-	//{
-	//	env[i] = (char *)malloc(sizeof(char) * (map[i].size() + 1));
-	//	strcpy(env[i], map[i].c_str());
-	//	i++;
-	//}
-	//env[i] = NULL;
-	//return (env);
+	char	**env;
+	int		i;
+
+	env = (char **)malloc(sizeof(char *) * (map.size() + 1));
+	i = 0;
+	while (i < map.size())
+	{
+		env[i] = (char *)malloc(sizeof(char) * (map[i].size() + 1));
+		strcpy(env[i], map[i].c_str());
+		i++;
+	}
+	env[i] = NULL;
+	return (env);
+}
+
+std::string	Utils::lastPath(std::string path)
+{
+	int		i;
+	int		j;
+
+	i = path.size() - 1;
+	j = i;
+	while (path[i] != '/' && i > 0)
+		i--;
+	return (path.substr(i + 1, j - i + 1));
 }

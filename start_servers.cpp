@@ -174,7 +174,7 @@ void Server::start_servers(std::map<int, Config> configs, char **envp)
 						if (servers[l].find_client(sd))
 						{
 							Request request(test[k], servers[l]);
-							
+							// request.setIp(inet_ntoa(address.sin_addr)); Il faut me set l'ip du client dans request
 							Response response(request, servers[l]);
 							send(sd, response.get_response().c_str(), response.get_response().size(), MSG_NOSIGNAL);
 							test[k] = "";

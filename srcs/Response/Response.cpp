@@ -547,18 +547,49 @@ void	Response::content_fill_from_file(void)
 				if (_request.get_target_path().find(".php") != std::string::npos)
 				{
 					std::cout << "Hey, PHP" << std::endl;
-					std::map<std::string, std::string>	envp = Utils::envToMap(_server.get_envp());
-
+					std::map<int, std::string>	envp = Utils::envToMap(_server.get_envp());
 					char	**arg;
 					int		fd[2];
 					int		fd1[2];
 					int		fd2[2];
+					
+					int		saveStdin = dup(STDIN_FILENO);
+					int		saveStdout = dup(STDOUT_FILENO);
+					envp[envp.size()] = "SERVER_PROTOCOL=HTTP/1.1";
+					if (_request.get_query_string().empty())
+						envp[envp.size()] = "REQUEST_URI=" + _request.get_target_path();
+					else
+						envp[envp.size()] = "REQUEST_URI=" + _request.get_target_path() + std::string("?") + _request.get_query_string();
+					envp[envp.size()] = "SERVER_PORT=" + _server.get_config()["port"];
+					envp[envp.size()] = "PATH_INFO=" + _request.get_target_path();
+					envp[envp.size()] = "PATH_TRANSLATED=" + _request.get_target_path();
 
+					try
+					{
+						Location tmp = Config::returnPath(_server.get_config(), URL::encode(_request.get_target_path()));
+						envp[envp.size()] = "SCRIPT_NAME=" + _request.get_target_path();
+						envp[envp.size()] = "SCRIPT_FILENAME=" + _request.get_target_path();
+						if (tmp["cgi_pass"].find("php") != std::string::npos)
+							envp[envp.size()] = "REDIRECT_STATUS=200";
+						else
+						{
+							envp[envp.size()] = "SERVER_SOFTWARE=webserv/1.0";
+							envp[envp.size()] = "SERVER_NAME=" + _server.get_config()["ip"];
+							envp[envp.size()] = "GATEWAY_INTERFACE=CGI/1.1";
+							envp[envp.size()] = "REQUEST_METHOD=" + _request.get_method();
+						}
+					}
+					catch(const std::exception& e) {}
+					envp[envp.size()] = "QUERY_STRING=" + _request.get_query_string();
+					envp[envp.size()] = "REMOTE_ADDR=" + _request.getIp();
+					envp[envp.size()] = "CONTENT_TYPE=text/html"; // set content type and content length (content_length)
+					envp[envp.size()] = "CONTENT_LENGTH=65";
+					char	**env = Utils::mapToEnv(envp);
 					pipe(fd);
 					pipe(fd1);
 					pipe(fd2);
 					arg = (char **)malloc(sizeof(char *) * 2);
-					arg[0] = strdup("/usr/bin/php-cgi");
+					arg[0] = strdup("./php-cgi");
 					arg[1] = NULL;
 					std::cout << "Command : " << arg[0] << " " << arg[1] << std::endl;
 					int pid = 0;
@@ -573,8 +604,12 @@ void	Response::content_fill_from_file(void)
 						close(fd1[1]);
 						close(fd2[0]);
 						close(fd2[1]);
-						std::cout << "Return error : " << execve("/usr/bin/php-cgi", arg, _server.get_envp()) << std::endl;
+						std::cout << "Return error : " << execve("./php-cgi", arg, env/*_server.get_envp()*/) << std::endl;
 						exit(-1);
+					}
+					else if (pid == -1)
+					{
+						std::cerr << RED << "Fork crashed." << RST << std::endl;
 					}
 					write(fd2[1], File::getFile(root + _request.get_target_path() + indexFile).c_str(), File::getFileSize(root + _request.get_target_path() + indexFile));
 					close(fd2[1]);
@@ -585,16 +620,25 @@ void	Response::content_fill_from_file(void)
 					close(fd2[0]);
 					std::string res = Utils::read_fd(fd[0]);
 					std::string err = Utils::read_fd(fd1[0]);
+					dup2(saveStdin, STDIN_FILENO);
+					dup2(saveStdout, STDOUT_FILENO);
 					close(fd[0]);
 					close(fd1[0]);
-					std::cout.flush();
-					std::cerr << "Exit code : " << exit_code << std::endl;
-					std::cerr << "Return : " << res << std::endl;
-					std::cerr << "Error : " << err << std::endl;
-					std::cout.flush();
-					free(arg[0]);
+					close(saveStdin);
+					close(saveStdout);
+					//std::cerr << "Exit code : " << exit_code << std::endl;
+					//std::cerr << "Return : " << res << std::endl;
+					//std::cerr << "Error : " << err << std::endl;
+					//exit(0);
+					int	x = 0;
+					while (arg[x])
+						free(arg[x++]);
 					free(arg);
-					if (res.find("Content-type") == std::string::npos || exit_code != 0)
+					x = 0;
+					while (env[x])
+						free(env[x++]);
+					free(env);
+					if ((res.find("Content-type") == std::string::npos && res.find("Content-Type") == std::string::npos) || exit_code != 0 || err.find("Status: 500") != std::string::npos || (err.find("Status: 500") != std::string::npos && err.find("Status: 500") >= 20))
 					{
 						fill_content_with_error_code(500);
 						break;

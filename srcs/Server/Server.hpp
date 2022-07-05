@@ -26,7 +26,7 @@ class Server
 		void 				set_port(int port_entry);
 		void				set_envp(char **envp);
 		void 				set_config(Config *config);
-		char			**get_envp(void) const;
+		char				**get_envp(void) const;
 		void				add_client(int client_socket);
 		void				remove_client(int client_socket);
 		bool 				find_client(int client_socket);
