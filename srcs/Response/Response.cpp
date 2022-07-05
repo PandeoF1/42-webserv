@@ -747,11 +747,11 @@ void	Response::content_fill_from_file(void)
 					std::cerr << RED << "Failed to create file" << RST << std::endl;
 					break;
 				}
-				if (_request.get_headers()["content-type"].empty())
-				{
-					fill_content_with_error_code(400);
-					break;
-				}
+				// if (_request.get_headers()["content-type"].empty())
+				// {
+				// 	fill_content_with_error_code(400);
+				// 	break;
+				// }
 				write(fd, _request.get_headers()["my_content"].c_str(), _request.get_headers()["my_content"].length());
 				_request.set_code(201);
 				break;
@@ -781,11 +781,11 @@ void	Response::content_fill_from_file(void)
 					std::cerr << RED << "Failed to change file" << RST << std::endl;
 					break;
 				}
-				if (_request.get_headers()["content-type"].empty())
-				{
-					fill_content_with_error_code(400);
-					break;
-				}
+				// if (_request.get_headers()["content-type"].empty())
+				// {
+				// 	fill_content_with_error_code(400);
+				// 	break;
+				// }
 				//std::cout << _request.get_headers()["my_content"].length() << std::endl;
 				write(fd, _request.get_headers()["my_content"].c_str(), _request.get_headers()["my_content"].length());
 				_request.set_code(204);
