@@ -159,3 +159,17 @@ std::string	Utils::lastPath(std::string path)
 		i--;
 	return (path.substr(i + 1, j - i + 1));
 }
+
+int	Utils::isSameExt(std::string path, std::string ext)
+{
+	int		i = path.size() - 1;
+	int		j = ext.size() - 1;
+
+	while (path[i] == ext[j])
+	{
+		i--, j--;
+	}
+	if (j == -1)
+		return (1);
+	return (0);
+}
