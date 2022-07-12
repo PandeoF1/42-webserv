@@ -46,7 +46,7 @@ void Server::start_servers(std::map<int, Config> configs, char **envp)
 	for (i = 0; i < max_clients; i++)
 		client_socket[i] = 0;  
 
-	char 	buffer[BUFLEN];
+	std::vector<char> buffer(BUFLEN);
 	std::string test[MAX_CLIENTS];
 
 	fd_set readfds;
@@ -129,11 +129,11 @@ void Server::start_servers(std::map<int, Config> configs, char **envp)
         for (int k = 0; k < max_clients; k++)  
         {  
             sd = client_socket[k];
-			memset(buffer, 0, BUFLEN);
+			memset(buffer.data(), 0, BUFLEN);
             if (FD_ISSET( sd , &readfds))  
             {  
                 //Check if it was for closing , and also read the incoming message)
-                if ((valread = recv( sd , buffer, BUFLEN, 0)) == 0)  
+                if ((valread = recv( sd , buffer.data(), BUFLEN, MSG_DONTWAIT)) == 0  && (test[k].size() == 0 || test[k].find("\r\n\r\n") != std::string::npos))
                 {  
                     //Somebody disconnected , get his details and print  
                     printf("Host disconnected , fd %d\n" , client_socket[k]);                       
@@ -160,15 +160,48 @@ void Server::start_servers(std::map<int, Config> configs, char **envp)
                 else 
                 {
                     //set the string terminating NULL byte on the end of the data read 
-					buffer[valread] = '\0';
-					std::string tmp = buffer;
-					if (test[k].size() > 0)
-						test[k] += tmp;
-					else
-						test[k] = buffer;
-					if (test[k].find("\r\n\r\n") == std::string::npos)
-						break ;
-
+					// buffer[valread] = '\0';
+					// std::string tmp = buffer;
+					// if (test[k].size() > 0)
+					// 	test[k] += tmp;
+					// else
+					// 	test[k] = buffer;
+					// if (test[k].find("\r\n\r\n") == std::string::npos)
+					// 	break ;
+					while (true)
+                    {
+						if (valread < 0)
+							std::cout << BLU << sd << std::endl;
+                        if (valread <= 0)
+                            break;
+                    	//std::cout << GRN << valread << RST << std::endl;
+                        if (valread < 100)
+                            std::cout << RED << buffer.data() << RST << std::endl;
+                        buffer[valread] = '\0';
+                        if (test[k].size() > 0)
+                            test[k] += buffer.data();
+                        else
+                            test[k] = buffer.data();
+                        // if (valread < 0)
+                        // {
+                        //     std::cerr << "Error: couldn't handle request." << std::endl;
+                        //     client_socket[k] = 0;
+                        //     for (int l = 0; l < configs.size(); l++)
+                        //         if (servers[l].find_client(sd))
+                        //             servers[l].remove_client(sd);
+                        //     test[k] = "";
+                        //     close( sd );
+                        //     break ;
+                        // }
+                        memset(buffer.data(), 0, BUFLEN);
+						//std::cout << "here1" << std::endl;
+                        valread = recv( sd , buffer.data(), BUFLEN, MSG_DONTWAIT);
+						if (valread < 0)
+							if (errno == EWOULDBLOCK)
+								break;
+                        std::cout << BLU << "here" << RST << std::endl;
+                        std::cout << valread << std::endl;    
+                    }
 					for (int l = 0; l < configs.size(); l++)
 					{
 						if (servers[l].find_client(sd))
