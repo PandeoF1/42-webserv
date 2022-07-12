@@ -58,6 +58,8 @@ void    Request::parse()
 			if (line != "")
 				_headers["my_content"] += line += "\r\n";
 	}
+	if (checkMaxBody() == false)
+		return ;
 	if (_headers["host"].size() > 0)
 	{
 		int after_space = _headers["host"].find_first_not_of(' ');
@@ -100,6 +102,35 @@ void    Request::parse()
 	}
 }
 
+bool    Request::checkMaxBody()
+{
+    Location location;
+
+    try {
+        location = Config::returnPath(_server.get_config(), URL::encode(get_target_path()));
+        if (!_headers["content-length"].empty())
+        {
+            int content_length_max;
+            if (!location["client_body_buffer_size"].empty())
+                content_length_max = Utils::string_to_int(location["client_body_buffer_size"]);
+            else if (!_server.get_config()["client_body_buffer_size"].empty())
+                content_length_max = Utils::string_to_int(_server.get_config()["client_body_buffer_size"]);
+            else
+                content_length_max = 1000;
+
+            std::cout << content_length_max * 1000000 << std::endl;
+
+            if (Utils::string_to_int(Config::removeWhiteSpace(_headers["content-length"])) > content_length_max * 1000000)
+            {
+                std::cout << RED << "Error: content-length too long" << RST << std::endl;
+                _return_code = 413;
+                return (false);
+            }
+        }
+    } catch (const std::exception& e) {}
+    return (true);
+}
+
 std::string    Request::checkMethod(std::string line)
 {
 	std::vector<std::string>    methods;
@@ -117,6 +148,17 @@ std::string    Request::checkMethod(std::string line)
 
 			for (size_t i = 0; i != allow_methods.size(); i++)
 				methods.push_back(allow_methods[i] + " ");
+		}
+
+		if (Utils::isSameExt(get_target_path(), location["cgi_ext"]))
+		{
+			if (!location["cgi_methods"].empty())	//Allow methods from webserv.hpp if not found in location
+			{
+				std::vector<std::string>	allow_methods = Utils::split_with_space(location["cgi_methods"]);
+
+				for (size_t i = 0; i != allow_methods.size(); i++)
+					methods.push_back(allow_methods[i] + " ");
+			}
 		}
 	}
 	catch (const std::exception& e){

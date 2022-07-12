@@ -69,7 +69,10 @@ Config		Config::extractConfig(std::string content)
 		if (Config::isSameWord(content, pos, Location_Name))
 		{
 			Location tmp = Location::extractLocation(content, pos);
-			config.setLocation(Location::removeBracket(tmp["name"]), tmp);
+			if (Location::removeBracket(tmp["name"])[Location::removeBracket(tmp["name"]).length() - 1] == '/')
+				config.setLocation(Location::removeBracket(tmp["name"]), tmp);
+			else
+				config.setLocation(Location::removeBracket(tmp["name"]) + '/', tmp);
 			if (Location::removeBracket(tmp["name"]).find(" ") != std::string::npos)
 				throw Config::SyntaxInvalidAt(Config::getLineOfPos(content, pos));
 			pos += getDataBeforeLine(content, pos).length() - 1;
@@ -410,6 +413,7 @@ std::string		Config::getPathBefore(std::string path)
 		x--;
 	if (path.substr(0, x) == "")
 		return ("/");
+	std::cout << "path : " << path.substr(0, x) << std::endl;
 	return (path.substr(0, x));
 }
 
@@ -418,8 +422,8 @@ Location		Config::returnPath(Config config, std::string value)
 	if (config.getLocation_str()[value].getData().size() != 0)
 		return (config.getLocation_str()[value]);
 	while ((value = Config::getPathBefore(value)) != "/")
-		if (config.getLocation_str()[value].getData().size() != 0)
-			return (config.getLocation_str()[value]);
+		if (config.getLocation_str()[value + "/"].getData().size() != 0)
+			return (config.getLocation_str()[value + "/"]);
 	if (config.getLocation_str()["/"].getData().size() != 0)
 			return (config.getLocation_str()["/"]);
 	throw std::logic_error("Config::returnPath : Path not found");
