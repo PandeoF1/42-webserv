@@ -383,7 +383,7 @@ void	Response::autoindex(std::string directory, std::string indexFile, Location 
 		{
 			std::stringstream ss;
 			ss << File::getFileSize(directory + _request.get_target_path() + indexFile + listedDirectory[i]);
-			temp += "<li><a href=\"" + URL::encode(_request.get_target_path() + indexFile + listedDirectory[i]) + "\">" + listedDirectory[i] + " - " + ss.str() + " byte(s)" + "</a></li>";
+			temp += "<li><a href=\"" + URL::encode(Utils::RemoveBeginString((_request.get_target_path() + indexFile + listedDirectory[i]), inLocationOrConfig(location, _server.get_config(), "root"))) + "\">" + listedDirectory[i] + " - " + ss.str() + " byte(s)" + "</a></li>";
 		}
 		i = templateFile.find("$files_and_directories");
 		templateFile.erase(i, 23);
@@ -398,7 +398,12 @@ void	Response::autoindex(std::string directory, std::string indexFile, Location 
 		if (_request.get_target_path() == "/")
 			parent_directory = "";
 		else
-			parent_directory = "<li><a href=\"" +  URL::encode(Config::getPathBefore(Config::getPathBefore(_request.get_target_path() + indexFile))) + "\">../</a></li>";
+		{
+			if (inLocationOrConfig(location, _server.get_config(), "root") != Config::getPathBefore(Config::getPathBefore(_request.get_target_path() + indexFile)))
+				parent_directory = "<li><a href=\"" +  URL::encode(Utils::RemoveBeginString(Config::getPathBefore(Config::getPathBefore(_request.get_target_path() + indexFile)), inLocationOrConfig(location, _server.get_config(), "root"))) + "\">../</a></li>";
+			else
+				parent_directory = "<li><a href=\"" +  URL::encode("/") + "\">../</a></li>";
+		}
 
 		templateFile.insert(i, parent_directory);
 		i += parent_directory.size();

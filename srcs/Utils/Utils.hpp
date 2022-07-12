@@ -16,5 +16,6 @@ class Utils
 		static std::string                 	    lastPath(std::string path);
 		static int								isSameExt(std::string path, std::string ext);
 		static std::string						removeFirstPath(std::string path, std::string toRemove, std::string toAdd);
+		static std::string						RemoveBeginString(std::string string, std::string ToRemove);
 
 };

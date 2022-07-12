@@ -186,3 +186,14 @@ std::string Utils::removeFirstPath(std::string path, std::string toRemove, std::
 		i++;
 	return (toAdd + path.substr(i));
 }
+
+std::string Utils::RemoveBeginString(std::string string, std::string ToRemove)
+{
+	int i = 0;
+
+	while (string[i] && ToRemove[i] && string[i] == ToRemove[i])
+		i++;
+	if (i == ToRemove.size())
+		return (string.substr(i));
+	return (string);
+}

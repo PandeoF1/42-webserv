@@ -1,8 +1,9 @@
 {
     "makefile.extensionOutputFolder": "./.vscode",
     "files.associations": {
-        "map": "cpp",
-        "vector": "cpp",
-        "xstring": "cpp"
-    }
+		"map": "cpp",
+		"vector": "cpp",
+		"xstring": "cpp",
+		"string": "cpp"
+	}
 }
