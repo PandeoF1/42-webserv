@@ -54,8 +54,8 @@
 #include "../srcs/Utils/Utils.hpp"
 
 #define				Location_Name "location"
-static std::string	Location_Valid_Param[] = {"allow_methods", "root", "alias", "client_body_buffer_size", "index", "cgi_pass", "autoindex", "return", "cgi_ext"};
-#define				Location_Valid_Param_Length 9
+static std::string	Location_Valid_Param[] = {"allow_methods", "root", "alias", "client_body_buffer_size", "index", "cgi_pass", "autoindex", "return", "cgi_ext", "cgi_methods"};
+#define				Location_Valid_Param_Length 10
 #define				Location_Methods 0
 #define				Location_Root 1
 #define				Location_Cgi 5
