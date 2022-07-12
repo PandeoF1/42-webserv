@@ -383,7 +383,7 @@ void	Response::autoindex(std::string directory, std::string indexFile, Location 
 		{
 			std::stringstream ss;
 			ss << File::getFileSize(directory + _request.get_target_path() + indexFile + listedDirectory[i]);
-			temp += "<li><a href=\"" + URL::encode(_request.get_target_path() + indexFile + listedDirectory[i]) + "\">" + listedDirectory[i] + " - " + ss.str() + " byte(s)" + "</a></li>";
+			temp += "<li><a href=\"" + URL::encode(Utils::RemoveBeginString((_request.get_target_path() + indexFile + listedDirectory[i]), inLocationOrConfig(location, _server.get_config(), "root"))) + "\">" + listedDirectory[i] + " - " + ss.str() + " byte(s)" + "</a></li>";
 		}
 		i = templateFile.find("$files_and_directories");
 		templateFile.erase(i, 23);
@@ -398,7 +398,12 @@ void	Response::autoindex(std::string directory, std::string indexFile, Location 
 		if (_request.get_target_path() == "/")
 			parent_directory = "";
 		else
-			parent_directory = "<li><a href=\"" +  URL::encode(Config::getPathBefore(Config::getPathBefore(_request.get_target_path() + indexFile))) + "\">../</a></li>";
+		{
+			if (inLocationOrConfig(location, _server.get_config(), "root") != Config::getPathBefore(Config::getPathBefore(_request.get_target_path() + indexFile)))
+				parent_directory = "<li><a href=\"" +  URL::encode(Utils::RemoveBeginString(Config::getPathBefore(Config::getPathBefore(_request.get_target_path() + indexFile)), inLocationOrConfig(location, _server.get_config(), "root"))) + "\">../</a></li>";
+			else
+				parent_directory = "<li><a href=\"" +  URL::encode("/") + "\">../</a></li>";
+		}
 
 		templateFile.insert(i, parent_directory);
 		i += parent_directory.size();
@@ -583,9 +588,12 @@ void	Response::content_fill_from_file(void)
 					envp[envp.size()] = "REMOTE_ADDR=" + _request.getIp();
 					if (_request.get_method() == "POST")
 					{
-						envp[envp.size()] = "QUERY_STRING=" + _request.get_headers()["my_content"].substr(0, _request.get_headers()["my_content"].find("\r\n\r\n"));
+						envp[envp.size()] = "QUERY_STRING=" + _request.get_headers()["my_content"].substr(0, _request.get_headers()["my_content"].find("\r\n\r\n")).substr(0, _request.get_headers()["my_content"].substr(0, _request.get_headers()["my_content"].find("\r\n\r\n")).size() - 1);
+						std::cerr << envp[envp.size() - 1] << std::endl;
 						envp[envp.size()] = "CONTENT_TYPE=" +  Config::removeWhiteSpace(_request.get_headers()["content-type"]); // set content type and content length (content_length)
-						envp[envp.size()] = "CONTENT_LENGTH="+ Config::removeWhiteSpace(_request.get_headers()["content-length"]);
+						std::cerr << envp[envp.size() - 1] << std::endl;
+						envp[envp.size()] = "CONTENT_LENGTH=" + Utils::int_to_string(Utils::string_to_int(Config::removeWhiteSpace(_request.get_headers()["content-length"])) - 1);
+						std::cerr << envp[envp.size() - 1] << std::endl;
 					}
 					else
 						envp[envp.size()] = "QUERY_STRING=" + _request.get_query_string();
@@ -641,8 +649,8 @@ void	Response::content_fill_from_file(void)
 					close(saveStdout);
 					close(saveStderr);
 					//std::cerr << "Exit code : " << exit_code << std::endl;
-					//std::cerr << "Return : " << res << std::endl;
-					//std::cerr << "Error : " << err << std::endl;
+					std::cerr << "Return : " << res << std::endl;
+					std::cerr << "Error : " << err << std::endl;
 					//exit(0);
 					int	x = 0;
 					while (arg[x])
@@ -813,6 +821,8 @@ void	Response::create_response(void)
 		_response += "\r\n";
 	}
 	_response += _content + "\r\n";
+
+	std::cout << BLU << _content_length << RST << std::endl;
 
 	//std::cout<< _response;
 }
