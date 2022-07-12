@@ -15,4 +15,6 @@ class Utils
 		static std::map<int, std::string>       envToMap(char **env);
 		static std::string                 	    lastPath(std::string path);
 		static int								isSameExt(std::string path, std::string ext);
+		static std::string						removeFirstPath(std::string path, std::string toRemove, std::string toAdd);
+
 };

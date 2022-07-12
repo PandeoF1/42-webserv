@@ -488,19 +488,36 @@ void	Response::content_fill_from_file(void)
 		_request.set_code(return_code);
 		return ;
 	}
-
+	std::string name;
+	std::cout << "target path : " << _request.get_target_path() << " et " << (root = inLocationOrConfig(location, _server.get_config(), "root")) << std::endl;
 	if ((root = inLocationOrConfig(location, _server.get_config(), "root")).empty())
 		root = "www";
+	if (!(name = inLocationOrConfig(location, _server.get_config(), "name")).empty())
+	{
+		std::cout << "Name : " << name << std::endl;
+		_request.set_target_path_force(Utils::removeFirstPath(_request.get_target_path(), name, root));
+		root = "";
+	}
+	//else
+	//{
+	//	std::cout << "target path : " << _request.get_target_path() << " et " << Utils::lastPath(_request.get_target_path()) << std::endl;
+	//	if (Utils::lastPath(_request.get_target_path()) != "")
+	//		_request.set_target_path_force("/" + Utils::lastPath(_request.get_target_path()));
+	//	else
+	//		_request.set_target_path_force("/");
+	//}
+	std::cout << "target path : " << _request.get_target_path() << std::endl;
 	if ((indexs_from_config = inLocationOrConfig(location, _server.get_config(), "index")).empty())
 		indexs_from_config = "index.html";
-
 	// std::cout << GRN << location["index"] << RST << std::endl;
 
 	std::string indexFile = "";
 	if (_request.get_target_path()[_request.get_target_path().find_first_of("/") + 1] == ' ' || _request.get_target_path()[_request.get_target_path().find_first_of("/") + 1] == '\0')
 		indexFile = get_index_file(root, indexs_from_config);
+	std::cout << indexFile << std::endl;
 	if (_request.get_method() == "GET" || _request.get_method() == "POST")
 	{
+		printf("On regard ici : %s ---- %s\n", (root + _request.get_target_path() + indexFile).c_str(), location["index"].c_str());
 		switch(File::getType(root + _request.get_target_path() + indexFile))
 		{
 			case -1: //Not exist
@@ -730,11 +747,11 @@ void	Response::content_fill_from_file(void)
 					std::cerr << RED << "Failed to create file" << RST << std::endl;
 					break;
 				}
-				if (_request.get_headers()["content-type"].empty())
-				{
-					fill_content_with_error_code(400);
-					break;
-				}
+				// if (_request.get_headers()["content-type"].empty())
+				// {
+				// 	fill_content_with_error_code(400);
+				// 	break;
+				// }
 				write(fd, _request.get_headers()["my_content"].c_str(), _request.get_headers()["my_content"].length());
 				_request.set_code(201);
 				break;
@@ -764,11 +781,11 @@ void	Response::content_fill_from_file(void)
 					std::cerr << RED << "Failed to change file" << RST << std::endl;
 					break;
 				}
-				if (_request.get_headers()["content-type"].empty())
-				{
-					fill_content_with_error_code(400);
-					break;
-				}
+				// if (_request.get_headers()["content-type"].empty())
+				// {
+				// 	fill_content_with_error_code(400);
+				// 	break;
+				// }
 				//std::cout << _request.get_headers()["my_content"].length() << std::endl;
 				write(fd, _request.get_headers()["my_content"].c_str(), _request.get_headers()["my_content"].length());
 				_request.set_code(204);
