@@ -69,9 +69,9 @@ class Config {
 		static Location		returnPath(Config config, std::string path);
 	private:
 
-		static int	_verbose;
-		std::map<std::string, std::string>	_data;
-		std::map<int, Location>				_location;
+		static int									 _verbose;
+		std::map<std::string, std::string>			_data;
+		std::map<int, Location>						_location;
 		std::map<std::string, Location>				_location_str;
 	public:
 		class IndexOutOfRange : public std::exception
