@@ -69,7 +69,8 @@ Host: %s\r\n\
     }
     else{
       len = recv(sock, buf, BUFSIZ, 0);
-      if(len == 0)break;
+      if(len <= 0)
+	  	break;
       result = realloc(result, (strlen(result) + len + 1) * sizeof(char));
       strncat(result, buf, len);
     }

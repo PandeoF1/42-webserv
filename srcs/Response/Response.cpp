@@ -589,11 +589,8 @@ void	Response::content_fill_from_file(void)
 					if (_request.get_method() == "POST")
 					{
 						envp[envp.size()] = "QUERY_STRING=" + _request.get_headers()["my_content"].substr(0, _request.get_headers()["my_content"].find("\r\n\r\n")).substr(0, _request.get_headers()["my_content"].substr(0, _request.get_headers()["my_content"].find("\r\n\r\n")).size() - 1);
-						std::cerr << envp[envp.size() - 1] << std::endl;
 						envp[envp.size()] = "CONTENT_TYPE=" +  Config::removeWhiteSpace(_request.get_headers()["content-type"]); // set content type and content length (content_length)
-						std::cerr << envp[envp.size() - 1] << std::endl;
 						envp[envp.size()] = "CONTENT_LENGTH=" + Utils::int_to_string(Utils::string_to_int(Config::removeWhiteSpace(_request.get_headers()["content-length"])) - 1);
-						std::cerr << envp[envp.size() - 1] << std::endl;
 					}
 					else
 						envp[envp.size()] = "QUERY_STRING=" + _request.get_query_string();
@@ -627,10 +624,12 @@ void	Response::content_fill_from_file(void)
 					if (Utils::isSameExt(_request.get_target_path(), ".php") && _request.get_method() == "POST")
 					{
 						std::string v = std::string("<?php $_POST = $_GET; $_GET = array();?>\n") + File::getFile(root + _request.get_target_path() + indexFile); 
-						write(fd2[1], v.c_str(), v.length());
+						if (write(fd2[1], v.c_str(), v.length()) == -1)
+							std::cerr << RED << "Write error." << RST << std::endl;
 					}
 					else
-						write(fd2[1], File::getFile(root + _request.get_target_path() + indexFile).c_str(), File::getFileSize(root + _request.get_target_path() + indexFile));
+						if (write(fd2[1], File::getFile(root + _request.get_target_path() + indexFile).c_str(), File::getFileSize(root + _request.get_target_path() + indexFile)) == -1)
+							std::cerr << RED << "Write error." << RST << std::endl;
 					close(fd2[1]);
 					int	exit_code = 0;
 					waitpid(pid, &exit_code, 0);
@@ -760,7 +759,8 @@ void	Response::content_fill_from_file(void)
 				// 	fill_content_with_error_code(400);
 				// 	break;
 				// }
-				write(fd, _request.get_headers()["my_content"].c_str(), _request.get_headers()["my_content"].length());
+				if (write(fd, _request.get_headers()["my_content"].c_str(), _request.get_headers()["my_content"].length()) == -1)
+					std::cerr << RED << "Failed to write file" << RST << std::endl;
 				_request.set_code(201);
 				break;
 			case 1: //Directory
@@ -795,7 +795,8 @@ void	Response::content_fill_from_file(void)
 				// 	break;
 				// }
 				//std::cout << _request.get_headers()["my_content"].length() << std::endl;
-				write(fd, _request.get_headers()["my_content"].c_str(), _request.get_headers()["my_content"].length());
+				if (write(fd, _request.get_headers()["my_content"].c_str(), _request.get_headers()["my_content"].length()) == -1)
+					std::cerr << RED << "Failed to write file" << RST << std::endl;
 				_request.set_code(204);
 				break;
 			_content_length = _content.length();
@@ -822,9 +823,9 @@ void	Response::create_response(void)
 	}
 	_response += _content + "\r\n";
 
-	std::cout << BLU << _content_length << RST << std::endl;
+	// std::cout << BLU << _content_length << RST << std::endl;
 
-	//std::cout<< _response;
+	// std::cout << RED << _request.get_code() << RST << std::endl;
 }
 
 std::string		Response::get_response(void) const

@@ -24,7 +24,8 @@ static	int	status = 1;
 void	sig_int(int sig)
 {
 	(void)sig;
-	write(2, "\b\b", 2);
+	if (write(2, "\b\b", 2) == -1)
+		std::cerr << RED << "Write error." << RST << std::endl;
 	std::cout << "Shutdown in progress..." << std::endl;
 	status = 0;
 }
@@ -170,13 +171,8 @@ void Server::start_servers(std::map<int, Config> configs, char **envp)
 					// 	break ;
 					while (true)
                     {
-						if (valread < 0)
-							std::cout << BLU << sd << std::endl;
                         if (valread <= 0)
                             break;
-                    	//std::cout << GRN << valread << RST << std::endl;
-                        if (valread < 100)
-                            std::cout << RED << buffer.data() << RST << std::endl;
                         buffer[valread] = '\0';
                         if (test[k].size() > 0)
                             test[k] += buffer.data();
@@ -199,8 +195,8 @@ void Server::start_servers(std::map<int, Config> configs, char **envp)
 						if (valread < 0)
 							if (errno == EWOULDBLOCK)
 								break;
-                        std::cout << BLU << "here" << RST << std::endl;
-                        std::cout << valread << std::endl;    
+                        // std::cout << BLU << "here" << RST << std::endl;
+                        // std::cout << valread << std::endl;    
                     }
 					for (int l = 0; l < configs.size(); l++)
 					{
