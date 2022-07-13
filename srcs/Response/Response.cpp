@@ -8,8 +8,7 @@ Response::Response(Request &request, Server &server) : _request(request), _serve
 }
 
 Response::~Response(void)
-{
-}
+{}
 
 void	Response::set_extension(void)
 {
@@ -352,8 +351,6 @@ void	Response::autoindex(std::string directory, std::string indexFile, Location 
 		return ;
 	}
 
-	// if (listedDirectory.size() == 0)
-	// 	fill_content_with_error_code(403);
 	if (location["autoindex"] != "on")
 		fill_content_with_error_code(404);
 	else
@@ -440,10 +437,8 @@ std::string	Response::get_directory_index(std::string directory, std::string ind
 	if (indexs.size() == 0)
 		return ("index.html");
 	for (int i = 0; i < indexs.size(); i++)
-	{
 		if (File::getType(directory + indexs[i]) != -1)
 			return (indexs[i]);
-	}
 	return ("index.html");
 }
 
@@ -480,9 +475,7 @@ void	Response::content_fill_from_file(void)
 	try {
 		location = Config::returnPath(_server.get_config(), URL::encode(_request.get_target_path()));
 	}
-	catch (const std::exception& e){ 
-		// std::cout << RED << "JE PETE A L'EXCEPTION" << RST << std::endl;
-	}
+	catch (const std::exception& e){}
 
 	if (!location["return"].empty())
 	{
@@ -691,10 +684,6 @@ void	Response::create_response(void)
 		_response += "\r\n";
 	}
 	_response += _content + "\r\n";
-
-	// std::cout << BLU << _content_length << RST << std::endl;
-
-	// std::cout << RED << _request.get_code() << RST << std::endl;
 }
 
 std::string		Response::get_response(void) const
