@@ -503,26 +503,14 @@ void	Response::content_fill_from_file(void)
 		_request.set_target_path_force(Utils::removeFirstPath(_request.get_target_path(), name, root));
 		root = "";
 	}
-	//else
-	//{
-	//	std::cout << "target path : " << _request.get_target_path() << " et " << Utils::lastPath(_request.get_target_path()) << std::endl;
-	//	if (Utils::lastPath(_request.get_target_path()) != "")
-	//		_request.set_target_path_force("/" + Utils::lastPath(_request.get_target_path()));
-	//	else
-	//		_request.set_target_path_force("/");
-	//}
-	std::cout << "target path : " << _request.get_target_path() << std::endl;
 	if ((indexs_from_config = inLocationOrConfig(location, _server.get_config(), "index")).empty())
 		indexs_from_config = "index.html";
-	// std::cout << GRN << location["index"] << RST << std::endl;
-
 	std::string indexFile = "";
 	if (_request.get_target_path()[_request.get_target_path().find_first_of("/") + 1] == ' ' || _request.get_target_path()[_request.get_target_path().find_first_of("/") + 1] == '\0')
 		indexFile = get_index_file(root, indexs_from_config);
 	std::cout << indexFile << std::endl;
 	if (_request.get_method() == "GET" || _request.get_method() == "POST")
 	{
-		printf("On regard ici : %s ---- %s\n", (root + _request.get_target_path() + indexFile).c_str(), location["index"].c_str());
 		switch(File::getType(root + _request.get_target_path() + indexFile))
 		{
 			case -1: //Not exist
@@ -538,7 +526,6 @@ void	Response::content_fill_from_file(void)
 					std::string	target_path_with_slash = _request.get_target_path() + "/";
 					_request.set_target_path_force(target_path_with_slash);
 				}
-				// std::cout << RED << root + _request.get_target_path() + get_index_file(root, indexs_from_config) << RST << std::endl;
 				if (File::getType(root + get_directory_index(root, indexs_from_config)) == 1)
 				{
 					set_return(get_directory_index(root, indexs_from_config));
@@ -555,118 +542,11 @@ void	Response::content_fill_from_file(void)
 			case 2: //File
 				if (Utils::isSameExt(_request.get_target_path(), location["cgi_ext"]))
 				{
-					std::map<int, std::string>	envp = Utils::envToMap(_server.get_envp());
-					char	**arg;
-					int		fd[2];
-					int		fd1[2];
-					int		fd2[2];
-					
-					int		saveStdin = dup(STDIN_FILENO);
-					int		saveStdout = dup(STDOUT_FILENO);
-					int		saveStderr = dup(STDERR_FILENO);
-					envp[envp.size()] = "SERVER_PROTOCOL=HTTP/1.1";
-					if (_request.get_query_string().empty())
-						envp[envp.size()] = "REQUEST_URI=" + _request.get_target_path();
-					else
-						envp[envp.size()] = "REQUEST_URI=" + _request.get_target_path() + std::string("?") + _request.get_query_string();
-					envp[envp.size()] = "SERVER_PORT=" + _server.get_config()["port"];
-					envp[envp.size()] = "PATH_INFO=" + _request.get_target_path();
-					envp[envp.size()] = "PATH_TRANSLATED=" + _request.get_target_path();
-					std::string	cgi_name;
-					cgi_name = location["cgi_pass"];
-					envp[envp.size()] = "SCRIPT_NAME=" + _request.get_target_path();
-					envp[envp.size()] = "SCRIPT_FILENAME=" + _request.get_target_path();
-					if (Utils::isSameExt(_request.get_target_path(), ".php"))
-						envp[envp.size()] = "REDIRECT_STATUS=200";
-					else
-					{
-						envp[envp.size()] = "SERVER_SOFTWARE=webserv/1.0";
-						envp[envp.size()] = "SERVER_NAME=" + _server.get_config()["ip"];
-						envp[envp.size()] = "GATEWAY_INTERFACE=CGI/1.1";
-						envp[envp.size()] = "REQUEST_METHOD=" + _request.get_method();
-					}
-					envp[envp.size()] = "REMOTE_ADDR=" + _request.getIp();
-					if (_request.get_method() == "POST")
-					{
-						envp[envp.size()] = "QUERY_STRING=" + _request.get_headers()["my_content"].substr(0, _request.get_headers()["my_content"].find("\r\n\r\n")).substr(0, _request.get_headers()["my_content"].substr(0, _request.get_headers()["my_content"].find("\r\n\r\n")).size() - 1);
-						envp[envp.size()] = "CONTENT_TYPE=" +  Config::removeWhiteSpace(_request.get_headers()["content-type"]); // set content type and content length (content_length)
-						envp[envp.size()] = "CONTENT_LENGTH=" + Utils::int_to_string(Utils::string_to_int(Config::removeWhiteSpace(_request.get_headers()["content-length"])) - 1);
-					}
-					else
-						envp[envp.size()] = "QUERY_STRING=" + _request.get_query_string();
-					char	**env = Utils::mapToEnv(envp);
-					pipe(fd);
-					pipe(fd1);
-					pipe(fd2);
-					arg = (char **)malloc(sizeof(char *) * 2);
-					arg[0] = strdup(cgi_name.c_str());
-					arg[1] = NULL;
-					int pid = 0;
-					if ((pid = fork()) == 0)
-					{
-						dup2(fd2[0], 0);
-						dup2(fd[1], 1);
-						dup2(fd1[1], 2);
-						close(fd[0]);
-						close(fd[1]);
-						close(fd1[0]);
-						close(fd1[1]);
-						close(fd2[0]);
-						close(fd2[1]);
-						std::cout << "Return error : " << execve(cgi_name.c_str(), arg, env) << std::endl;
-						exit(-1);
-					}
-					else if (pid == -1)
-					{
-						std::cerr << RED << "Fork crashed." << RST << std::endl;
-					}
-					
-					if (Utils::isSameExt(_request.get_target_path(), ".php") && _request.get_method() == "POST")
-					{
-						std::string v = std::string("<?php $_POST = $_GET; $_GET = array();?>\n") + File::getFile(root + _request.get_target_path() + indexFile); 
-						if (write(fd2[1], v.c_str(), v.length()) == -1)
-							std::cerr << RED << "Write error." << RST << std::endl;
-					}
-					else
-						if (write(fd2[1], File::getFile(root + _request.get_target_path() + indexFile).c_str(), File::getFileSize(root + _request.get_target_path() + indexFile)) == -1)
-							std::cerr << RED << "Write error." << RST << std::endl;
-					close(fd2[1]);
-					int	exit_code = 0;
-					waitpid(pid, &exit_code, 0);
-					close(fd[1]);
-					close(fd1[1]);
-					close(fd2[0]);
-					std::string res = Utils::read_fd(fd[0]);
-					std::string err = Utils::read_fd(fd1[0]);
-					dup2(saveStdin, STDIN_FILENO);
-					dup2(saveStdout, STDOUT_FILENO);
-					dup2(saveStderr, STDERR_FILENO);
-					
-					close(fd[0]);
-					close(fd1[0]);
-					close(saveStdin);
-					close(saveStdout);
-					close(saveStderr);
-					//std::cerr << "Exit code : " << exit_code << std::endl;
-					std::cerr << "Return : " << res << std::endl;
-					std::cerr << "Error : " << err << std::endl;
-					//exit(0);
-					int	x = 0;
-					while (arg[x])
-						free(arg[x++]);
-					free(arg);
-					x = 0;
-					while (env[x])
-						free(env[x++]);
-					free(env);
-					if ((res.find("Content-type") == std::string::npos && res.find("Content-Type") == std::string::npos) || exit_code != 0 || err.find("Status: 500") != std::string::npos || (err.find("Status: 500") != std::string::npos && err.find("Status: 500") >= 20))
+					if (this->CGI(root, indexFile, location, &content) == -1)
 					{
 						fill_content_with_error_code(500);
 						break;
 					}
-
-					content += res;
-					_cgi = 1;
 				}
 				else if (File::getFileSize(root + _request.get_target_path() + indexFile) > (Utils::string_to_int(_server.get_config()["client_body_buffer_size"]) * 1000000))
 				{
@@ -754,11 +634,6 @@ void	Response::content_fill_from_file(void)
 					std::cerr << RED << "Failed to create file" << RST << std::endl;
 					break;
 				}
-				// if (_request.get_headers()["content-type"].empty())
-				// {
-				// 	fill_content_with_error_code(400);
-				// 	break;
-				// }
 				if (write(fd, _request.get_headers()["my_content"].c_str(), _request.get_headers()["my_content"].length()) == -1)
 					std::cerr << RED << "Failed to write file" << RST << std::endl;
 				_request.set_code(201);
@@ -789,12 +664,6 @@ void	Response::content_fill_from_file(void)
 					std::cerr << RED << "Failed to change file" << RST << std::endl;
 					break;
 				}
-				// if (_request.get_headers()["content-type"].empty())
-				// {
-				// 	fill_content_with_error_code(400);
-				// 	break;
-				// }
-				//std::cout << _request.get_headers()["my_content"].length() << std::endl;
 				if (write(fd, _request.get_headers()["my_content"].c_str(), _request.get_headers()["my_content"].length()) == -1)
 					std::cerr << RED << "Failed to write file" << RST << std::endl;
 				_request.set_code(204);
@@ -831,4 +700,125 @@ void	Response::create_response(void)
 std::string		Response::get_response(void) const
 {
 	return (_response);
+}
+
+int				Response::CGI(std::string root, std::string indexFile, Location location, std::string *content)
+{
+	std::map<int, std::string>	envp = Utils::envToMap(_server.get_envp());
+	char	**arg;
+	int		fd[2];
+	int		fd1[2];
+	int		fd2[2];
+	
+	int		saveStdin = dup(STDIN_FILENO);
+	int		saveStdout = dup(STDOUT_FILENO);
+	int		saveStderr = dup(STDERR_FILENO);
+	envp[envp.size()] = "SERVER_PROTOCOL=HTTP/1.1";
+	if (_request.get_query_string().empty())
+		envp[envp.size()] = "REQUEST_URI=" + _request.get_target_path();
+	else
+		envp[envp.size()] = "REQUEST_URI=" + _request.get_target_path() + std::string("?") + _request.get_query_string();
+	envp[envp.size()] = "SERVER_PORT=" + _server.get_config()["port"];
+	envp[envp.size()] = "PATH_INFO=" + _request.get_target_path();
+	envp[envp.size()] = "PATH_TRANSLATED=" + _request.get_target_path();
+	std::string	cgi_name;
+	cgi_name = location["cgi_pass"];
+	envp[envp.size()] = "SCRIPT_NAME=" + _request.get_target_path();
+	envp[envp.size()] = "SCRIPT_FILENAME=" + _request.get_target_path();
+	if (Utils::isSameExt(_request.get_target_path(), ".php"))
+		envp[envp.size()] = "REDIRECT_STATUS=200";
+	else
+	{
+		envp[envp.size()] = "SERVER_SOFTWARE=webserv/1.0";
+		envp[envp.size()] = "SERVER_NAME=" + _server.get_config()["ip"];
+		envp[envp.size()] = "GATEWAY_INTERFACE=CGI/1.1";
+		envp[envp.size()] = "REQUEST_METHOD=" + _request.get_method();
+	}
+	envp[envp.size()] = "REMOTE_ADDR=" + _request.getIp();
+	if (_request.get_method() == "POST")
+	{
+		envp[envp.size()] = "QUERY_STRING=" + _request.get_headers()["my_content"].substr(0, _request.get_headers()["my_content"].find("\r\n\r\n")).substr(0, _request.get_headers()["my_content"].substr(0, _request.get_headers()["my_content"].find("\r\n\r\n")).size() - 1);
+		envp[envp.size()] = "CONTENT_TYPE=" +  Config::removeWhiteSpace(_request.get_headers()["content-type"]); // set content type and content length (content_length)
+		envp[envp.size()] = "CONTENT_LENGTH=" + Utils::int_to_string(Utils::string_to_int(Config::removeWhiteSpace(_request.get_headers()["content-length"])) - 1);
+	}
+	else
+		envp[envp.size()] = "QUERY_STRING=" + _request.get_query_string();
+	char	**env = Utils::mapToEnv(envp);
+	pipe(fd);
+	pipe(fd1);
+	pipe(fd2);
+	arg = (char **)malloc(sizeof(char *) * 2);
+	if (!arg)
+	{
+		std::cerr << "Error: malloc failed" << std::endl;
+		exit(-1);
+	}
+	arg[0] = strdup(cgi_name.c_str());
+	arg[1] = NULL;
+	int pid = 0;
+	if ((pid = fork()) == 0)
+	{
+		dup2(fd2[0], 0);
+		dup2(fd[1], 1);
+		dup2(fd1[1], 2);
+		close(fd[0]);
+		close(fd[1]);
+		close(fd1[0]);
+		close(fd1[1]);
+		close(fd2[0]);
+		close(fd2[1]);
+		execve(cgi_name.c_str(), arg, env);
+		exit(-1);
+	}
+	else if (pid == -1)
+	{
+		std::cerr << RED << "Fork crashed." << RST << std::endl;
+		exit(-1);
+	}
+	if (Utils::isSameExt(_request.get_target_path(), ".php") && _request.get_method() == "POST")
+	{
+		std::string v = std::string("<?php $_POST = $_GET; $_GET = array();?>\n") + File::getFile(root + _request.get_target_path() + indexFile); 
+		if (write(fd2[1], v.c_str(), v.length()) == -1)
+			std::cerr << RED << "Write error." << RST << std::endl;
+	}
+	else
+		if (write(fd2[1], File::getFile(root + _request.get_target_path() + indexFile).c_str(), File::getFileSize(root + _request.get_target_path() + indexFile)) == -1)
+			std::cerr << RED << "Write error." << RST << std::endl;
+	close(fd2[1]);
+	int	exit_code = 0;
+
+	waitpid(pid, &exit_code, 0);
+ 
+	close(fd[1]);
+	close(fd1[1]);
+	close(fd2[0]);
+
+	std::string res = Utils::read_fd(fd[0]);
+	std::string err = Utils::read_fd(fd1[0]);
+
+	dup2(saveStdin, STDIN_FILENO);
+	dup2(saveStdout, STDOUT_FILENO);
+	dup2(saveStderr, STDERR_FILENO);
+
+	close(fd[0]);
+	close(fd1[0]);
+	close(saveStdin);
+	close(saveStdout);
+	close(saveStderr);
+	//std::cerr << "Exit code : " << exit_code << std::endl;
+	//std::cerr << "Return : " << res << std::endl;
+	//std::cerr << "Error : " << err << std::endl; 
+	int	x = 0;
+	while (arg[x])
+		free(arg[x++]);
+	free(arg);
+	x = 0;
+	while (env[x])
+		free(env[x++]);
+	free(env);
+	if ((res.find("Content-type") == std::string::npos && res.find("Content-Type") == std::string::npos) || exit_code != 0 || err.find("Status: 500") != std::string::npos || (err.find("Status: 500") != std::string::npos && err.find("Status: 500") >= 20))
+		return (-1);
+	(*content) += res;
+	_cgi = 1;
+	return (0);
 }

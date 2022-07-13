@@ -33,7 +33,7 @@ class Response
 		std::string					get_return(void) const;
 		std::string					inLocationOrConfig(Location location, Config config, std::string what);
 		std::string					get_directory_index(std::string directory, std::string indexs_from_config);
-
+		int							CGI(std::string root, std::string indexFile, Location location, std::string *content);
 	public:
 		Response(Request &request, Server &server);
 		~Response(void);
