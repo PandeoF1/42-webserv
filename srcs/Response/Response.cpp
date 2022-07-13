@@ -657,6 +657,12 @@ void	Response::content_fill_from_file(void)
 					std::cerr << RED << "Failed to change file" << RST << std::endl;
 					break;
 				}
+				// if (_request.get_headers()["content-type"].empty())
+				// {
+				// 	fill_content_with_error_code(400);
+				// 	break;
+				// }
+				//std::cout << _request.get_headers()["my_content"].length() << std::endl;
 				if (write(fd, _request.get_headers()["my_content"].c_str(), _request.get_headers()["my_content"].length()) == -1)
 					std::cerr << RED << "Failed to write file" << RST << std::endl;
 				_request.set_code(204);
@@ -794,9 +800,9 @@ int				Response::CGI(std::string root, std::string indexFile, Location location,
 	close(saveStdin);
 	close(saveStdout);
 	close(saveStderr);
-	//std::cerr << "Exit code : " << exit_code << std::endl;
-	//std::cerr << "Return : " << res << std::endl;
-	//std::cerr << "Error : " << err << std::endl; 
+	std::cerr << "Exit code : " << exit_code << std::endl;
+	std::cerr << "Return : " << res << std::endl;
+	std::cerr << "Error : " << err << std::endl; 
 	int	x = 0;
 	while (arg[x])
 		free(arg[x++]);
