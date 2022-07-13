@@ -7,7 +7,7 @@ Request::Request(std::string request, Server &server) :
 	(void)_server;
 	std::string new_request = request;
 	_default_request = new_request;
-	// std::cout<< RED <<_default_request << RST <<  std::endl;
+	std::cout<< RED <<_default_request.size() << RST <<  std::endl;
 	parse();
 }
 
@@ -165,7 +165,6 @@ std::string    Request::checkMethod(std::string line)
 		for (int i = 0; i < Methods_List_Length; i++)
 			methods.push_back(Methods_List[i] + " ");
 	}
-
 	for (int i = 0; line[i] != ' '; i++)
 		if (std::islower(line[i]))
 			return ("400");
@@ -175,8 +174,10 @@ std::string    Request::checkMethod(std::string line)
 			return (*it);
 
 	for (int i = 0; line[i] != ' '; i++)
+	{
 		if (std::isupper(line[i]))
 			return ("405");
+	}
 	return ("400");
 }
 

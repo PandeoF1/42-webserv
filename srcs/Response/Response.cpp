@@ -825,7 +825,7 @@ void	Response::create_response(void)
 
 	// std::cout << BLU << _content_length << RST << std::endl;
 
-	// std::cout << RED << _request.get_code() << RST << std::endl;
+	std::cout << RED << _request.get_code() << RST << std::endl;
 }
 
 std::string		Response::get_response(void) const
