@@ -14,7 +14,7 @@ Request::Request(std::string request, Server &server) :
 Request::~Request(void) {
 }
 
-std::map<std::string, int>	Request::get_accepted_type() {
+std::map<std::string, int>	Request::get_accepted_type() const {
 	return (_accepted_type);
 }
 
@@ -58,8 +58,16 @@ void    Request::parse()
 			if (line != "")
 				_headers["my_content"] += line += "\r\n";
 	}
-	if (checkMaxBody() == false)
+	if (!checkMaxBody())
 		return ;
+	checkHost();
+	checkAccept();
+
+	return ;
+}
+
+void	Request::checkHost()
+{
 	if (_headers["host"].size() > 0)
 	{
 		int after_space = _headers["host"].find_first_not_of(' ');
@@ -73,6 +81,11 @@ void    Request::parse()
 		std::cout << RED << "Error: host not valid" << RST << std::endl;
 		_return_code = 400;
 	}
+}
+
+void	Request::checkAccept()
+{
+	int i = 0;
 	if (ACCEPT == 1)
 	{
 		if (!_headers["accept"].empty())
@@ -92,10 +105,8 @@ void    Request::parse()
 				}
 			}
 			for (i = 0; i != accept_vector.size(); i++)
-			{
 				if (!(accept_vector[i][0] && accept_vector[i][0] == 'q' && accept_vector[i][1] && accept_vector[i][1] == '='))
 					_accepted_type[accept_vector[i]] = 1;
-			}
 		}
 		else
 			_accepted_type["*/*"] = 1;
@@ -118,15 +129,32 @@ bool    Request::checkMaxBody()
             else
                 content_length_max = 1000;
 
-            std::cout << content_length_max * 1000000 << std::endl;
-
             if (Utils::string_to_int(Config::removeWhiteSpace(_headers["content-length"])) > content_length_max * 1000000)
             {
                 std::cout << RED << "Error: content-length too long" << RST << std::endl;
                 _return_code = 413;
                 return (false);
             }
-        }
+        } else if (_method == "POST" || _method == "PUT") {
+			int content_length_max;
+            if (!location["client_body_buffer_size"].empty())
+                content_length_max = Utils::string_to_int(location["client_body_buffer_size"]);
+            else if (!_server.get_config()["client_body_buffer_size"].empty())
+                content_length_max = Utils::string_to_int(_server.get_config()["client_body_buffer_size"]);
+            else
+                content_length_max = 1000;
+
+			if (_default_request.find("\r\n") != std::string::npos)
+			{
+				int len = _default_request.substr(_default_request.find("\r\n"), _default_request.size() - _default_request.find("\r\n")).size();
+				if (len > content_length_max * 1000000)
+				{
+					std::cout << RED << "Error: content-length too long" << RST << std::endl;
+               		_return_code = 413;
+					return (false);
+				}
+			}
+		}
     } catch (const std::exception& e) {}
     return (true);
 }

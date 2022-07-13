@@ -131,16 +131,26 @@ std::map<int, std::string>	Utils::envToMap(char **env)
 	return (map);
 }
 
-char	**Utils::mapToEnv(std::map<int, std::string> map)
+char	**Utils:: mapToEnv(std::map<int, std::string> map)
 {
 	char	**env;
 	int		i;
 
 	env = (char **)malloc(sizeof(char *) * (map.size() + 1));
+	if (!env)
+	{
+		std::cerr << "Error: malloc failed" << std::endl;
+		exit(-1);
+	}
 	i = 0;
 	while (i < map.size())
 	{
 		env[i] = (char *)malloc(sizeof(char) * (map[i].size() + 1));
+		if (!env[i])
+		{
+			std::cerr << "Error: malloc failed" << std::endl;
+			exit(-1);
+		}
 		strcpy(env[i], map[i].c_str());
 		i++;
 	}
@@ -184,9 +194,9 @@ std::string Utils::removeFirstPath(std::string path, std::string toRemove, std::
 		toRemove = "/" + toRemove;
 	while (path[i] && toRemove[i] && path[i] == toRemove[i])
 		i++;
-	if (i == toRemove.size())
+	//if (i == toRemove.size())
 		return (toAdd + path.substr(i));
-	return (path);
+	//eturn (path);
 }
 
 std::string Utils::RemoveBeginString(std::string string, std::string ToRemove)
