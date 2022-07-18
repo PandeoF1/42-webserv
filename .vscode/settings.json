@@ -68,6 +68,7 @@
 		"typeinfo": "cpp",
 		"unordered_map": "cpp",
 		"utility": "cpp",
-		"filesystem": "cpp"
+		"filesystem": "cpp",
+		"types.h": "c"
 	}
 }

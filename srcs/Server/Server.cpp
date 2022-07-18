@@ -74,16 +74,15 @@ void Server::ft_create_serv()
 	//create a master socket 
 	if ((_master_socket = socket(AF_INET, SOCK_STREAM, 0)) == 0)
 	{
-		perror("socket failed");
+		std::cerr << "socket failed" << std::endl;
 		exit(EXIT_FAILURE);
 	}
 
 	//set master socket to allow multiple connections , 
-	//this is just a good habit, it will work without this 
 	if (setsockopt(_master_socket, SOL_SOCKET, SO_REUSEADDR, (char *)&opt,
 					sizeof(opt)) < 0)
 	{
-		perror("setsockopt");
+		std::cerr << "setsockopt error" << std::endl;
 		exit(EXIT_FAILURE);
 	}
 
@@ -95,15 +94,15 @@ void Server::ft_create_serv()
 	//bind the socket to localhost port 8888 
 	if (bind(_master_socket, (struct sockaddr *)&_address, sizeof(_address)) < 0)
 	{
-		perror("bind failed");
+		std::cerr << "[Webserv] Bind failed" << std::endl;
 		exit(EXIT_FAILURE);
 	}
-	printf("Listener on port %d \n", _port);
+	std::cout << "Listener on port " << _port << std::endl;
 
 	//try to specify maximum of 3 pending connections for the master socket 
 	if (listen(_master_socket, 100) < 0)
 	{
-		perror("listen");
+		std::cerr << "listen error" << std::endl;
 		exit(EXIT_FAILURE);
 	}
 }

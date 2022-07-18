@@ -2,11 +2,18 @@
 
 int main(int argc, char *argv[], char *envp[])
 {
-	(void)argc, (void)argv;
+	if (argc != 2 && argc != 1)
+	{
+		std::cout << "Usage: " << argv[0] << " <config>" << std::endl;
+		return (1);
+	}
 	try {
-		std::map<int, Config> config = Config::createConfig("config.conf");
-		//Config::returnPath(config[0], "/post_body/post_body/post_body/post_body");
-		//Config::print(config);
+		std::map<int, Config> config;
+		if (argc == 1)
+			config = Config::createConfig("config.conf");
+		else
+			config = Config::createConfig(argv[1]);
+		Config::print(config);
 		Server::start_servers(config, envp);
 	}
 	catch (std::exception &e)
@@ -14,6 +21,4 @@ int main(int argc, char *argv[], char *envp[])
 		std::cout << e.what() << std::endl;
 		return (1);
 	}
-	// std::map<int, Config> config = Config::createConfig("config.conf");
-	// Config::print(config);
 }

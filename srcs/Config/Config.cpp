@@ -26,7 +26,8 @@ std::map<int, Config> Config::createConfig(std::string path)
 	std::string				content;
 	size_t					pos = 0;
 	
-
+	if (File::getType(path) != 2)
+		throw std::runtime_error("[Config] file is not a file !");
 	content = file.getFile(path);
 	while (!Config::isEndOfFile(content, pos))
 	{
@@ -183,7 +184,7 @@ int			Config::isValidIp(std::string ip)
 	std::string c = ip.substr(pos + 1, ip.find(".", pos + 1) - pos - 1);
 	pos = ip.find(".", pos + 1);
 	std::string d = ip.substr(pos + 1, ip.find(".", pos + 1) - pos - 1);
-	// if (a.length() > 3 || b.length() > 3 || c.length() > 3 || d.length() > 3) add it if you want to parse 00005
+	// if (a.length() > 3 || b.length() > 3 || c.length() > 3 || d.length() > 3)
 	// 	throw Config::SyntaxInvalidValue("IP", ip);
 	if (atoi(a.c_str()) > 255 || atoi(b.c_str()) > 255 || atoi(c.c_str()) > 255 || atoi(d.c_str()) > 255)
 		throw Config::SyntaxInvalidValue("IP", ip);
@@ -413,7 +414,6 @@ std::string		Config::getPathBefore(std::string path)
 		x--;
 	if (path.substr(0, x) == "")
 		return ("/");
-	std::cout << "path : " << path.substr(0, x) << std::endl;
 	return (path.substr(0, x));
 }
 

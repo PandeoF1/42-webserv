@@ -1,21 +1,18 @@
-#include <stdio.h> 
-#include <iostream> 
-#include <string.h>   //strlen 
-#include <stdlib.h> 
-#include <errno.h> 
-#include <unistd.h>   //close 
-#include <arpa/inet.h>    //close 
-#include <sys/types.h> 
-#include <sys/socket.h> 
-#include <netinet/in.h> 
+#include <stdio.h>
+#include <iostream>
+#include <string.h>
+#include <stdlib.h>
+#include <errno.h>
+#include <unistd.h>
+#include <arpa/inet.h>
+#include <sys/types.h>
+#include <sys/socket.h>
+#include <netinet/in.h>
 #include <sys/time.h> //FD_SET, FD_ISSET, FD_ZERO macros
 #include "includes/webserv.hpp"
-     
-#define TRUE   1 
-#define FALSE  0 
-#define PORT 80
-#define PORT2 8765
-// #define configs.size() 2
+	 
+#define TRUE 1
+#define FALSE 0
 #define MAX_CLIENTS 50000
 #define BUFLEN 65536
 
@@ -42,7 +39,8 @@ void Server::start_servers(std::map<int, Config> configs, char **envp)
 		servers[i].set_port(Utils::string_to_int(configs[i]["port"]));
 	}
 
-    int new_socket, client_socket[MAX_CLIENTS], max_clients = MAX_CLIENTS, activity, i, valread , sd, max_sd;
+	int new_socket, client_socket[MAX_CLIENTS], max_clients = MAX_CLIENTS, activity, i, valread , sd, max_sd;
+
 	//initialise all client_socket[] to 0 so not checked
 	for (i = 0; i < max_clients; i++)
 		client_socket[i] = 0;  
@@ -52,46 +50,44 @@ void Server::start_servers(std::map<int, Config> configs, char **envp)
 	size_t y;
 	fd_set readfds;
 	
-    while(status)  
-    {
-        //clear the socket set 
-        FD_ZERO(&readfds);  
-     
+	while(status)
+	{
+		//clear the socket set 
+		FD_ZERO(&readfds);  
+		
 		max_sd = 0;
-        //add master socket to set
+		//add master socket to set
 		for (int i = 0; i < configs.size(); i++)
 		{
 			FD_SET(servers[i].get_master_socket() , &readfds);
 			if (servers[i].get_master_socket() > max_sd)
 				max_sd = servers[i].get_master_socket();
 		}
-        //add child sockets to set 
-        for ( i = 0 ; i < max_clients ; i++)  
-        {  
-            //socket descriptor 
-            sd = client_socket[i];  
-                 
-            //if valid socket descriptor then add to read list 
-            if(sd > 0) 
-                FD_SET( sd , &readfds);  
-                 
-            //highest file descriptor number, need it for the select function 
-            if(sd > max_sd)  
-                max_sd = sd;  
-        }  
-     
-        //wait for an activity on one of the sockets , timeout is NULL , 
-        //so wait indefinitely
-        activity = select( max_sd + 1 , &readfds , NULL , NULL , NULL);
+		//add child sockets to set 
+		for ( i = 0 ; i < max_clients ; i++)  
+		{  
+			//socket descriptor 
+			sd = client_socket[i];  
+					
+			//if valid socket descriptor then add to read list 
+			if(sd > 0) 
+				FD_SET( sd , &readfds);  
+					
+			//highest file descriptor number, need it for the select function 
+			if(sd > max_sd)  
+				max_sd = sd;  
+		}  
+		
+		//wait for an activity on one of the sockets , timeout is NULL , so wait indefinitely
+		activity = select( max_sd + 1 , &readfds , NULL , NULL , NULL);
 		if (status == 0)
 			break;
-		// puts("selection artisanale");
-        if ((activity < 0) && (errno!=EINTR))  
-        {  
-            printf("select error");  
-        }  
-             
-        //If something happened on the master socket , then its an incoming connection
+		if ((activity < 0) && (errno!=EINTR))  
+		{  
+			std::cout << "select error" << std::endl;;  
+		}  
+			 
+		//If something happened on the master socket , then its an incoming connection
 		for (int i = 0; i < configs.size(); i++)
 		{
 			if (FD_ISSET(servers[i].get_master_socket(), &readfds))
@@ -101,16 +97,9 @@ void Server::start_servers(std::map<int, Config> configs, char **envp)
 				if ((new_socket = accept(servers[i].get_master_socket(),
 						(struct sockaddr *)&address, (socklen_t*)&addrlen))<0)  
 				{  
-					perror("accept");  
+					std::cerr << "accept" << std::endl;  
 					exit(EXIT_FAILURE);
-				}  
-				
-				//inform user of socket number - used in send and receive commands
-				// if (!client_socket[max_clients - 1])
-				// {
-				// 	printf("New connection on Port : %d, socket fd is %d , ip is : %s , port : %d\n" , servers[i].get_port(),  new_socket , inet_ntoa(address.sin_addr) , ntohs(address.sin_port));  
-				// }
-					
+				}				
 				//add new socket to array of sockets 
 				for (int j = 0; j < max_clients; j++)  
 				{  
@@ -119,48 +108,46 @@ void Server::start_servers(std::map<int, Config> configs, char **envp)
 					{  
 						client_socket[j] = new_socket;
 						servers[i].add_client(new_socket); 
-						// printf("Adding to list of sockets, on master_socket %d\n" , i);  
-							
 						break;  
 					}  
 				}
 			}
 		}      
-        //else its some IO operation on some other socket
-        for (int k = 0; k < max_clients; k++)  
-        {  
-            sd = client_socket[k];
+		//else its some IO operation on some other socket
+		for (int k = 0; k < max_clients; k++)  
+		{  
+			sd = client_socket[k];
 			memset(buffer.data(), 0, BUFLEN);
-            if (FD_ISSET( sd , &readfds))  
-            {  
-                //Check if it was for closing , and also read the incoming message)
-                if ((valread = recv( sd , buffer.data(), BUFLEN, 0)) == 0)
-                {
-                    //Somebody disconnected , get his details and print  
-                    printf("Host disconnected , fd %d\n" , client_socket[k]);                       
-                    //Close the socket and mark as 0 in list for reuse 
-                    client_socket[k] = 0;
+			if (FD_ISSET( sd , &readfds))  
+			{  
+				//Check if it was for closing , and also read the incoming message)
+				if ((valread = recv( sd , buffer.data(), BUFLEN, 0)) == 0)
+				{
+					//Somebody disconnected , get his details and print  
+					//std::cout << "Host disconnected , fd " << client_socket[k] << std::endl;                       
+					//Close the socket and mark as 0 in list for reuse 
+					client_socket[k] = 0;
 					for (int l = 0; l < configs.size(); l++)
 						if (servers[l].find_client(sd))
 							servers[l].remove_client(sd);
-                    close( sd );
+					close( sd );
 					test[k] = "";
 					break ;
-                }
+				}
 				else if (valread < 0)
 				{
-					std::cerr << "Error: couldn't handle request." << std::endl;
+					//std::cerr << "Error: couldn't handle request." << std::endl;
 					client_socket[k] = 0;
 					for (int l = 0; l < configs.size(); l++)
 						if (servers[l].find_client(sd))
 							servers[l].remove_client(sd);
 					test[k] = "";
-                    close( sd );
+					close( sd );
 					break ;
 				}              
-                else 
-                {
-                    //set the string terminating NULL byte on the end of the data read 
+				else 
+				{
+					//set the string terminating NULL byte on the end of the data read 
 					buffer[valread] = '\0';
 					if (test[k].size() > 0)
 						test[k] += buffer.data();
@@ -168,44 +155,15 @@ void Server::start_servers(std::map<int, Config> configs, char **envp)
 						test[k] = buffer.data();
 					if ((y = test[k].find("\r\n\r\n")) == std::string::npos)
 						break ;
-					//std::cout << "Received: |" << test[k] << "|" << std::endl;
-					if (test[k].find("\r\n\r\n", y + 4) == std::string::npos && ((test[k].find("PUT")) == 0 || (test[k].find("POST")) == 0))
-						break ;
-					// while (true)
-                    // {
-                    //     if (valread <= 0)
-                    //         break;
-                    //     buffer[valread] = '\0';
-                    //     if (test[k].size() > 0)
-                    //         test[k] += buffer.data();
-                    //     else
-                    //         test[k] = buffer.data();
-                    //     // if (valread < 0)
-                    //     // {
-                    //     //     std::cerr << "Error: couldn't handle request." << std::endl;
-                    //     //     client_socket[k] = 0;
-                    //     //     for (int l = 0; l < configs.size(); l++)
-                    //     //         if (servers[l].find_client(sd))
-                    //     //             servers[l].remove_client(sd);
-                    //     //     test[k] = "";
-                    //     //     close( sd );
-                    //     //     break ;
-                    //     // }
-                    //     memset(buffer.data(), 0, BUFLEN);
-					// 	//std::cout << "here1" << std::endl;
-                    //     valread = recv( sd , buffer.data(), BUFLEN, 0);
-					// 	if (valread < 0)
-					// 		if (errno == EWOULDBLOCK)
-					// 			break;
-                    //     // std::cout << BLU << "here" << RST << std::endl;
-                    //     // std::cout << valread << std::endl;    
-                    //}
+					// if (test[k].find("\r\n\r\n", y + 4) == std::string::npos && ((test[k].find("PUT")) == 0 || (test[k].find("POST")) == 0))
+					// 	break ;
+					if (strlen(buffer.data()) == BUFLEN)
+						break;
 					for (int l = 0; l < configs.size(); l++)
 					{
 						if (servers[l].find_client(sd))
 						{
 							Request request(test[k], servers[l]);
-							// request.setIp(inet_ntoa(address.sin_addr)); Il faut me set l'ip du client dans request
 							Response response(request, servers[l]);
 							send(sd, response.get_response().c_str(), response.get_response().size(), MSG_NOSIGNAL);
 							test[k] = "";
@@ -225,7 +183,7 @@ void Server::start_servers(std::map<int, Config> configs, char **envp)
 						}
 					}
 				}
-            }  
-        }  
-    }  
+			}  
+		}  
+	}  
 }
