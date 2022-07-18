@@ -50,6 +50,8 @@ int	Location::isValidValue(std::string param, std::string value)
 {
 	if (param == Location_Valid_Param[Location_Methods])
 		Config::isValidMethods(value);
+	else if (param == Location_Valid_Param[Location_CGI_Methods])
+		Config::isValidMethods(value);
 	else if (param == Location_Valid_Param[Location_Root] && Config::getNumberOfValue(value) != 1)
 		throw Config::SyntaxInvalidValue(Location_Valid_Param[Location_Root], value);
 	else if (param == Location_Valid_Param[Location_Cgi] && Config::getNumberOfValue(value) != 1)

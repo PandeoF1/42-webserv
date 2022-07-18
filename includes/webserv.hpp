@@ -63,6 +63,7 @@ static std::string	Location_Valid_Param[] = {"allow_methods", "root", "alias", "
 #define             Location_autoindex 6
 #define             Location_Return 7
 #define             Location_Cgi_Ext 8
+#define				Location_CGI_Methods 9
 
 
 static std::string	Server_Valid_Param[] = {"server_name", "listen", "root", "index", "allow_methods", "client_body_buffer_size", "error_400", "error_403", "error_404", "error_405", "error_413", "error_406", "error_50x"};

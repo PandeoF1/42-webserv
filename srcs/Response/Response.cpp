@@ -363,7 +363,7 @@ void	Response::autoindex(std::string directory, std::string indexFile, Location 
 		catch(const std::exception& e)
 		{
 			templateFile = "<html><head><title>Webserv - Index of $path</title></head><body><h1>Index of $path</h1><ul>$files_and_directories</ul></body></html>";
-			std::cerr << e.what() << '\n';
+			//std::cerr << e.what() << '\n';
 		}
 
 		int i = templateFile.find("$path");
@@ -487,12 +487,10 @@ void	Response::content_fill_from_file(void)
 		return ;
 	}
 	std::string name;
-	std::cout << "target path : " << _request.get_target_path() << " et " << (root = inLocationOrConfig(location, _server.get_config(), "root")) << std::endl;
 	if ((root = inLocationOrConfig(location, _server.get_config(), "root")).empty())
 		root = "www";
 	if (!(name = inLocationOrConfig(location, _server.get_config(), "name")).empty())
 	{
-		std::cout << "Name : " << name << std::endl;
 		_request.set_target_path_force(Utils::removeFirstPath(_request.get_target_path(), name, root));
 		root = "";
 	}
@@ -501,7 +499,6 @@ void	Response::content_fill_from_file(void)
 	std::string indexFile = "";
 	if (_request.get_target_path()[_request.get_target_path().find_first_of("/") + 1] == ' ' || _request.get_target_path()[_request.get_target_path().find_first_of("/") + 1] == '\0')
 		indexFile = get_index_file(root, indexs_from_config);
-	std::cout << indexFile << std::endl;
 	if (_request.get_method() == "GET" || _request.get_method() == "POST")
 	{
 		switch(File::getType(root + _request.get_target_path() + indexFile))
@@ -533,7 +530,7 @@ void	Response::content_fill_from_file(void)
 				else
 					indexFile = get_index_file(root, indexs_from_config);
 			case 2: //File
-				if (Utils::isSameExt(_request.get_target_path(), location["cgi_ext"]))
+				if (!location["cgi_ext"].empty() && !location["cgi_pass"].empty() && Utils::isSameExt(_request.get_target_path(), location["cgi_ext"]))
 				{
 					if (this->CGI(root, indexFile, location, &content) == -1)
 					{
@@ -547,7 +544,7 @@ void	Response::content_fill_from_file(void)
 					break;
 				}
 				
-				if (!Utils::isSameExt(_request.get_target_path(), location["cgi_ext"]))
+				if (location["cgi_ext"].empty() || location["cgi_pass"].empty() || !Utils::isSameExt(_request.get_target_path(), location["cgi_ext"]))
 				{
 					try
 					{
@@ -560,7 +557,7 @@ void	Response::content_fill_from_file(void)
 					}
 				}
 				_content = content;
-				if (Utils::isSameExt(_request.get_target_path(), location["cgi_ext"]))
+				if (!location["cgi_ext"].empty() && !location["cgi_pass"].empty() && Utils::isSameExt(_request.get_target_path(), location["cgi_ext"]))
 				{
 					int	tmp = content.find("\r\n\r\n");
 					_content_length = content.length() - tmp - 4;
@@ -629,6 +626,10 @@ void	Response::content_fill_from_file(void)
 				}
 				if (write(fd, _request.get_headers()["my_content"].c_str(), _request.get_headers()["my_content"].length()) == -1)
 					std::cerr << RED << "Failed to write file" << RST << std::endl;
+					content += "File changed";
+				_content = content;
+				_content_length = _content.length();
+				_extension = get_extension(_request.get_target_path() + indexFile);
 				_request.set_code(201);
 				break;
 			case 1: //Directory
@@ -666,7 +667,6 @@ void	Response::content_fill_from_file(void)
 				if (write(fd, _request.get_headers()["my_content"].c_str(), _request.get_headers()["my_content"].length()) == -1)
 					std::cerr << RED << "Failed to write file" << RST << std::endl;
 				_request.set_code(204);
-				break;
 			_content_length = _content.length();
 			_extension = get_extension(_request.get_target_path() + indexFile);
 			break;
@@ -734,7 +734,7 @@ int				Response::CGI(std::string root, std::string indexFile, Location location,
 	{
 		envp[envp.size()] = "QUERY_STRING=" + _request.get_headers()["my_content"].substr(0, _request.get_headers()["my_content"].find("\r\n\r\n")).substr(0, _request.get_headers()["my_content"].substr(0, _request.get_headers()["my_content"].find("\r\n\r\n")).size() - 1);
 		envp[envp.size()] = "CONTENT_TYPE=" +  Config::removeWhiteSpace(_request.get_headers()["content-type"]); // set content type and content length (content_length)
-		envp[envp.size()] = "CONTENT_LENGTH=" + Utils::int_to_string(Utils::string_to_int(Config::removeWhiteSpace(_request.get_headers()["content-length"])) - 1);
+		//envp[envp.size()] = "CONTENT_LENGTH=" + Utils::int_to_string(Utils::string_to_int(Config::removeWhiteSpace(_request.get_headers()["content-length"])) - 1);
 	}
 	else
 		envp[envp.size()] = "QUERY_STRING=" + _request.get_query_string();
@@ -770,15 +770,8 @@ int				Response::CGI(std::string root, std::string indexFile, Location location,
 		std::cerr << RED << "Fork crashed." << RST << std::endl;
 		exit(-1);
 	}
-	if (Utils::isSameExt(_request.get_target_path(), ".php") && _request.get_method() == "POST")
-	{
-		std::string v = std::string("<?php $_POST = $_GET; $_GET = array();?>\n") + File::getFile(root + _request.get_target_path() + indexFile); 
-		if (write(fd2[1], v.c_str(), v.length()) == -1)
-			std::cerr << RED << "Write error." << RST << std::endl;
-	}
-	else
-		if (write(fd2[1], File::getFile(root + _request.get_target_path() + indexFile).c_str(), File::getFileSize(root + _request.get_target_path() + indexFile)) == -1)
-			std::cerr << RED << "Write error." << RST << std::endl;
+	if (write(fd2[1], File::getFile(root + _request.get_target_path() + indexFile).c_str(), File::getFileSize(root + _request.get_target_path() + indexFile)) == -1)
+		std::cerr << RED << "Write error." << RST << std::endl;
 	close(fd2[1]);
 	int	exit_code = 0;
 

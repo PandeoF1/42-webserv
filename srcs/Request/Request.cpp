@@ -7,7 +7,6 @@ Request::Request(std::string request, Server &server) :
 	(void)_server;
 	std::string new_request = request;
 	_default_request = new_request;
-	std::cout<< RED <<_default_request.size() << RST <<  std::endl;
 	parse();
 }
 
@@ -178,7 +177,7 @@ std::string    Request::checkMethod(std::string line)
 				methods.push_back(allow_methods[i] + " ");
 		}
 
-		if (Utils::isSameExt(get_target_path(), location["cgi_ext"]))
+		if (!location["cgi_ext"].empty() && !location["cgi_pass"].empty() && Utils::isSameExt(get_target_path(), location["cgi_ext"]))
 		{
 			if (!location["cgi_methods"].empty())	//Allow methods from webserv.hpp if not found in location
 			{
@@ -200,13 +199,7 @@ std::string    Request::checkMethod(std::string line)
 	for (std::vector<std::string>::iterator it = methods.begin() ; it != methods.end(); ++it)
 		if (line.find(*it) == 0)
 			return (*it);
-
-	for (int i = 0; line[i] != ' '; i++)
-	{
-		if (std::isupper(line[i]))
-			return ("405");
-	}
-	return ("400");
+	return ("405");
 }
 
 void    Request::set_method(std::string line)
